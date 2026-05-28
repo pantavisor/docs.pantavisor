@@ -1,9 +1,11 @@
 name: Docs – build and open PR
 
-# Runs whenever docs source files change on any non-main branch.
-# On main it only builds (no PR needed — changes are already merged).
+# Triggers only when changes land on main (i.e. a PR is merged).
+# Feature branches do not trigger this workflow on their own.
 on:
   push:
+    branches:
+      - main
     paths:
       - 'docs/**'
       - 'releases/**'
@@ -19,11 +21,11 @@ on:
 
 jobs:
   build-and-pr:
-    name: Build site and open PR
+    name: Build site and open deployment PR
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pull-requests: write
+      contents: write      # needed to push the deploy branch
+      pull-requests: write # needed to open the PR
 
     steps:
       - name: Checkout
@@ -41,39 +43,24 @@ jobs:
       - name: Build Docusaurus
         run: npm run build
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+      # Commits the built static site to a deploy branch and opens a PR
+      # to gh-pages for review before the site goes live.
+      - name: Open deployment PR
+        uses: peter-evans/create-pull-request@v7
         with:
-          name: site-${{ github.sha }}
-          path: build/
-          retention-days: 14
+          token: ${{ secrets.GITHUB_TOKEN }}
+          add-paths: build/
+          branch: deploy/site-update
+          base: gh-pages
+          commit-message: "build: update static site output"
+          title: "deploy: update site (${{ github.sha }})"
+          body: |
+            Built site update from merge into `main`.
 
-      # Only open a PR when pushing to a feature branch, not to main itself.
-      - name: Open or update pull request
-        if: github.ref_name != 'main' && github.ref_name != 'gh-pages'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          BRANCH="${{ github.ref_name }}"
-          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            | | |
+            |---|---|
+            | **Source commit** | `${{ github.sha }}` |
+            | **Workflow run** | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
 
-          BODY="## Docs update
-
-          Docusaurus build passed ✓
-
-          | | |
-          |---|---|
-          | **Branch** | \`${BRANCH}\` |
-          | **Commit** | \`${{ github.sha }}\` |
-          | **Build artifact** | [Download](${RUN_URL}) |
-
-          > The build artifact contains the full static site and can be downloaded
-          > from the Actions run linked above to preview the changes locally."
-
-          # Create the PR; silently skip if one already exists for this branch.
-          gh pr create \
-            --base main \
-            --head "${BRANCH}" \
-            --title "docs: update site from ${BRANCH}" \
-            --body "${BODY}" \
-          || echo "PR already exists for '${BRANCH}', skipping creation."
+            Merge this PR to publish the updated site to GitHub Pages.
+          delete-branch: true

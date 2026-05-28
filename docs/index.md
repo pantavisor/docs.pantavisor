@@ -15,4 +15,4 @@ Welcome to the official documentation for the Pantacor ecosystem.
 
 ## Quick Start
 
-New to Pantavisor? Start with the [concepts overview](/meta-pantavisor/learn/concepts/what-is-pantavisor) to understand the fundamentals, then follow the [device setup guide](/meta-pantavisor/learn/device-setup/download-and-flash) to get your first device running.
+New to Pantavisor? Start with the [concepts overview](/meta-pantavisor/learn/concepts/what-is-pantavisor) to understand the fundamentals, then follow the [device setup guide](/meta-pantavisor/learn/device-setup/download-and-flash) to get your first device running. 
