@@ -18,6 +18,7 @@ on:
       - 'static/**'
       - 'migrate-docs.js'
       - 'package*.json'
+      - '.github/workflows/**'
 
 jobs:
   build-and-pr:
