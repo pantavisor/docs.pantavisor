@@ -2,6 +2,7 @@
 title: Supported Devices
 sidebar_position: 200
 description: Table of supported devices
+keywords: ["pantavisor cli", "pvr cli", "command line tools", "embedded cli", "container cli", "pvcontrol", "pantavisor commands", "embedded development tools", "iot cli tools", "supported devices"]
 ---
 
 ## Supported Devices

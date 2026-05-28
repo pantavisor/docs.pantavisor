@@ -2,6 +2,7 @@
 title: Learn Pantavisor
 sidebar_position: 1
 description: Comprehensive learning resources for embedded systems developers, IoT product managers, and DevOps engineers using Pantavisor containerization.
+keywords: ["learn pantavisor", "embedded linux tutorial", "iot containerization guide", "embedded devops", "container orchestration tutorial", "embedded systems education", "pantavisor documentation", "iot development guide", "embedded linux containers tutorial", "containerized embedded development"]
 ---
 
 <style>

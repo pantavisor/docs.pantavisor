@@ -2,6 +2,7 @@
 title: Remote Access via Pantahub
 sidebar_position: 5
 description: Learn how to access, monitor, and update your Pantavisor devices remotely using Pantahub and the PVR CLI tool.
+keywords: ["pantavisor remote access", "pantahub", "pvr cli", "iot remote management", "embedded linux updates", "ota updates"]
 ---
 
 Once a device is claimed on Pantahub and connected to the internet, you can manage it from anywhere using the `pvr` CLI. The device polls Pantahub for new revisions and applies OTA updates automatically — no local network access required.

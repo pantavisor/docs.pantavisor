@@ -2,6 +2,7 @@
 title: Local Network
 sidebar_position: 3
 description: Configure WiFi and ethernet network connectivity for Pantavisor Linux devices. Complete guide for getting your device online.
+keywords: ["pantavisor network setup", "wifi configuration", "ethernet setup", "embedded network", "iot connectivity", "device network config", "pantavisor wifi", "embedded linux network", "device internet connection", "iot network setup"]
 ---
 
 Once the device has an IP address, you can reach it over SSH, interact with it via `pvr` from your workstation, and browse its pvtx web UI.

@@ -2,6 +2,7 @@
 title: Troubleshooting
 sidebar_position: 60
 description: Troubleshooting guide for Pantavisor Linux. Find solutions to common issues, connectivity problems, and app management questions.
+keywords: ["pantavisor troubleshooting", "pantavisor problems", "embedded linux issues", "connectivity issues", "app problems", "pantavisor faq", "device troubleshooting", "pantavisor support", "embedded troubleshooting", "iot device issues"]
 ---
 
 Find solutions to common issues with Pantavisor Linux devices, builds, and application management.

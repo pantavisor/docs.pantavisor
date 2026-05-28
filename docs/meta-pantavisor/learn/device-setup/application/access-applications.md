@@ -2,6 +2,7 @@
 title: Access Your Applications
 sidebar_position: 44
 description: Access web interfaces of applications running on Pantavisor Linux. Learn about port mapping, remote access, and security considerations.
+keywords: ["access pantavisor apps", "web interface", "application ports", "remote access", "app web ui", "device applications", "web application access", "pantavisor web interface", "embedded app access", "container web apps"]
 ---
 
 Pantavisor containers are isolated LXC namespaces. There are three ways to interact with a running application: enter its namespace directly, reach it over the host network, or wire it to other containers through the pv-xconnect service mesh.

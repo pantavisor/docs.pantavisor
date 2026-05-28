@@ -2,6 +2,7 @@
 title: Download and Flash Image
 sidebar_position: 1
 description: Step-by-step guide to download and flash Pantavisor Linux images to SD cards for Raspberry Pi and embedded devices.
+keywords: ["flash pantavisor image", "download pantavisor", "raspberry pi flash", "embedded linux flash", "pantavisor installation", "sd card flash", "pvflasher", "bmap flash tool", "wic image flash", "embedded device setup", "iot linux flash", "pantavisor image download"]
 ---
 
 ## Getting Started with Pantavisor Linux

@@ -23,6 +23,7 @@ const config: Config = {
     format: 'detect',
     hooks: {
       onBrokenMarkdownLinks: 'warn',
+      onBrokenMarkdownImages: 'warn',
     },
   },
 
@@ -61,7 +62,7 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/pantacor-social-card.png',
+    image: 'img/docusaurus-social-card.jpg',
     colorMode: {
       respectPrefersColorScheme: true,
     },

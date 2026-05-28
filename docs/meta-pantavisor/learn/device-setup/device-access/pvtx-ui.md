@@ -2,6 +2,7 @@
 title: Embedded web UI
 sidebar_position: 4
 description: Learn to use the Pantavisor embedded web UI for managing applications on Pantavisor Linux. Complete guide to navigation, installation, and configuration.
+keywords: ["pvtx interface", "pantavisor web ui", "application management", "pantavisor gui", "device management", "pvtx tutorial", "app installation", "pantavisor interface", "embedded device management", "container management ui"]
 ---
 
 The pvtx UI is a web interface served directly from the device on port **12368**. It gives you a browser-based view of the device's running containers, revision state, system resources, configuration, and logs — without needing the `pvr` CLI or SSH.

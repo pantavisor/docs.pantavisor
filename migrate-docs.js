@@ -72,6 +72,8 @@ function toYamlValue(val) {
   if (typeof val === 'boolean') return String(val);
   if (typeof val === 'number') return String(val);
   if (typeof val === 'string') {
+    // Raw JSON arrays — pass through as-is (valid YAML)
+    if (val.startsWith('[')) return val;
     // Quote if contains special chars
     if (val.includes(':') || val.includes('"') || val.includes("'") ||
         val.includes('\n') || val.includes('#') || val.startsWith('>') ||
@@ -85,10 +87,11 @@ function toYamlValue(val) {
 
 function buildDocuFrontmatter(parsed) {
   const fm = {};
-  if (parsed.title)       fm.title       = parsed.title;
+  if (parsed.title)       fm.title            = parsed.title;
   const pos = parsed.sidebar_position ?? parsed.weight ?? parsed.nav_order;
   if (pos !== undefined)  fm.sidebar_position = Number(pos);
-  if (parsed.description) fm.description  = parsed.description;
+  if (parsed.description) fm.description      = parsed.description;
+  if (parsed.keywords)    fm.keywords         = parsed.keywords;
   const isDraft = parsed.draft;
   if (isDraft && isDraft !== false && isDraft !== 'false') fm.draft = true;
   return fm;
@@ -148,4 +151,23 @@ function walk(srcDir, destDir) {
 
 fs.rmSync(DEST, { recursive: true, force: true });
 walk(SRC, DEST);
+
+// Restore placeholder images for relative image refs that have no source.
+// These are referenced in pantavisor/overview/ docs but never existed in the repo.
+const PLACEHOLDER = path.join(__dirname, 'static', 'images', 'kas-menu-1.png');
+const relativeImagePlaceholders = [
+  path.join(DEST, 'pantavisor', 'overview', 'images', 'state-pv.png'),
+  path.join(DEST, 'pantavisor', 'overview', 'images', 'state-phclient.png'),
+  path.join(DEST, 'pantavisor', 'overview', 'images', 'flow-remote-update.png'),
+  path.join(DEST, 'pantavisor', 'overview', 'images', 'flow-local-update.png'),
+];
+if (fs.existsSync(PLACEHOLDER)) {
+  for (const img of relativeImagePlaceholders) {
+    if (!fs.existsSync(img)) {
+      fs.mkdirSync(path.dirname(img), { recursive: true });
+      fs.copyFileSync(PLACEHOLDER, img);
+    }
+  }
+}
+
 console.log(`Migrated releases/${srcArg} → ${destArg}`);

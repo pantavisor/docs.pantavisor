@@ -2,6 +2,7 @@
 title: PVR
 sidebar_position: 41
 description: Install your first application on Pantavisor Linux using PVR CLI. Step-by-step guide to install Home Assistant from the marketplace.
+keywords: ["install pantavisor app", "home assistant install", "pvr cli installation", "first application", "pantacor marketplace", "container install", "app installation guide", "embedded app install", "pantavisor applications", "iot app deployment"]
 ---
 
 The `pvr` CLI lets you add a Docker Hub image as a Pantavisor container, commit the change locally, and deploy it to the device over the local network — all without touching the device directly.

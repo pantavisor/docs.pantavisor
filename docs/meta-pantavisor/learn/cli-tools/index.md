@@ -2,6 +2,7 @@
 title: CLI Tools
 sidebar_position: 200
 description: Command-line tools cheatsheet and essential reference for Pantavisor development
+keywords: ["pantavisor cli", "pvr cli", "command line tools", "embedded cli", "container cli", "pvcontrol", "pantavisor commands", "embedded development tools", "iot cli tools"]
 ---
 
 ## Command Line Tools

@@ -2,6 +2,7 @@
 title: PVTX
 sidebar_position: 42
 description: Install your first application on Pantavisor Linux using PVTX. Step-by-step guide to install Home Assistant from the marketplace.
+keywords: ["install pantavisor app", "home assistant install", "pvtx installation", "first application", "pantacor marketplace", "container install", "app installation guide", "embedded app install", "pantavisor applications", "iot app deployment"]
 ---
 
 The pvtx web UI lets you upload a container package to a device using only a browser — no `pvr deploy` or direct network access to the pvr endpoint required. You still use the `pvr` CLI on your workstation to build the package, then transfer it via the browser.

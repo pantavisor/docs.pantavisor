@@ -2,6 +2,7 @@
 title: Quick Start
 sidebar_position: 10
 description: Quick start guide for setting up Pantavisor Linux on your device. Flash images, configure network, install applications in just a few minutes.
+keywords: ["pantavisor quick start", "pantavisor setup", "embedded linux setup", "iot device setup", "raspberry pi pantavisor", "flash pantavisor", "embedded container setup", "pantavisor installation", "iot linux installation"]
 ---
 
 Get Pantavisor Linux running on your device and install your first application in just a few minutes.

@@ -2,6 +2,7 @@
 title: Device specification
 sidebar_position: 3
 description: Learn about device machine specifications for porting Pantavisor Linux. Guide to hardware configuration and board support packages.
+keywords: ["pantavisor machine", "device specification", "board support", "hardware configuration", "pantavisor porting", "machine config", "embedded hardware", "bsp configuration", "device porting", "yocto machine"]
 ---
 
 A **machine file** in `kas/machines/` binds a platform (its set of BSP layers) to a specific Yocto `MACHINE` name and adds any device-specific BitBake configuration.

@@ -2,6 +2,7 @@
 title: Serial Console
 sidebar_position: 2
 description: Configure WiFi and ethernet network connectivity for Pantavisor Linux devices. Complete guide for getting your device online.
+keywords: ["pantavisor network setup", "wifi configuration", "ethernet setup", "embedded network", "iot connectivity", "device network config", "pantavisor wifi", "embedded linux network", "device internet connection", "iot network setup"]
 ---
 
 The serial console is the most direct access path to a Pantavisor device — it works without any network configuration and shows the full boot sequence from bootloader to Pantavisor startup.

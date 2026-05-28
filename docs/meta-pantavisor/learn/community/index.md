@@ -2,6 +2,7 @@
 title: Community
 sidebar_position: 300
 description: Join the Pantavisor community - forums, support, and project submissions
+keywords: ["pantavisor community", "embedded linux community", "iot community", "open source community", "pantavisor support", "embedded developers", "container community", "iot developers", "pantavisor forum", "embedded linux forum"]
 ---
 
 ## Community Overview

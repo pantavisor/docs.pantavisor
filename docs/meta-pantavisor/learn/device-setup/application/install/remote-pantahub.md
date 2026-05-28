@@ -2,6 +2,7 @@
 title: Pantahub
 sidebar_position: 43
 description: Install your first application on Pantavisor Linux using Pantacor Hub. Step-by-step guide to install Home Assistant from the marketplace.
+keywords: ["install pantavisor app", "home assistant install", "pantacor hub installation", "first application", "pantacor marketplace", "container install", "app installation guide", "embedded app install", "pantavisor applications", "iot app deployment"]
 ---
 
 Pantahub is the cloud backend for Pantavisor. Once a device is claimed, you can push application updates to it from anywhere — the device polls Pantahub and applies the new revision automatically.

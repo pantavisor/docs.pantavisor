@@ -2,6 +2,7 @@
 title: What is Pantavisor?
 sidebar_position: 111
 description: "Understanding Pantavisor's role in the embedded Linux ecosystem"
+keywords: ["what is pantavisor", "pantavisor explained", "embedded container framework", "lightweight linux containers", "embedded devops", "iot container orchestration", "modular embedded updates", "embedded linux containerization", "pantavisor vs docker", "embedded system architecture"]
 ---
 
 ## What Pantavisor Is

@@ -2,6 +2,7 @@
 title: Porting Pantavisor
 sidebar_position: 50
 description: Troubleshooting guide for Pantavisor Linux. Find solutions to common issues, connectivity problems, and app management questions.
+keywords: ["pantavisor troubleshooting", "pantavisor problems", "embedded linux issues", "connectivity issues", "app problems", "pantavisor faq", "device troubleshooting", "pantavisor support", "embedded troubleshooting", "iot device issues"]
 ---
 
 This section covers how to add support for a new device or hardware platform to `meta-pantavisor`.

@@ -2,6 +2,7 @@
 title: Device platform
 sidebar_position: 2
 description: Learn about Pantavisor device platforms. Guide to platform configuration, layers, and integration for embedded Linux devices.
+keywords: ["pantavisor platform", "device platform", "platform configuration", "pantavisor layers", "embedded platform", "linux platform", "platform porting", "device integration", "yocto platform", "pantavisor distro"]
 ---
 
 A **platform file** in `kas/platforms/` declares the set of Yocto/OE layers required for a family of devices. Platform files are shared across multiple machine configurations — for example, `freescale.yaml` is included by both `nxp.yaml` and `toradex.yaml`.

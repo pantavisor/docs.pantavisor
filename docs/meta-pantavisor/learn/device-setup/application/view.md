@@ -2,6 +2,7 @@
 title: View Installed Applications
 sidebar_position: 42
 description: Monitor and manage installed applications on Pantavisor Linux. Learn to check status, start/stop apps, and view application details.
+keywords: ["view pantavisor apps", "application status", "manage containers", "pvr app list", "app monitoring", "container management", "installed applications", "application control", "pantavisor management", "device app status"]
 ---
 
 You can inspect running containers, their health state, and their logs from the device console, the `pvcontrol` CLI, or the pvtx local web UI.

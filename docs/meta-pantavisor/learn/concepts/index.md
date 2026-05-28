@@ -1,6 +1,7 @@
 ---
 title: Concepts
 sidebar_position: 10
+keywords: ["pantavisor concepts", "embedded containerization", "container architecture", "embedded linux concepts", "iot containerization principles", "pantavisor architecture", "embedded systems design", "container orchestration concepts", "modular embedded systems", "containerized iot"]
 ---
 
 ## What is Pantavisor Linux?

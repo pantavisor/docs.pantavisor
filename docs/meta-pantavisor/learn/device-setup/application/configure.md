@@ -2,6 +2,7 @@
 title: Configure Application Settings
 sidebar_position: 43
 description: Configure application settings on Pantavisor Linux. Learn to edit manifests, set environment variables, and manage app configurations.
+keywords: ["configure pantavisor apps", "app configuration", "application manifest", "environment variables", "app settings", "container config", "pantavisor configuration", "app customization", "embedded app config", "application management"]
 ---
 
 Each container's root filesystem is a read-only SquashFS image (`root.squashfs`). To change files inside a running container you do not edit the device directly. Instead you make changes in a local `pvr` checkout of the device state, then deploy a new revision. Pantavisor applies the overlay on the next boot.

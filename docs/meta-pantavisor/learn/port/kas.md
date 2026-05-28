@@ -2,6 +2,7 @@
 title: Building
 sidebar_position: 4
 description: Learn how to build Pantavisor Linux images using Kas. Complete guide to the build system, configuration, and compilation.
+keywords: ["pantavisor build", "kas build system", "yocto build", "embedded linux build", "pantavisor compilation", "device image build", "pantavisor kas", "build configuration", "embedded development", "iot build system"]
 ---
 
 With a [platform](../platform/) and [machine](../machine/) file in place, you can build the Pantavisor image and flash it to the board.

@@ -2,6 +2,7 @@
 title: Applications
 sidebar_position: 20
 description: Comprehensive guide on managing applications within Pantavisor Linux. Learn how to install, configure, access, view, and remove containerized services on your device.
+keywords: ["pantavisor applications", "containerized services", "embedded linux apps", "iot applications", "pantavisor install", "pantavisor configure", "manage containers"]
 ---
 
 In Pantavisor, every piece of user space — applications, system services, even OS components — runs as an isolated **LXC container**. Each container has its own read-only root filesystem (a SquashFS image), its own LXC configuration, and an optional `run.json` manifest that controls restart policy, auto-recovery, and service-mesh wiring.

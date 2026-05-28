@@ -2,6 +2,7 @@
 title: Frequently Asked Questions
 sidebar_position: 10
 description: Frequently asked questions about Pantavisor Linux. Get answers to common questions about app management, connectivity, and technical issues.
+keywords: ["pantavisor faq", "frequently asked questions", "pantavisor help", "common questions", "pantavisor answers", "embedded linux faq", "docker containers pantavisor", "pvr cli", "pantavisor support", "troubleshooting faq"]
 ---
 
 ## App Management

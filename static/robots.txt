@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pantavisor.github.io/docs.pantavisor/sitemap.xml
