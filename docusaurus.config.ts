@@ -11,8 +11,8 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://docs.pantacor.io',
-  baseUrl: '/',
+  url: 'https://pantavisor.github.io',
+  baseUrl: '/docs.pantavisor/',
 
   onBrokenLinks: 'warn',
   onBrokenAnchors: 'warn',
