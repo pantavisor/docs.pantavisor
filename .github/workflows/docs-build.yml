@@ -43,6 +43,17 @@ jobs:
       - name: Build Docusaurus
         run: npm run build
 
+      # Create gh-pages as an empty orphan branch the very first time.
+      - name: Ensure gh-pages branch exists
+        run: |
+          if ! git ls-remote --exit-code origin gh-pages; then
+            git checkout --orphan gh-pages
+            git reset --hard
+            git commit --allow-empty -m "init: create gh-pages branch"
+            git push origin gh-pages
+            git checkout master
+          fi
+
       # Commits the built static site to a deploy branch and opens a PR
       # to gh-pages for review before the site goes live.
       - name: Open deployment PR
