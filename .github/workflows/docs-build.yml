@@ -1,0 +1,79 @@
+name: Docs – build and open PR
+
+# Runs whenever docs source files change on any non-main branch.
+# On main it only builds (no PR needed — changes are already merged).
+on:
+  push:
+    paths:
+      - 'docs/**'
+      - 'releases/**'
+      - 'versioned_docs/**'
+      - 'versioned_sidebars/**'
+      - 'versions.json'
+      - 'docusaurus.config.ts'
+      - 'sidebars.ts'
+      - 'src/**'
+      - 'static/**'
+      - 'migrate-docs.js'
+      - 'package*.json'
+
+jobs:
+  build-and-pr:
+    name: Build site and open PR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Docusaurus
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-${{ github.sha }}
+          path: build/
+          retention-days: 14
+
+      # Only open a PR when pushing to a feature branch, not to main itself.
+      - name: Open or update pull request
+        if: github.ref_name != 'main' && github.ref_name != 'gh-pages'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          BODY="## Docs update
+
+          Docusaurus build passed ✓
+
+          | | |
+          |---|---|
+          | **Branch** | \`${BRANCH}\` |
+          | **Commit** | \`${{ github.sha }}\` |
+          | **Build artifact** | [Download](${RUN_URL}) |
+
+          > The build artifact contains the full static site and can be downloaded
+          > from the Actions run linked above to preview the changes locally."
+
+          # Create the PR; silently skip if one already exists for this branch.
+          gh pr create \
+            --base main \
+            --head "${BRANCH}" \
+            --title "docs: update site from ${BRANCH}" \
+            --body "${BODY}" \
+          || echo "PR already exists for '${BRANCH}', skipping creation."
