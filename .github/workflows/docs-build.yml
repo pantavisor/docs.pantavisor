@@ -1,11 +1,11 @@
 name: Docs – build and open PR
 
-# Triggers only when changes land on main (i.e. a PR is merged).
+# Triggers only when changes land on master (i.e. a PR is merged).
 # Feature branches do not trigger this workflow on their own.
 on:
   push:
     branches:
-      - main
+      - master
     paths:
       - 'docs/**'
       - 'releases/**'
@@ -55,7 +55,7 @@ jobs:
           commit-message: "build: update static site output"
           title: "deploy: update site (${{ github.sha }})"
           body: |
-            Built site update from merge into `main`.
+            Built site update from merge into `master`.
 
             | | |
             |---|---|
