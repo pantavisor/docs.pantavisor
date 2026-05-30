@@ -85,10 +85,13 @@ To publish a version, edit **`releases.json`** only:
 }
 ```
 
-Commit `releases.json`; the build downloads + regenerates everything. The CI
-ingest workflow (`.github/workflows/docs-ingest.yml`) automates this: given an
-artifact URL it records the version in `releases.json` (with checksum), verifies
-the build, and opens a PR. **No generated docs are ever committed.**
+Commit `releases.json`; the build resolves each version's tarball (URL +
+`sha256`) from the upstream manifest, downloads + verifies it, and regenerates
+everything. The CI ingest workflow (`.github/workflows/docs-ingest.yml`)
+automates this: given a `version` (or a `filename` to parse it from), it adds the
+version to `releases.json` `versions`, sets it as `current`, verifies the build,
+and opens a PR that changes only `releases.json`. **No generated docs are ever
+committed.**
 
 ---
 

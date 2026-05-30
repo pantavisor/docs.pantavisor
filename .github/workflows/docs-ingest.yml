@@ -1,30 +1,31 @@
 name: Docs – ingest new release
 
-# Triggered by another repo via the GitHub API:
+# Triggered by another repo (or manually) once a release's docs tarball has been
+# published to the upstream manifest:
+#   https://pantavisor-ci.s3.amazonaws.com/meta-pantavisor/releases.json
 #
 #   gh workflow run docs-ingest.yml \
 #     --repo pantavisor/docs.pantavisor \
-#     -f artifact_url="https://host/meta-pantavisor.abc1234+028-rc12.docs.tar.zst" \
-#     -f filename="meta-pantavisor.abc1234+028-rc12.docs.tar.zst"
+#     -f version=028-rc12
+#   # or pass a filename and let the workflow parse the version from it:
+#   gh workflow run docs-ingest.yml \
+#     --repo pantavisor/docs.pantavisor \
+#     -f filename="pantavisor-docs-028-rc12.tar.gz"
 #
-# The filename must follow the pattern:
-#   <image-name>.<short-hash>+<version>.docs.tar.zst
-# The <version> segment becomes the new release version (e.g. 028-rc12).
-#
-# This workflow does NOT commit any generated docs. It records the release in
-# releases.json (durable URL + sha256) and opens a PR. The build workflow
-# regenerates reference/ + reference_versioned_docs/ from releases.json on every
-# deploy (scripts/sync-reference.mjs). See README.md.
+# This workflow records the version in releases.json (sets it as `current`) and
+# opens a PR. It does NOT download anything or commit generated docs: the build
+# resolves each version's tarball URL + sha256 from the upstream manifest and
+# regenerates the reference docs (scripts/sync-reference.mjs). See README.md.
 
 on:
   workflow_dispatch:
     inputs:
-      artifact_url:
-        description: 'Durable download URL of the .docs.tar.zst file'
-        required: true
+      version:
+        description: 'Release version to publish, e.g. 028-rc12 (optional if filename is given)'
+        required: false
       filename:
-        description: 'Filename  e.g. meta-pantavisor.abc1234+028-rc12.docs.tar.zst'
-        required: true
+        description: 'Docs tarball filename to parse the version from (optional if version is given)'
+        required: false
 
 jobs:
   ingest:
@@ -38,52 +39,45 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ── 1. Parse the version tag out of the filename ──────────────────────
-      - name: Parse version from filename
+      # ── 1. Determine the version (explicit input or parsed from filename) ──
+      - name: Resolve version
         id: parse
+        env:
+          VERSION_IN: ${{ inputs.version }}
+          FILENAME: ${{ inputs.filename }}
         run: |
-          FILENAME="${{ inputs.filename }}"
-          VERSION=$(echo "$FILENAME" | sed 's/.*+\(.*\)\.docs\.tar\.\(zst\|gz\)$/\1/')
-          if [ -z "$VERSION" ] || [ "$VERSION" = "$FILENAME" ]; then
-            echo "::error::Cannot parse version from filename: $FILENAME"
-            echo "::error::Expected pattern: <name>.<hash>+<version>.docs.tar.(zst|gz)"
+          VERSION="$VERSION_IN"
+          if [ -z "$VERSION" ] && [ -n "$FILENAME" ]; then
+            # strip a leading "pantavisor-docs-" and a trailing ".tar.(gz|zst)",
+            # or take the segment after the last '+' for <name>+<version>.* names
+            V="${FILENAME##*+}"
+            V="${V%.docs.tar.*}"; V="${V%.tar.*}"
+            VERSION="${V#pantavisor-docs-}"
+          fi
+          if [ -z "$VERSION" ]; then
+            echo "::error::Provide either the version input or a filename to parse."
             exit 1
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Parsed version: $VERSION"
+          echo "Resolved version: $VERSION"
 
-      # ── 2. Download artifact and compute its checksum ─────────────────────
-      - name: Download artifact and hash it
-        id: hash
-        run: |
-          curl -fL -o artifact.tarball "${{ inputs.artifact_url }}"
-          SHA=$(sha256sum artifact.tarball | cut -d' ' -f1)
-          echo "sha256=$SHA" >> "$GITHUB_OUTPUT"
-          echo "sha256: $SHA"
-
-      # ── 3. Record the release in releases.json ────────────────────────────
+      # ── 2. Record the version in releases.json (newest first, set current) ─
       - name: Update releases.json
         env:
           NEW_VERSION: ${{ steps.parse.outputs.version }}
-          ARTIFACT_URL: ${{ inputs.artifact_url }}
-          SHA256: ${{ steps.hash.outputs.sha256 }}
         run: |
           node << 'EOF'
           const fs = require('fs');
           const version = process.env.NEW_VERSION;
-          const url = process.env.ARTIFACT_URL;
-          const sha256 = process.env.SHA256;
-          const channel = /rc/i.test(version) ? 'rc' : 'stable';
-
           const m = JSON.parse(fs.readFileSync('releases.json', 'utf8'));
-          m.releases = (m.releases || []).filter(r => r.version !== version);
-          m.releases.unshift({ version, channel, url, sha256 });
-          m.current = version; // newest ingested becomes the default/current
+          m.versions = [version, ...((m.versions || []).filter(v => v !== version))];
+          m.current = version; // newest ingested becomes the default version
           fs.writeFileSync('releases.json', JSON.stringify(m, null, 2) + '\n');
-          console.log(`releases.json: current → ${version}; ${m.releases.length} releases`);
+          console.log(`releases.json: current → ${version}; versions = ${JSON.stringify(m.versions)}`);
           EOF
 
-      # ── 4. Node setup + verify the site builds from releases.json ─────────
+      # ── 3. Verify the site builds (resolves the tarball from the upstream
+      #       manifest, verifies its sha256, and regenerates the reference) ───
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -93,34 +87,34 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build (verify — downloads + regenerates reference from releases.json)
+      - name: Build (verify)
         run: npm run build
 
-      # ── 5. Open the PR (only releases.json changes) ───────────────────────
+      # ── 4. Open the PR (only releases.json changes) ───────────────────────
       - name: Create pull request
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: "release/${{ steps.parse.outputs.version }}"
           base: master
-          commit-message: "release: record docs ${{ steps.parse.outputs.version }} in releases.json"
+          commit-message: "release: publish docs ${{ steps.parse.outputs.version }}"
           title: "release: ${{ steps.parse.outputs.version }} docs"
           add-paths: releases.json
           body: |
-            ## New docs release: `${{ steps.parse.outputs.version }}`
+            ## Publish docs version: `${{ steps.parse.outputs.version }}`
 
             | | |
             |---|---|
             | **New version (now current)** | `${{ steps.parse.outputs.version }}` |
-            | **Artifact** | `${{ inputs.filename }}` |
-            | **sha256** | `${{ steps.hash.outputs.sha256 }}` |
             | **Workflow run** | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
 
             ### What this PR does
-            - Records the release in `releases.json` (durable URL + sha256) and sets it as `current`.
-            - **No generated docs are committed.** On merge, the build downloads the
-              tarball, verifies the checksum, and regenerates `reference/` +
-              `reference_versioned_docs/` via `scripts/sync-reference.mjs`.
+            - Adds `${{ steps.parse.outputs.version }}` to `releases.json` `versions`
+              and sets it as `current`.
+            - **No generated docs are committed.** On merge, the build resolves the
+              tarball URL + sha256 from the upstream manifest, verifies the
+              checksum, and regenerates `reference/` + `reference_versioned_docs/`
+              via `scripts/sync-reference.mjs`.
 
             Merging will trigger the build-and-deploy workflow.
           delete-branch: true
