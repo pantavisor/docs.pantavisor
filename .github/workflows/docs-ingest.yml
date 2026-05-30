@@ -10,12 +10,17 @@ name: Docs – ingest new release
 # The filename must follow the pattern:
 #   <image-name>.<short-hash>+<version>.docs.tar.zst
 # The <version> segment becomes the new release version (e.g. 028-rc12).
+#
+# This workflow does NOT commit any generated docs. It records the release in
+# releases.json (durable URL + sha256) and opens a PR. The build workflow
+# regenerates reference/ + reference_versioned_docs/ from releases.json on every
+# deploy (scripts/sync-reference.mjs). See README.md.
 
 on:
   workflow_dispatch:
     inputs:
       artifact_url:
-        description: 'Download URL of the .docs.tar.zst file'
+        description: 'Durable download URL of the .docs.tar.zst file'
         required: true
       filename:
         description: 'Filename  e.g. meta-pantavisor.abc1234+028-rc12.docs.tar.zst'
@@ -23,7 +28,7 @@ on:
 
 jobs:
   ingest:
-    name: Ingest docs release
+    name: Record docs release
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -38,29 +43,47 @@ jobs:
         id: parse
         run: |
           FILENAME="${{ inputs.filename }}"
-          # Extract everything between the last '+' and '.docs.tar.zst'
-          VERSION=$(echo "$FILENAME" | sed 's/.*+\(.*\)\.docs\.tar\.zst$/\1/')
+          VERSION=$(echo "$FILENAME" | sed 's/.*+\(.*\)\.docs\.tar\.\(zst\|gz\)$/\1/')
           if [ -z "$VERSION" ] || [ "$VERSION" = "$FILENAME" ]; then
             echo "::error::Cannot parse version from filename: $FILENAME"
-            echo "::error::Expected pattern: <name>.<hash>+<version>.docs.tar.zst"
+            echo "::error::Expected pattern: <name>.<hash>+<version>.docs.tar.(zst|gz)"
             exit 1
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Parsed version: $VERSION"
 
-      # ── 2. Download and extract ────────────────────────────────────────────
-      - name: Download artifact
-        run: curl -fL -o artifact.docs.tar.zst "${{ inputs.artifact_url }}"
-
-      - name: Extract to releases/<version>
+      # ── 2. Download artifact and compute its checksum ─────────────────────
+      - name: Download artifact and hash it
+        id: hash
         run: |
-          VERSION="${{ steps.parse.outputs.version }}"
-          mkdir -p "releases/$VERSION"
-          tar -I zstd -xf artifact.docs.tar.zst -C "releases/$VERSION"
-          echo "Contents of releases/$VERSION:"
-          ls "releases/$VERSION"
+          curl -fL -o artifact.tarball "${{ inputs.artifact_url }}"
+          SHA=$(sha256sum artifact.tarball | cut -d' ' -f1)
+          echo "sha256=$SHA" >> "$GITHUB_OUTPUT"
+          echo "sha256: $SHA"
 
-      # ── 3. Node / Docusaurus setup ─────────────────────────────────────────
+      # ── 3. Record the release in releases.json ────────────────────────────
+      - name: Update releases.json
+        env:
+          NEW_VERSION: ${{ steps.parse.outputs.version }}
+          ARTIFACT_URL: ${{ inputs.artifact_url }}
+          SHA256: ${{ steps.hash.outputs.sha256 }}
+        run: |
+          node << 'EOF'
+          const fs = require('fs');
+          const version = process.env.NEW_VERSION;
+          const url = process.env.ARTIFACT_URL;
+          const sha256 = process.env.SHA256;
+          const channel = /rc/i.test(version) ? 'rc' : 'stable';
+
+          const m = JSON.parse(fs.readFileSync('releases.json', 'utf8'));
+          m.releases = (m.releases || []).filter(r => r.version !== version);
+          m.releases.unshift({ version, channel, url, sha256 });
+          m.current = version; // newest ingested becomes the default/current
+          fs.writeFileSync('releases.json', JSON.stringify(m, null, 2) + '\n');
+          console.log(`releases.json: current → ${version}; ${m.releases.length} releases`);
+          EOF
+
+      # ── 4. Node setup + verify the site builds from releases.json ─────────
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -70,120 +93,34 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # ── 4. Read what the current version label is ──────────────────────────
-      - name: Read current version label
-        id: current
-        run: |
-          LABEL=$(node -p "
-            const c = require('fs').readFileSync('docusaurus.config.ts', 'utf8');
-            (c.match(/current:\s*\{[^}]*label:\s*'([^']+)'/s) || [])[1] || ''
-          ")
-          if [ -z "$LABEL" ]; then
-            echo "::error::Could not read current version label from docusaurus.config.ts"
-            exit 1
-          fi
-          echo "label=$LABEL" >> "$GITHUB_OUTPUT"
-          echo "Current label: $LABEL"
-
-      # ── 5. Freeze current docs/ then migrate the new release ───────────────
-      - name: Freeze current docs as versioned snapshot
-        run: npx docusaurus docs:version "${{ steps.current.outputs.label }}"
-
-      - name: Migrate new release into docs/
-        run: node migrate-docs.js "${{ steps.parse.outputs.version }}" docs
-
-      - name: Restore landing page
-        run: |
-          cat > docs/index.md << 'MDEOF'
-          ---
-          title: Pantacor Documentation
-          sidebar_position: 1
-          ---
-
-          # Pantacor Documentation
-
-          Welcome to the official documentation for the Pantacor ecosystem.
-
-          ## Projects
-
-          - **[Pantavisor](/pantavisor/overview/pantavisor-architecture)** — the open-source, container-based embedded Linux runtime
-          - **[meta-pantavisor](/meta-pantavisor/learn)** — the Yocto/OpenEmbedded layer for building Pantavisor images
-          - **[PVR SDK](/pvr-sdk/README)** — the on-device management service
-
-          ## Quick Start
-
-          New to Pantavisor? Start with the [concepts overview](/meta-pantavisor/learn/concepts/what-is-pantavisor)
-          to understand the fundamentals, then follow the [device setup guide](/meta-pantavisor/learn/device-setup/download-and-flash)
-          to get your first device running.
-          MDEOF
-
-      # ── 6. Update docusaurus.config.ts ─────────────────────────────────────
-      # - Change current.label to the new version
-      # - Add an explicit entry for the version that was just frozen
-      - name: Update version config
-        env:
-          NEW_VERSION: ${{ steps.parse.outputs.version }}
-          OLD_VERSION: ${{ steps.current.outputs.label }}
-        run: |
-          node << 'EOF'
-          const fs = require('fs');
-          const newVersion = process.env.NEW_VERSION;
-          const oldVersion = process.env.OLD_VERSION;
-
-          let cfg = fs.readFileSync('docusaurus.config.ts', 'utf8');
-
-          // 1. Update current label to the new version
-          cfg = cfg.replace(
-            /(current:\s*\{[^}]*label:\s*')[^']*(')/s,
-            `$1${newVersion}$2`
-          );
-
-          // 2. Insert an explicit entry for the just-frozen version
-          //    right after the current: { ... }, block so the dropdown
-          //    shows it with the correct label and path.
-          const frozenEntry = `
-            '${oldVersion}': {
-              label: '${oldVersion}',
-              path: '/${oldVersion}',
-            },`;
-
-          cfg = cfg.replace(
-            /(current:\s*\{[^}]*\},)/s,
-            `$1${frozenEntry}`
-          );
-
-          fs.writeFileSync('docusaurus.config.ts', cfg);
-          console.log(`Updated config: current label → ${newVersion}, added entry for ${oldVersion}`);
-          EOF
-
-      # ── 7. Verify the build compiles cleanly ──────────────────────────────
-      - name: Build (verify)
+      - name: Build (verify — downloads + regenerates reference from releases.json)
         run: npm run build
 
-      # ── 8. Open the PR ─────────────────────────────────────────────────────
+      # ── 5. Open the PR (only releases.json changes) ───────────────────────
       - name: Create pull request
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: "release/${{ steps.parse.outputs.version }}"
           base: master
-          commit-message: "release: add docs for ${{ steps.parse.outputs.version }}"
+          commit-message: "release: record docs ${{ steps.parse.outputs.version }} in releases.json"
           title: "release: ${{ steps.parse.outputs.version }} docs"
+          add-paths: releases.json
           body: |
             ## New docs release: `${{ steps.parse.outputs.version }}`
 
             | | |
             |---|---|
-            | **New version** | `${{ steps.parse.outputs.version }}` |
-            | **Previous version** | `${{ steps.current.outputs.label }}` (now frozen) |
-            | **Source file** | `${{ inputs.filename }}` |
+            | **New version (now current)** | `${{ steps.parse.outputs.version }}` |
+            | **Artifact** | `${{ inputs.filename }}` |
+            | **sha256** | `${{ steps.hash.outputs.sha256 }}` |
             | **Workflow run** | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
 
             ### What this PR does
-            - Adds `releases/${{ steps.parse.outputs.version }}/` from the tarball
-            - Freezes `${{ steps.current.outputs.label }}` into `versioned_docs/`
-            - Migrates the new release into `docs/` (the live current version)
-            - Updates `docusaurus.config.ts` to label the current version as `${{ steps.parse.outputs.version }}`
+            - Records the release in `releases.json` (durable URL + sha256) and sets it as `current`.
+            - **No generated docs are committed.** On merge, the build downloads the
+              tarball, verifies the checksum, and regenerates `reference/` +
+              `reference_versioned_docs/` via `scripts/sync-reference.mjs`.
 
             Merging will trigger the build-and-deploy workflow.
           delete-branch: true
