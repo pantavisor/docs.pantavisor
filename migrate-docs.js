@@ -1,14 +1,18 @@
 #!/usr/bin/env node
-// Migrates a releases/<version>/ folder into a Docusaurus docs target.
+// Migrates a releases/<version>/ folder into the REFERENCE docs instance.
+// The reference instance is the generated, versioned, repo-shaped content.
+// The curated/ instance (user-task IA, positioning) is hand-authored Markdown
+// and is NEVER touched by this script.
 // Usage:
 //   node migrate-docs.js <src-version> <dest>
-//   node migrate-docs.js 028-rc11 docs           ← current version
-//   node migrate-docs.js 028-rc10 versioned_docs/version-028-rc10
+//   node migrate-docs.js 028-rc11 reference                              ← current version
+//   node migrate-docs.js 028-rc10 reference_versioned_docs/version-028-rc10
 //
 // - Converts TOML +++ frontmatter to YAML ---
 // - Renames _index.md → index.md
 // - Maps weight/nav_order → sidebar_position
 // - Copies image assets in place
+// - Writes a Reference landing index.md when DEST is the live `reference` dir
 
 const fs = require('fs');
 const path = require('path');
@@ -131,10 +135,27 @@ function processMarkdown(content) {
   return content;
 }
 
+// Paths (relative to the release root) that are NOT reference material and are
+// excluded from the generated reference instance. The "learn" tree is curated,
+// versionless narrative and is hand-authored in curated/ instead.
+const EXCLUDE_FROM_REFERENCE = new Set([
+  // Curated narrative/guides — maintained by hand in curated/, not generated.
+  'meta-pantavisor/learn',
+  'meta-pantavisor/overview',
+  'meta-pantavisor/how-to-build',
+  'meta-pantavisor/how-to-install',
+  'meta-pantavisor/supported-devices',
+]);
+
 function walk(srcDir, destDir) {
   fs.mkdirSync(destDir, { recursive: true });
   for (const entry of fs.readdirSync(srcDir, { withFileTypes: true })) {
     const srcPath = path.join(srcDir, entry.name);
+    const relFromRoot = path.relative(SRC, srcPath).split(path.sep).join('/');
+    if (EXCLUDE_FROM_REFERENCE.has(relFromRoot)) {
+      console.log(`  (excluded from reference: ${relFromRoot})`);
+      continue;
+    }
     let destName = entry.name === '_index.md' ? 'index.md' : entry.name;
     const destPath = path.join(destDir, destName);
 
@@ -168,6 +189,33 @@ if (fs.existsSync(PLACEHOLDER)) {
       fs.copyFileSync(PLACEHOLDER, img);
     }
   }
+}
+
+// Reference landing page. The reference instance is regenerated on every build,
+// so the landing is written here rather than hand-maintained. Written for the
+// live `reference` dir and for each frozen `version-*` snapshot.
+const destBase = path.basename(DEST);
+if (destBase === 'reference' || destBase.startsWith('version-')) {
+  const REFERENCE_INDEX = `---
+title: Reference
+description: Generated, versioned reference for Pantavisor, meta-pantavisor, and pvr.
+sidebar_position: 1
+slug: /
+---
+
+# Reference
+
+This section is **generated from each Pantavisor release** and is **versioned** —
+use the version dropdown to match your device. It is the exact, authoritative
+reference for commands, schemas, recipes, and per-board material.
+
+For task guides and concepts, see the main [documentation](/) (curated and
+versionless).
+
+> Do not hand-edit pages under Reference. They are regenerated on every release
+> ingest. Edit the source in the originating repository instead.
+`;
+  fs.writeFileSync(path.join(DEST, 'index.md'), REFERENCE_INDEX);
 }
 
 console.log(`Migrated releases/${srcArg} → ${destArg}`);

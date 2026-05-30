@@ -7,16 +7,16 @@ on:
     branches:
       - master
     paths:
-      - 'docs/**'
-      - 'releases/**'
-      - 'versioned_docs/**'
-      - 'versioned_sidebars/**'
-      - 'versions.json'
+      - 'curated/**'
+      - 'releases.json'
+      - 'reference_versioned_sidebars/**'
       - 'docusaurus.config.ts'
-      - 'sidebars.ts'
+      - 'sidebarsCurated.ts'
+      - 'sidebarsReference.ts'
       - 'src/**'
       - 'static/**'
       - 'migrate-docs.js'
+      - 'scripts/**'
       - 'package*.json'
       - '.github/workflows/**'
 

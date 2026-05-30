@@ -1,16 +1,36 @@
+import {readFileSync} from 'fs';
 import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
+// Reference versions are derived from releases.json (the single source of
+// truth). scripts/sync-reference.mjs generates the matching reference/ and
+// reference_versioned_docs/ at build time; none of it is committed.
+const releases = JSON.parse(readFileSync('./releases.json', 'utf8')) as {
+  current: string;
+  versions: string[];
+};
+const referenceVersions: {[v: string]: {label: string; path: string}} = {};
+for (const version of releases.versions) {
+  if (version === releases.current) {
+    referenceVersions.current = {label: version, path: '/'};
+  } else {
+    referenceVersions[version] = {label: version, path: `/${version}`};
+  }
+}
+
 const config: Config = {
-  title: 'Pantacor Docs',
-  tagline: 'Documentation for Pantavisor and meta-pantavisor',
+  title: 'Pantavisor Docs',
+  tagline: 'Pantavisor is PID 1 and owns the full device update',
   favicon: 'img/favicon.ico',
 
   future: {
     v4: true,
   },
 
+  // GitHub Pages project sub-path for now. Switch url to https://docs.pantavisor.io
+  // and baseUrl to '/' when the canonical domain goes live (also update SITE in
+  // scripts/generate-llms.mjs to match).
   url: 'https://pantavisor.github.io',
   baseUrl: '/docs.pantavisor/',
 
@@ -18,8 +38,8 @@ const config: Config = {
   onBrokenAnchors: 'warn',
 
   markdown: {
-    // Parse .md files as standard CommonMark (not MDX) so existing HTML
-    // in docs (class= attributes, <!-- comments -->, <br> tags) passes through.
+    // By extension: .md → CommonMark (reference content with raw HTML/braces
+    // passes through), .mdx → MDX (authored curated content with admonitions).
     format: 'detect',
     hooks: {
       onBrokenMarkdownLinks: 'warn',
@@ -36,22 +56,12 @@ const config: Config = {
     [
       'classic',
       {
+        // Default docs instance = CURATED, versionless, user-task IA.
+        // Hand-authored Markdown in curated/. Never touched by release ingest.
         docs: {
-          sidebarPath: './sidebars.ts',
+          path: 'curated',
           routeBasePath: '/',
-          // Versioning: snapshot with `npx docusaurus docs:version <X>`
-          // when a new docs-vX folder arrives and replaces docs/.
-          lastVersion: 'current',
-          versions: {
-            current: {
-              label: '028-rc11',
-              path: '/',
-            },
-            '028-rc10': {
-              label: '028-rc10',
-              path: '/028-rc10',
-            },
-          },
+          sidebarPath: './sidebarsCurated.ts',
         },
         blog: false,
         theme: {
@@ -61,25 +71,66 @@ const config: Config = {
     ],
   ],
 
+  plugins: [
+    [
+      '@docusaurus/plugin-content-docs',
+      {
+        // REFERENCE instance = generated, versioned, repo-shaped content.
+        // migrate-docs.js writes the current version into reference/.
+        id: 'reference',
+        path: 'reference',
+        routeBasePath: 'reference',
+        sidebarPath: './sidebarsReference.ts',
+        lastVersion: 'current',
+        versions: referenceVersions,
+      },
+    ],
+  ],
+
+  themes: [
+    [
+      // Offline local search (no external service). Indexes both the curated
+      // and reference docs instances.
+      '@easyops-cn/docusaurus-search-local',
+      {
+        hashed: true,
+        indexDocs: true,
+        indexBlog: false,
+        docsRouteBasePath: ['/', 'reference'],
+        docsDir: ['curated', 'reference'],
+        highlightSearchTermsOnTargetPage: true,
+        searchResultLimits: 8,
+      },
+    ],
+  ],
+
   themeConfig: {
     image: 'img/docusaurus-social-card.jpg',
     colorMode: {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'Pantacor Docs',
+      title: 'Pantavisor Docs',
       logo: {
-        alt: 'Pantacor Logo',
-        src: 'img/logo.svg',
+        alt: 'Pantavisor',
+        src: 'images/logo-icon.svg',        // light theme (dark icon)
+        srcDark: 'images/logo-icon-white.svg', // dark theme (white icon)
+        width: 32,
+        height: 32,
       },
       items: [
+        {to: '/concepts', label: 'Concepts', position: 'left'},
+        {to: '/start', label: 'Start', position: 'left'},
+        {to: '/migrate', label: 'Migrate', position: 'left'},
+        {to: '/reference', label: 'Reference', position: 'left'},
         {
           type: 'docsVersionDropdown',
+          docsPluginId: 'reference',
           position: 'right',
           dropdownActiveClassDisabled: true,
         },
         {
-          href: 'https://github.com/pantacor',
+          href: 'https://github.com/pantavisor',
           label: 'GitHub',
           position: 'right',
         },
@@ -91,16 +142,18 @@ const config: Config = {
         {
           title: 'Docs',
           items: [
-            {label: 'Pantavisor', to: '/pantavisor/overview/pantavisor-architecture'},
-            {label: 'meta-pantavisor', to: '/meta-pantavisor/learn'},
-            {label: 'PVR SDK', to: '/pvr-sdk/README'},
+            {label: 'Concepts', to: '/concepts'},
+            {label: 'Start', to: '/start'},
+            {label: 'Migrate to Pantavisor', to: '/migrate'},
+            {label: 'Reference', to: '/reference'},
           ],
         },
         {
           title: 'Community',
           items: [
             {label: 'Pantacor Website', href: 'https://www.pantacor.com'},
-            {label: 'GitHub', href: 'https://github.com/pantacor'},
+            {label: 'Pantahub Docs', href: 'https://docs.pantahub.com'},
+            {label: 'GitHub', href: 'https://github.com/pantavisor'},
           ],
         },
       ],
