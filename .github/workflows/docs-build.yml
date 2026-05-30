@@ -3,13 +3,17 @@ name: Docs – build and deploy
 # Triggers only when changes land on master (i.e. a PR is merged).
 # Feature branches do not trigger this workflow on their own.
 on:
+  # Manual trigger (e.g. to re-fetch the upstream manifest without a repo change).
+  workflow_dispatch:
+  # Triggers when changes land on master (i.e. a PR is merged). Generated docs
+  # (reference/, reference_versioned_*, releases/, llms*.txt) are git-ignored, so
+  # only the committed inputs that affect the build are listed here.
   push:
     branches:
       - master
     paths:
       - 'curated/**'
       - 'releases.json'
-      - 'reference_versioned_sidebars/**'
       - 'docusaurus.config.ts'
       - 'sidebarsCurated.ts'
       - 'sidebarsReference.ts'
@@ -22,6 +26,11 @@ on:
 
 permissions:
   contents: read
+
+# Allow only one concurrent deployment; let an in-progress run finish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
   build:
