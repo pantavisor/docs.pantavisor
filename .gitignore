@@ -7,6 +7,19 @@ build/
 # Docusaurus cache
 .docusaurus/
 
+# Generated AI-discoverability files (built by scripts/generate-llms.mjs)
+static/llms.txt
+static/llms-full.txt
+
+# Generated/downloaded REFERENCE docs — rebuilt from releases.json at build time
+# by scripts/sync-reference.mjs. Never committed (see releases.json + README).
+releases/
+reference/
+reference_versioned_docs/
+reference_versioned_sidebars/
+reference_versions.json
+.releases-cache/
+
 # OS
 .DS_Store
 Thumbs.db
