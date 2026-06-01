@@ -122,7 +122,20 @@ const config: Config = {
         {to: '/concepts', label: 'Concepts', position: 'left'},
         {to: '/start', label: 'Start', position: 'left'},
         {to: '/migrate', label: 'Migrate', position: 'left'},
-        {to: '/reference', label: 'Reference', position: 'left'},
+        {
+          // The reference instance is repo-shaped; surface its top-level
+          // sections directly so they are reachable without drilling in.
+          type: 'dropdown',
+          label: 'Reference',
+          position: 'left',
+          to: '/reference',
+          items: [
+            {to: '/reference', label: 'Reference home'},
+            {to: '/reference/meta-pantavisor', label: 'meta-pantavisor'},
+            {to: '/reference/pantavisor', label: 'pantavisor'},
+            {to: '/reference/pvr', label: 'pvr'},
+          ],
+        },
         {
           type: 'docsVersionDropdown',
           docsPluginId: 'reference',

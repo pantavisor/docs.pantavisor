@@ -1,0 +1,38 @@
+:root {
+  --md-text-font-family: "Inter", sans-serif;
+  --md-code-font-family: "Roboto Mono";
+  --md-default-fg-color: rgba(0,0,0,0.87);
+  --md-default-fg-color--light: rgba(0,0,0,0.54);
+  --md-default-fg-color--lighter: rgba(0,0,0,0.32);
+  --md-default-fg-color--lightest: rgba(0,0,0,0.07);
+  --md-default-bg-color: #fff;
+  --md-default-bg-color--light: hsla(0,0%,100%,0.7);
+  --md-default-bg-color--lighter: hsla(0,0%,100%,0.3);
+  --md-default-bg-color--lightest: hsla(0,0%,100%,0.12);
+  --md-primary-fg-color: #6C63FF;
+  --md-primary-fg-color--light: #6C63FF;
+  --md-primary-fg-color--dark: #5952d3;
+  --md-primary-bg-color: #fff;
+  --md-primary-bg-color--light: hsla(0,0%,100%,0.7);
+  --md-accent-fg-color: #526cfe;
+  --md-accent-fg-color--transparent: rgba(82,108,254,0.1);
+  --md-accent-bg-color: #fff;
+  --md-accent-bg-color--light: hsla(0,0%,100%,0.7);
+}
+
+img {
+  max-width: 600px;
+}
+
+.md-header__button.md-logo img, .md-header__button.md-logo svg {
+  height: 2rem;
+  width: 160px;
+}
+
+.md-nav__title .md-nav__button.md-logo img, .md-nav__title .md-nav__button.md-logo svg {
+  width: 160px;
+}
+
+.headerlink {
+  display: none;
+}
