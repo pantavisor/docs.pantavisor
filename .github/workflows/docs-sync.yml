@@ -1,0 +1,59 @@
+name: Docs – release sync
+
+# Polls the upstream Pantavisor release manifest every 12 hours and registers
+# any new docs versions (stable 0XX or release-candidate 0XX-rcN) that are not
+# yet recorded in the local releases.json.
+#
+# When new versions are found the workflow:
+#   1. Merges them into releases.json (all versions sorted newest-first).
+#   2. Sets `current` to the overall latest version.
+#   3. Commits releases.json to a new branch (release/auto-sync-<timestamp>)
+#      so the change can be reviewed and merged independently.
+#
+# Version ordering rules
+#   Stable:  024 < 025 < 026  →  026 is latest
+#   RC:      026-rc1 < 026-rc2  →  026-rc2 is latest
+#   Mixed:   026-rc* < 026 (stable supersedes its own RCs)
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'   # every 12 hours
+  workflow_dispatch: {}        # allow manual trigger
+
+jobs:
+  sync:
+    name: Detect and register new docs versions
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch upstream manifest
+        run: |
+          curl -fsSL \
+            'https://pantavisor-ci.s3.amazonaws.com/meta-pantavisor/releases.json' \
+            -o /tmp/upstream-releases.json
+
+      # Compares upstream keys against local releases.json, merges any new
+      # versions in, and re-sorts everything newest-first.
+      - name: Detect and apply new versions
+        id: detect
+        run: python3 .github/scripts/detect-versions.py
+
+      - name: Commit to release branch
+        if: steps.detect.outputs.new_versions != ''
+        env:
+          NEW_VERSIONS: ${{ steps.detect.outputs.new_versions }}
+          CURRENT:      ${{ steps.detect.outputs.current }}
+        run: |
+          BRANCH="release/auto-sync-$(date -u +%Y%m%d-%H%M%S)"
+          git config user.name  "Pantavisor Docs CI"
+          git config user.email "pantavisor-meta@ci.pantavisor.io"
+          git checkout -b "$BRANCH"
+          git add releases.json
+          git commit -m "release: register docs version(s) ${NEW_VERSIONS}"
+          git push origin "$BRANCH"
+          echo "Pushed branch: $BRANCH  (current → ${CURRENT})"
