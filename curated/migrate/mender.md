@@ -1,0 +1,60 @@
+---
+title: Mender to Pantavisor
+sidebar_position: 1
+description: Move from Mender's A/B full-image updates to Pantavisor's content-addressed, object-level revisions — mapping meta-mender, Artifacts, and the Mender server to the Pantavisor model.
+---
+
+# Mender to Pantavisor
+
+Mender updates **the image**: it keeps two copies of the rootfs (an A/B slot
+pair) and writes a full Artifact into the inactive slot, then switches the
+bootloader flag. Pantavisor replaces that model entirely — it owns PID 1 and
+ships every change as a content-addressed **revision**, transferring only the
+objects that actually changed. There is no A/B duplication of the whole rootfs
+and no separate updater running on top of the OS.
+
+> **See also:** [Pantavisor vs Mender](/benchmarks/vs-mender) for the capability
+> comparison.
+
+## How the concepts map
+
+| Mender | Pantavisor | Notes |
+|---|---|---|
+| `meta-mender` Yocto layer | [`meta-pantavisor`](/build) | Swap the layer; Pantavisor builds the BSP, kernel, and containers. |
+| A/B rootfs slots | [Revisions in the trail](/concepts/what-is-pantavisor) | Rollback is to the previous revision, not a mirrored partition — no doubled storage for the full rootfs. |
+| Mender Artifact (`.mender`) | A `pvr` revision (`pvr commit` + `pvr post`) | The unit of update is a signed, diffable revision. |
+| `mender-binary-delta` (commercial delta) | Object-level diffs (built in) | Only changed content-addressed objects are transferred — no separate delta add-on. |
+| Update Modules (partial/app updates) | [Containers](/develop) | Every component is already an independent container; app updates never touch the base. |
+| Mender client (a service on the OS) | Pantavisor **is** PID 1 | No agent layered on top — the runtime and the updater are the same process. |
+| Mender server / Hosted Mender | [Pantahub](/operate/device-access/remote-pantahub) (optional) | Or deploy directly over the local network with `pvr`; the cloud is not required. |
+| Bootloader bootcount rollback | [Health-gated commit + bootloader try/rollback](/security/atomicity-and-trust) | A trial revision must pass health checks before it is marked good. |
+
+## Migration path
+
+1. **Rebuild with `meta-pantavisor`.** Replace `meta-mender` in your Yocto
+   configuration. See [Build with Yocto](/build) and
+   [Get started with meta-pantavisor](/build/get-started).
+2. **Decompose the rootfs into containers.** What was a single Mender rootfs
+   becomes a BSP container plus one or more application containers. See
+   [Concepts](/concepts/what-is-pantavisor) and
+   [Develop applications](/develop).
+3. **Flash a Pantavisor image** to your board. See
+   [Install on hardware](/install).
+4. **Wire up deployments.** Push revisions over the local network with `pvr`,
+   or claim the device on [Pantahub](/operate/device-access/remote-pantahub)
+   for remote OTA.
+
+## What changes for your team
+
+- **App fixes stop being full-image events.** A one-line change ships as a small
+  container layer, not a full rootfs Artifact. See the
+  [benchmarks](/benchmarks) for the size and time difference.
+- **The base and kernel are updated the same way** — as containers in a
+  revision — so you do not run an A/B image updater underneath Pantavisor.
+- **Rollback is automatic and health-gated**, not just a bootcount flip.
+
+> **⚠️ Warning — No hybrid stacks**
+>
+> Do not keep Mender updating the rootfs/kernel while Pantavisor handles apps.
+> That reintroduces whole-image updates and breaks the single signed-revision
+> model. Pantavisor replaces Mender, it does not run alongside it.

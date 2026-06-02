@@ -1,7 +1,7 @@
 ---
-title: PVR
+title: Install with the pvr CLI
 sidebar_position: 41
-description: Install your first application on Pantavisor Linux using PVR CLI. Step-by-step guide to install Home Assistant from the marketplace.
+description: Install an application on Pantavisor with the pvr CLI — clone the device, add a container from a Docker image, commit, and deploy a new revision over the local network.
 ---
 
 The `pvr` CLI lets you add a Docker Hub image as a Pantavisor container, commit the change locally, and deploy it to the device over the local network — all without touching the device directly.
@@ -15,7 +15,7 @@ The `pvr` CLI lets you add a Docker Hub image as a Pantavisor container, commit 
 Clone the device's current revision to your workstation. Pantavisor exposes its state over HTTP on port 12368.
 
 ```bash
-pvr clone <device-ip> mydevice
+pvr clone http://<device-ip>:12368/cgi-bin mydevice
 cd mydevice
 ```
 
@@ -67,10 +67,10 @@ pvr commit -m "add Tailscale container"
 
 ## 4 — Deploy to the Device
 
-Push the new revision to the device:
+Post the new revision to the device's pvr endpoint — the same URL you cloned from:
 
 ```bash
-pvr deploy trails/0 .
+pvr post http://<device-ip>:12368
 ```
 
 Pantavisor downloads the new container objects, writes them as a pending revision, and reboots. If the revision boots cleanly, it becomes the new permanent state.

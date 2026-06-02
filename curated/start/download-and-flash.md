@@ -6,7 +6,7 @@ description: Step-by-step guide to download and flash Pantavisor Linux images to
 
 ## Getting Started with Pantavisor Linux
 
-This guide will walk you through setting up **Pantavisor Linux** on a **Raspberry Pi 3B**. While Pantavisor supports a variety of embedded devices, the steps here are tailored for the Raspberry Pi 3B. If you are looking to apply the same principals here applied got to
+This guide will walk you through setting up **Pantavisor Linux** on a **Raspberry Pi 3B**. While Pantavisor supports a variety of embedded devices, the steps here are tailored for the Raspberry Pi 3B. The same principles apply to other boards — see [Install on hardware](/install) for board-specific guides.
 
 ### Prerequisites
 

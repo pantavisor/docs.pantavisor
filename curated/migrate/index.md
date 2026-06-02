@@ -13,12 +13,12 @@ base/BSP and kernel — you do not keep the old updater running underneath it.
 
 ## Guides
 
-- Mender to Pantavisor
-- RAUC to Pantavisor
-- SWUpdate to Pantavisor
-- Balena to Pantavisor
-- Docker Compose to Pantavisor
-- When *not* to use Pantavisor
+- [Mender to Pantavisor](/migrate/mender)
+- [RAUC to Pantavisor](/migrate/rauc)
+- [SWUpdate to Pantavisor](/migrate/swupdate)
+- [Balena to Pantavisor](/migrate/balena)
+- [Docker Compose to Pantavisor](/migrate/docker-compose)
+- [When *not* to use Pantavisor](/migrate/when-not-to-use)
 
 > **⚠️ Warning — No hybrid stacks**
 >

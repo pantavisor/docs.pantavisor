@@ -1,9 +1,12 @@
 ---
+title: Toradex Colibri iMX6ULL
+sidebar_position: 1
+description: Flash Pantavisor to a Toradex Colibri iMX6ULL module via the Toradex Easy Installer (Tezi), including carrier-board recovery-mode setup.
 ---
 
 # Flashing: Toradex Colibri iMX6ULL
 
-**Flash method:** Toradex Easy Installer (Tezi) — see the Tezi section above
+**Flash method:** Toradex Easy Installer (Tezi) — see the [Tezi flashing guide](/install/tezi)
 
 **Image artifact:** `pantavisor-starter-colibri-imx6ull*pv_teziimg.tar.xz`
 
@@ -33,7 +36,7 @@ mode by pulling `BOOT_MODE[1:0]` to `10b`.
 
 ## Flashing
 
-Follow the Tezi flashing procedure described in the section above.
+Follow the [Tezi flashing procedure](/install/tezi).
 
 ## Notes
 

@@ -1,7 +1,7 @@
 ---
 title: Serial Console
 sidebar_position: 2
-description: Configure WiFi and ethernet network connectivity for Pantavisor Linux devices. Complete guide for getting your device online.
+description: Access a Pantavisor device over the serial console — open the debug shell, list and enter containers, query device status, and read logs without any network.
 ---
 
 The serial console is the most direct access path to a Pantavisor device — it works without any network configuration and shows the full boot sequence from bootloader to Pantavisor startup.

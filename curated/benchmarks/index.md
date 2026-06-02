@@ -1,25 +1,54 @@
 ---
 title: Benchmarks and comparisons
-description: Reproducible numbers comparing Pantavisor to image updaters — payload size, time, and flash writes.
+description: How Pantavisor compares to Yocto, Balena, Buildroot, Docker, and image updaters — capability matrix plus reproducible payload/time/flash numbers.
 sidebar_position: 9
 slug: /benchmarks
 ---
 
 # Benchmarks and comparisons
 
-Our "more valid than an image updater" claim is backed by numbers, not slogans.
-Every figure here is reproducible from a published methodology.
+Choosing an embedded Linux approach is a long-lived decision. This section
+compares Pantavisor to the common alternatives on capability, and backs the
+efficiency claims with reproducible numbers.
 
-## Pages
+## Pantavisor vs alternatives
 
-- **Pantavisor vs Mender/RAUC/SWUpdate matrix** — capability comparison.
-- **Update efficiency benchmark (headline proof)** — payload size, update time,
-  and flash writes for an app-layer update vs a full-image update, on the same
-  hardware with the same app change.
-- **Reproducing the benchmarks** — so the numbers are defensible and re-runnable.
-- **Footprint table** — RAM/flash across reference boards.
+Pantavisor offers **composable firmware through lightweight LXC containers** —
+including the kernel/BSP as a container — which differs from both traditional
+build systems and container platforms.
 
-## What the numbers show (to be filled with measured data)
+| Feature | Pantavisor | Yocto | Balena | Buildroot | Docker |
+|---|---|---|---|---|---|
+| Composable architecture | ✅ Full stack | ❌ Monolithic | ⚠️ App-only | ❌ Monolithic | ⚠️ App-only |
+| Container runtime | ✅ LXC (~1 MB) | ❌ None | ✅ Docker | ❌ None | ✅ Docker |
+| Kernel as a container | ✅ Yes | ❌ No | ❌ No | ❌ No | ❌ No |
+| Atomic OTA rollback | ✅ Built-in | ⚠️ Bolt-on | ✅ Yes | ⚠️ Manual | ⚠️ Partial |
+| Resource constrained | ✅ ~1 MB core | ⚠️ Heavy | ⚠️ Heavy | ✅ Minimal | ⚠️ Heavy |
+| Bare-metal performance | ✅ Yes | ✅ Yes | ⚠️ Overhead | ✅ Yes | ⚠️ Overhead |
+| Offline operation | ✅ Full | ✅ Yes | ⚠️ Limited | ✅ Yes | ⚠️ Limited |
+| Open source | ✅ 100% | ✅ Yes | ⚠️ Open-core | ✅ Yes | ✅ Yes |
+
+Detailed comparisons:
+
+- **[Pantavisor vs Yocto](/benchmarks/vs-yocto)** — why Pantavisor complements Yocto rather than replacing it
+- **[Pantavisor vs Balena](/benchmarks/vs-balena)** — lightweight LXC vs Docker for embedded
+- **[Pantavisor vs Buildroot](/benchmarks/vs-buildroot)** — composability vs minimalism
+- **[Pantavisor vs Docker](/benchmarks/vs-docker)** — why Docker alone isn't enough for firmware
+
+For the migration *path* off an image updater or container platform, see
+[Migrate to Pantavisor](/migrate).
+
+## Pantavisor vs image updaters (Mender / RAUC / SWUpdate)
+
+Image updaters update **the image**: every change is a full-image event.
+Pantavisor versions the device as content-addressed objects, so a change ships
+only what actually changed.
+
+Per-tool comparisons:
+
+- **[Pantavisor vs Mender](/benchmarks/vs-mender)** — A/B full-image Artifacts vs object revisions
+- **[Pantavisor vs RAUC](/benchmarks/vs-rauc)** — signed A/B slot bundles vs a signed device state
+- **[Pantavisor vs SWUpdate](/benchmarks/vs-swupdate)** — scripted partition writes vs a declarative state
 
 | Scenario | Image updater (full image) | Pantavisor (container layer) |
 |---|---|---|
@@ -27,8 +56,9 @@ Every figure here is reproducible from a published methodology.
 | Downtime | reboot | no reboot for app updates |
 | Flash writes | whole image | changed objects only |
 
-> **📝 Note**
+> **📝 Note — measured numbers coming**
 >
-> This page ships with measured, reproducible data as part of the first public
-> deliverable. Until then, treat the table above as the shape of the comparison,
-> not as published figures.
+> The reproducible payload-size, update-time, and flash-write benchmarks (same
+> hardware, same app change, image-updater vs Pantavisor) ship with the first
+> public deliverable. Until then, treat the table above as the shape of the
+> comparison, not as published figures.

@@ -1,7 +1,7 @@
 ---
 title: Project, licensing, and governance
 description: Open-source licensing of the Pantavisor stack — MIT on-device, Apache-2.0 for backend services — and the Pantacor Hub boundary.
-sidebar_position: 12
+sidebar_position: 13
 slug: /licensing
 ---
 

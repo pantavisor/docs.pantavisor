@@ -1,486 +1,131 @@
 ---
 title: Configuration
 sidebar_position: 250
-description: File formats and repository structure reference
+description: How a Pantavisor revision is laid out on disk — the pvr checkout structure, the run.json container manifest, device.json, and _config overlays.
 ---
 
-## Repository Structure
+A Pantavisor device revision is described by a single JSON manifest where every
+key is a **file path** and every value is either a nested configuration object or
+the SHA256 of a binary artifact. When you `pvr clone` a device, that manifest is
+expanded into a working directory you can edit. This page covers the real
+layout; for the exhaustive field-by-field schema see the reference
+[state format](/reference/pantavisor/reference/pantavisor-state-format-v2) and
+[`run.json`](/reference/pantavisor/reference/pantavisor-tools).
 
-Understanding the layout and organization of Pantavisor repositories.
+## Repository layout
 
-### Standard Repository Layout
+A `pvr` checkout mirrors the device revision:
 
 ```
-my-pantavisor-repo/
-├── _config/              # Device configuration
-│   ├── device.json       # Device-level settings
-│   ├── network.json      # Network configuration
-│   └── system.json       # System settings
-├── containers/           # Container definitions
-│   ├── app-name/         # Application container
-│   │   ├── config.json   # Container configuration
-│   │   └── volumes/      # Container volumes
-│   ├── web-server/       # Web server container
-│   └── database/         # Database container
-├── volumes/              # Persistent data volumes
-│   ├── app-data/         # Application data
-│   ├── logs/             # Log files
-│   └── config/           # Configuration data
-├── .pvr/                 # PVR metadata
-│   ├── config            # Repository configuration
-│   ├── index             # File index
-│   └── objects/          # Version objects
-└── pvr.json             # Repository manifest
+my-device/
+├── #spec                       # parser version — "pantavisor-service-system@1"
+├── bsp/
+│   ├── run.json                # kernel, initrd, modules, firmware, DTB/FIT paths
+│   └── ...                     # the BSP artifacts (squashfs, kernel image, …)
+├── <container>/                # one directory per container (e.g. network, sensor-app)
+│   ├── run.json                # container manifest (see below)
+│   ├── lxc.container.conf      # LXC runtime configuration
+│   ├── root.squashfs           # read-only container rootfs
+│   ├── root.squashfs.docker-digest
+│   └── services.json           # (optional) services this container exports to xconnect
+├── device.json                 # disks, orchestration groups, Pantavisor volumes
+├── _config/<container>/<path>  # files injected into a container's rootfs (overlay)
+├── _sigs/<container>.json      # (optional) signature over the container's artifacts
+└── .pvr/
+    ├── json                    # the full revision manifest (state.json)
+    ├── config                  # repository configuration
+    └── objects/                # content-addressed objects
 ```
 
-### Key Directories
+> **📝 Note**
+>
+> There is no `pvr.json` and no top-level `containers/` or `volumes/` directory.
+> Each container is a directory at the **root** of the checkout; the full
+> revision manifest is `.pvr/json`.
 
-#### `_config/`
-Device-level configuration files that apply to the entire system.
+## Container manifest — `<container>/run.json`
 
-#### `containers/`
-Individual container definitions and their specific configurations.
-
-#### `volumes/`
-Persistent storage volumes that survive container updates.
-
-#### `.pvr/`
-PVR version control metadata (similar to `.git/` in Git repositories).
-
-## Configuration File Formats
-
-### Application Container JSON
-
-Basic container configuration format:
+Each container's `run.json` (`#spec: "service-manifest-run@1"`) configures how
+Pantavisor runs it:
 
 ```json
 {
-  "template": "builtin-lxc-docker",
-  "args": {
-    "OCI_CONFIG_PATH": "/containers/app-name"
-  }
-}
-```
-
-#### Advanced Container Configuration
-
-```json
-{
-  "template": "builtin-lxc-docker",
-  "args": {
-    "OCI_CONFIG_PATH": "/containers/web-server",
-    "LXC_ROOTFS_PATH": "/volumes/web-data",
-    "ENV_VARS": {
-      "NGINX_PORT": "80",
-      "WORKER_PROCESSES": "auto"
-    }
+  "#spec": "service-manifest-run@1",
+  "name": "sensor-app",
+  "type": "lxc",
+  "config": "lxc.container.conf",
+  "root-volume": "root.squashfs",
+  "group": "app",
+  "status_goal": "STARTED",
+  "restart_policy": "container",
+  "storage": {
+    "/var/lib/sensor": { "persistence": "permanent" }
   },
-  "volumes": [
-    {
-      "source": "/volumes/web-config",
-      "target": "/etc/nginx",
-      "readonly": true
-    },
-    {
-      "source": "/volumes/web-logs",
-      "target": "/var/log/nginx",
-      "readonly": false
-    }
-  ]
-}
-```
-
-### Device Configuration JSON
-
-System-wide device settings:
-
-```json
-{
-  "device": {
-    "name": "production-device-01",
-    "description": "Production web server",
-    "location": "datacenter-east"
-  },
-  "network": {
-    "hostname": "prod-web-01",
-    "domain": "example.com"
-  },
-  "system": {
-    "timezone": "UTC",
-    "locale": "en_US.UTF-8"
+  "auto_recovery": {
+    "policy": "on-failure",
+    "max_retries": 5,
+    "retry_delay": 5,
+    "backoff_factor": 2.0,
+    "backoff_policy": "10min"
   }
 }
 ```
 
-### Network Configuration
+Key fields:
 
-Network interface configuration:
+| Field | Purpose |
+|---|---|
+| `name` | Logical container name. |
+| `type` | Runtime — currently `lxc`. |
+| `config` | Path to the LXC configuration file. |
+| `root-volume` | Path to the rootfs squashfs artifact. |
+| `group` | Orchestration group (defined in `device.json`); inherits the group's defaults. |
+| `status_goal` | Target state — `MOUNTED`, `STARTED`, or `READY`. |
+| `restart_policy` | `container` (restart the container) or `system` (reboot the device) on crash. |
+| `storage` | Per-path persistence: `permanent` (survives updates), `revision` (survives reboots), `boot` (volatile). |
+| `auto_recovery` | Restart behaviour on failure — see below. |
+| `services` | xconnect service requirements (`required`/`optional`). |
 
-```json
-{
-  "interfaces": {
-    "eth0": {
-      "method": "static",
-      "address": "192.168.1.100",
-      "netmask": "255.255.255.0",
-      "gateway": "192.168.1.1",
-      "dns": ["8.8.8.8", "8.8.4.4"]
-    },
-    "wlan0": {
-      "method": "dhcp",
-      "wireless": {
-        "ssid": "MyNetwork",
-        "psk": "password"
-      }
-    }
-  }
-}
+### Auto-recovery
+
+`auto_recovery` controls restart-on-failure. If a container omits it, it
+inherits the policy of its `group` (all-or-nothing).
+
+| Field | Default | Meaning |
+|---|---|---|
+| `policy` | `no` | `no`, `always`, `on-failure`, `unless-stopped`. |
+| `max_retries` | `0` | Max restart attempts (`0` = unlimited). |
+| `retry_delay` | `0` | Seconds before the first restart. |
+| `backoff_factor` | `1.0` | Multiplier applied to `retry_delay` each retry. |
+| `reset_window` | `0` | Uptime (s) after which the retry counter resets. |
+| `stable_timeout` | `0` | Seconds the container must survive to gate the update commit. |
+| `backoff_policy` | `reboot` | After retries exhausted — `reboot`, `never`, or a duration (`10min`, `1h`). |
+
+## Device manifest — `device.json`
+
+`device.json` holds device-level infrastructure: storage `disks`, orchestration
+`groups` (with their default `status_goal`, `restart_policy`, `timeout`, and
+`auto_recovery`), and Pantavisor's own persistent `volumes`. See the reference
+[state format](/reference/pantavisor/reference/pantavisor-state-format-v2) for the
+disk and group schemas.
+
+## File overlays — `_config/<container>/`
+
+Container root filesystems (`root.squashfs`) are read-only. To add or change a
+file inside a container, place it under `_config/<container>/<path>`, mirroring
+the path inside the container. Pantavisor overlays it onto the rootfs at startup.
+This is how you add SSH keys, drop-in config files, or scripts without rebuilding
+the image — see [Configure applications](/develop/application/configure).
+
+## Editing and applying changes
+
+Edit these files in your `pvr` checkout, then commit and post a new revision:
+
+```bash
+pvr add .
+pvr commit -m "configure sensor-app auto-recovery"
+pvr post http://<device-ip>:12368
 ```
 
-## Container Templates
-
-### Built-in Templates
-
-#### `builtin-lxc-docker`
-Standard template for Docker-based containers:
-
-```json
-{
-  "template": "builtin-lxc-docker",
-  "args": {
-    "OCI_CONFIG_PATH": "/containers/my-app"
-  }
-}
-```
-
-#### `builtin-lxc-system`
-Template for system-level containers:
-
-```json
-{
-  "template": "builtin-lxc-system",
-  "args": {
-    "SYSTEM_CONFIG_PATH": "/containers/system-service",
-    "INIT_SYSTEM": "systemd"
-  }
-}
-```
-
-### Custom Templates
-
-Define custom container templates:
-
-```json
-{
-  "template": "custom-web-app",
-  "args": {
-    "APP_PORT": "3000",
-    "DB_CONNECTION": "postgresql://localhost:5432/myapp",
-    "LOG_LEVEL": "info"
-  },
-  "volumes": [
-    {
-      "source": "/volumes/app-config",
-      "target": "/app/config"
-    }
-  ],
-  "environment": {
-    "NODE_ENV": "production",
-    "API_KEY": "${API_KEY}"
-  }
-}
-```
-
-## Volume Configuration
-
-### Volume Types
-
-#### Persistent Volumes
-Data that survives container updates:
-
-```json
-{
-  "volumes": {
-    "database-data": {
-      "type": "persistent",
-      "path": "/volumes/db-data",
-      "backup": true
-    }
-  }
-}
-```
-
-#### Configuration Volumes
-Configuration files and settings:
-
-```json
-{
-  "volumes": {
-    "app-config": {
-      "type": "config",
-      "path": "/volumes/app-config",
-      "readonly": true
-    }
-  }
-}
-```
-
-#### Temporary Volumes
-Temporary storage cleared on restart:
-
-```json
-{
-  "volumes": {
-    "temp-cache": {
-      "type": "temporary",
-      "path": "/tmp/cache",
-      "size_limit": "1GB"
-    }
-  }
-}
-```
-
-## Environment Variables
-
-### Container Environment
-
-Set environment variables for containers:
-
-```json
-{
-  "environment": {
-    "DATABASE_URL": "postgresql://user:pass@db:5432/myapp",
-    "REDIS_URL": "redis://cache:6379",
-    "LOG_LEVEL": "info",
-    "API_SECRET": "${API_SECRET}"
-  }
-}
-```
-
-### System Environment
-
-System-wide environment variables:
-
-```json
-{
-  "system_environment": {
-    "TZ": "America/New_York",
-    "LANG": "en_US.UTF-8",
-    "PATH": "/usr/local/bin:/usr/bin:/bin"
-  }
-}
-```
-
-## Resource Limits
-
-### Container Resources
-
-Limit container resource usage:
-
-```json
-{
-  "resources": {
-    "memory": {
-      "limit": "512MB",
-      "reservation": "256MB"
-    },
-    "cpu": {
-      "limit": "1.0",
-      "shares": 1024
-    },
-    "storage": {
-      "limit": "2GB"
-    }
-  }
-}
-```
-
-### System Resources
-
-System-wide resource management:
-
-```json
-{
-  "system_resources": {
-    "memory": {
-      "total": "2GB",
-      "containers": "1.5GB",
-      "system": "512MB"
-    },
-    "cpu": {
-      "cores": 4,
-      "container_limit": 3
-    }
-  }
-}
-```
-
-## Security Configuration
-
-### Container Security
-
-Security settings for containers:
-
-```json
-{
-  "security": {
-    "user": "appuser",
-    "group": "appgroup",
-    "capabilities": {
-      "drop": ["ALL"],
-      "add": ["NET_BIND_SERVICE"]
-    },
-    "readonly_rootfs": true,
-    "no_new_privileges": true
-  }
-}
-```
-
-### System Security
-
-System-level security configuration:
-
-```json
-{
-  "system_security": {
-    "firewall": {
-      "enabled": true,
-      "default_policy": "DROP",
-      "rules": [
-        {
-          "port": 22,
-          "protocol": "tcp",
-          "action": "ACCEPT"
-        },
-        {
-          "port": 80,
-          "protocol": "tcp",
-          "action": "ACCEPT"
-        }
-      ]
-    },
-    "ssh": {
-      "port": 22,
-      "password_auth": false,
-      "key_auth": true
-    }
-  }
-}
-```
-
-## Configuration Examples
-
-### Web Application Stack
-
-Complete configuration for a web application:
-
-```json
-{
-  "containers": {
-    "web": {
-      "template": "builtin-lxc-docker",
-      "image": "nginx:alpine",
-      "ports": [
-        {
-          "host": 80,
-          "container": 80
-        }
-      ],
-      "volumes": [
-        {
-          "source": "/volumes/web-content",
-          "target": "/usr/share/nginx/html"
-        }
-      ]
-    },
-    "app": {
-      "template": "builtin-lxc-docker",
-      "image": "node:16-alpine",
-      "environment": {
-        "NODE_ENV": "production",
-        "PORT": "3000"
-      },
-      "volumes": [
-        {
-          "source": "/volumes/app-code",
-          "target": "/app"
-        }
-      ]
-    },
-    "database": {
-      "template": "builtin-lxc-docker",
-      "image": "postgres:13-alpine",
-      "environment": {
-        "POSTGRES_DB": "myapp",
-        "POSTGRES_USER": "appuser",
-        "POSTGRES_PASSWORD": "${DB_PASSWORD}"
-      },
-      "volumes": [
-        {
-          "source": "/volumes/db-data",
-          "target": "/var/lib/postgresql/data"
-        }
-      ]
-    }
-  }
-}
-```
-
-### IoT Sensor Device
-
-Configuration for an IoT sensor device:
-
-```json
-{
-  "device": {
-    "type": "iot-sensor",
-    "location": "factory-floor-a",
-    "sensors": ["temperature", "humidity", "pressure"]
-  },
-  "containers": {
-    "sensor-collector": {
-      "template": "builtin-lxc-docker",
-      "image": "sensor-app:latest",
-      "environment": {
-        "SENSOR_INTERVAL": "30",
-        "MQTT_BROKER": "mqtt://broker.example.com:1883"
-      },
-      "devices": [
-        "/dev/ttyUSB0"
-      ]
-    },
-    "edge-processing": {
-      "template": "builtin-lxc-docker",
-      "image": "tensorflow-lite:arm64",
-      "resources": {
-        "memory": "256MB",
-        "cpu": "0.5"
-      }
-    }
-  }
-}
-```
-
-## Best Practices
-
-### Configuration Management
-- Use version control for all configuration changes
-- Keep sensitive data in environment variables
-- Document configuration changes with commit messages
-
-### File Organization
-- Group related containers in subdirectories
-- Use descriptive names for volumes and containers
-- Maintain consistent naming conventions
-
-### Security
-- Never store passwords in configuration files
-- Use environment variables for secrets
-- Apply principle of least privilege for container permissions
-
-### Performance
-- Set appropriate resource limits
-- Use readonly volumes when possible
-- Monitor resource usage and adjust limits accordingly
-
-This configuration reference provides the foundation for understanding and managing Pantavisor systems effectively.
+Pantavisor applies the new revision atomically and rolls back automatically if it
+fails its health checks.

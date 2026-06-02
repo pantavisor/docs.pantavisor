@@ -1,6 +1,6 @@
 ---
 title: Access Your Applications
-sidebar_position: 44
+sidebar_position: 43
 description: Access web interfaces of applications running on Pantavisor Linux. Learn about port mapping, remote access, and security considerations.
 ---
 
@@ -90,7 +90,7 @@ If the Tailscale container is installed on the device, every container that uses
 ```bash
 pvr app add tailscale --from tailscale/tailscale --platform linux/arm64
 pvr add . && pvr commit -m "add Tailscale"
-pvr deploy trails/0 .
+pvr post http://<device-ip>:12368
 ```
 
 ## Troubleshooting

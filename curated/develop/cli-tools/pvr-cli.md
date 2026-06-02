@@ -86,8 +86,8 @@ pvr init
 #### Clone Device
 ```bash
 # Clone an existing device configuration
-pvr clone http://192.168.1.122:12368/cgi-bin/pvr my-checkout
-pvr clone http://DEVICE_IP:12368/cgi-bin/pvr my-device
+pvr clone http://192.168.1.122:12368/cgi-bin my-checkout
+pvr clone http://DEVICE_IP:12368/cgi-bin my-device
 ```
 
 #### Stage and Commit Changes
@@ -158,22 +158,35 @@ pvr device logs
 
 ### Deployment
 
-#### Basic Deployment
-```bash
-# Deploy repository to device
-pvr deploy trails/0 /path/to/repo
+#### Post a revision to a device
 
-# Deploy current directory
-pvr deploy trails/0 .
+`pvr post <endpoint>` sends your committed revision to a device's pvr endpoint —
+either a device on the local network or a Pantahub-managed device. This is the
+command that actually pushes an update to a device.
+
+```bash
+# Local network (the same endpoint you cloned from)
+pvr post http://DEVICE_IP:12368
+
+# Pantahub-managed device
+pvr post https://pvr.pantahub.com/USERNAME/DEVICE_NAME
 ```
 
-#### Advanced Deployment
-```bash
-# Deploy with specific configurations
-pvr deploy trails/0 /path/to/repo/.pvr#os /tmp/export.tgz#bsp
+#### Assemble a deploy directory with `pvr deploy`
 
-# Deploy to specific device
-pvr deploy trails/0 . --device DEVICE_ID
+`pvr deploy <deploy-dir> [source-repos]+` composes one or more source repos into
+a local deployment directory (such as `trails/0`). It builds the directory on
+disk; it does **not** push to a device — use `pvr post` for that.
+
+```bash
+# Assemble the current repo into trails/0
+pvr deploy trails/0 .
+
+# Assemble from a specific repo path
+pvr deploy trails/0 /path/to/repo
+
+# Compose from multiple sources (os from a repo, bsp from an export)
+pvr deploy trails/0 /path/to/repo/.pvr#os /tmp/export.tgz#bsp
 ```
 
 ### Signature Management
@@ -218,7 +231,7 @@ Configuration files are stored in the `.pvr/` directory within your repository.
 # 1. Initialize or clone repository
 pvr init
 # OR
-pvr clone http://DEVICE_IP:12368/cgi-bin/pvr my-project
+pvr clone http://DEVICE_IP:12368/cgi-bin my-project
 
 # 2. Navigate to repository
 cd my-project
@@ -230,8 +243,8 @@ pvr app add --from nginx:latest web-server
 pvr add .
 pvr commit -m "Added nginx web server"
 
-# 5. Deploy to device
-pvr deploy trails/0 .
+# 5. Post to the device
+pvr post http://DEVICE_IP:12368
 ```
 
 ### Device Configuration Workflow
@@ -240,7 +253,7 @@ pvr deploy trails/0 .
 pvr device scan
 
 # 2. Clone device for editing
-pvr clone http://192.168.1.100:12368/cgi-bin/pvr my-device
+pvr clone http://192.168.1.100:12368/cgi-bin my-device
 
 # 3. Make configuration changes
 cd my-device
@@ -250,8 +263,8 @@ cd my-device
 pvr add .
 pvr commit -m "Updated device configuration"
 
-# 5. Deploy back to device
-pvr deploy trails/0 .
+# 5. Post back to the device
+pvr post http://DEVICE_IP:12368
 ```
 
 ## Tips and Best Practices

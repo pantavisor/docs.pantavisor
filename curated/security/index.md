@@ -1,7 +1,7 @@
 ---
 title: Security and compliance
 description: Trust model, signed revisions, secure boot, SBOM/CVE, and recertification.
-sidebar_position: 10
+sidebar_position: 11
 slug: /security
 ---
 
@@ -12,7 +12,9 @@ updater — and the docs back that up with evidence.
 
 ## Pages
 
-- **Trust model**
+- **[Trust model](/security/trust-model)** — what Pantavisor protects, the trust
+  boundaries from secure boot to per-container integrity, and the end-to-end
+  verification chain.
 - **[Atomicity and trust evidence](/security/atomicity-and-trust)** — published
   power-fail and rollback test methodology and results.
 - **Signed revisions** and artifact verification — one signature transitively

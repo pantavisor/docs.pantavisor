@@ -1,7 +1,7 @@
 ---
 title: Remove applications
-sidebar_position: 42
-description: Monitor and manage installed applications on Pantavisor Linux. Learn to check status, start/stop apps, and view application details.
+sidebar_position: 44
+description: Remove an application from a Pantavisor device — delete the container from your pvr checkout, commit, and deploy a new revision. Pantavisor stops and discards it on the next boot.
 ---
 
 Removing an application follows the same revision workflow as adding one: remove the container from your local `pvr` checkout, commit, and deploy. Pantavisor stops the container and removes it from the trail on the next boot.
@@ -13,7 +13,7 @@ Removing an application follows the same revision workflow as adding one: remove
 If you do not already have a local checkout, clone the device:
 
 ```bash
-pvr clone http://<device-ip>:12368/cgi-bin/pvr my-device
+pvr clone http://<device-ip>:12368/cgi-bin my-device
 cd my-device
 ```
 
@@ -47,7 +47,7 @@ Stage any remaining changes, commit, and deploy to the device:
 ```bash
 pvr add .
 pvr commit -m "remove my-old-app"
-pvr deploy trails/0 .
+pvr post http://<device-ip>:12368
 ```
 
 ## Step 4 — What Happens on the Device

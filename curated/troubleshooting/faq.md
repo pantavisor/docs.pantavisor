@@ -11,12 +11,12 @@ description: Frequently asked questions about Pantavisor Linux. Get answers to c
 Clone the device, remove the container with `pvr app rm`, commit, and deploy:
 
 ```bash
-pvr clone http://<device-ip>:12368/cgi-bin/pvr my-device
+pvr clone http://<device-ip>:12368/cgi-bin my-device
 cd my-device
 pvr app rm my-old-app
 pvr add .
 pvr commit -m "remove my-old-app"
-pvr deploy trails/0 .
+pvr post http://<device-ip>:12368
 ```
 
 Pantavisor stops the container and removes it from the trail on the next boot.
@@ -26,13 +26,13 @@ Pantavisor stops the container and removes it from the trail on the next boot.
 Container rootfs images (`root.squashfs`) are read-only. To overlay files on top of them, add files to `_config/<container-name>/` in your pvr checkout. The directory structure mirrors where those files live inside the container.
 
 ```bash
-pvr clone http://<device-ip>:12368/cgi-bin/pvr my-device
+pvr clone http://<device-ip>:12368/cgi-bin my-device
 cd my-device
 mkdir -p _config/my-app/etc/myapp
 # edit _config/my-app/etc/myapp/config.json
 pvr add .
 pvr commit -m "update my-app config"
-pvr deploy trails/0 .
+pvr post http://<device-ip>:12368
 ```
 
 To change Pantavisor-level behaviour (restart policy, auto-recovery, environment variables), edit the container's `run.json` directly in the checkout directory. See [Configure Applications](/develop/application/configure).
@@ -43,7 +43,7 @@ To change Pantavisor-level behaviour (restart policy, auto-recovery, environment
 pvr app update my-app --from myorg/myapp:v2.0.0
 pvr add .
 pvr commit -m "update my-app to v2.0.0"
-pvr deploy trails/0 .
+pvr post http://<device-ip>:12368
 ```
 
 ### What happens if an OTA update fails?
@@ -70,7 +70,7 @@ Pantavisor serves the state API on port **12368**. Confirm:
 
 - The device has a network address: `ip addr show`
 - The pvr-sdk (or network) container is running: `lxc-ls -f`
-- You are using the full URL: `pvr clone http://<device-ip>:12368/cgi-bin/pvr <dir>`
+- You are using the full URL: `pvr clone http://<device-ip>:12368/cgi-bin <dir>`
 
 ---
 
@@ -103,7 +103,7 @@ This lets you add SSH keys, config files, or scripts to a container without rebu
 | `pvr app rm <name>` | Remove a container from the local state |
 | `pvr add .` | Stage all changes |
 | `pvr commit -m "..."` | Record a new local revision |
-| `pvr deploy trails/0 .` | Push the revision to the device |
+| `pvr post http://<device-ip>:12368` | Push the revision to the device |
 | `pvr device scan` | Discover Pantavisor devices on the local network |
 | `pvr sig add --part <name>` | Sign a container with an X.509 key |
 

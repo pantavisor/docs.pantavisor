@@ -1,9 +1,12 @@
 ---
+title: Variscite DART-MX8M-MINI
+sidebar_position: 3
+description: Flash Pantavisor to a Variscite DART-MX8M-MINI (i.MX8M Mini) over uuu to eMMC or via SD card, with Symphony-Board switch settings.
 ---
 
 # Flashing: Variscite DART-MX8M-MINI
 
-**Flash methods:** uuu (eMMC) | SD card — see the sections above
+**Flash methods:** uuu (eMMC) | SD card — see the [uuu](/install/uuu) and [SD card](/install/sdcard) guides
 
 **Image artifact:** `pantavisor-starter-imx8mm-var-dart*.wic`
 
@@ -24,8 +27,8 @@ switches to select SD:
 | SW4-3 | OFF | ON |
 | SW4-4 | OFF | OFF |
 
-Insert the flashed SD card and power on. See the SD card flashing section
-above for how to write the `.wic` image.
+Insert the flashed SD card and power on. See the [SD card flashing
+guide](/install/sdcard) for how to write the `.wic` image.
 
 ## uuu (USB download to eMMC)
 
@@ -51,7 +54,7 @@ sudo uuu -b emmc_all \
     pantavisor-starter-imx8mm-var-dart*.wic
 ```
 
-See the uuu section above for full details and troubleshooting.
+See the [uuu flashing guide](/install/uuu) for full details and troubleshooting.
 
 ### 4. Restore boot-mode to eMMC
 

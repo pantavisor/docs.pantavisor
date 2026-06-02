@@ -1,4 +1,7 @@
 ---
+title: Flash with NXP uuu
+sidebar_position: 230
+description: Flash Pantavisor to i.MX board eMMC over USB with NXP's Universal Update Utility (uuu).
 ---
 
 # Flashing via NXP uuu (Universal Update Utility)

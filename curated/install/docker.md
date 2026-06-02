@@ -1,4 +1,7 @@
 ---
+title: Run with AppEngine (Docker)
+sidebar_position: 240
+description: Run Pantavisor inside your existing Linux distro with AppEngine init mode — a non-invasive way to try the platform without reflashing, plus the test suites.
 ---
 
 # Running Pantavisor AppEngine

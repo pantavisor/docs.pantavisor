@@ -10,6 +10,11 @@ slug: /concepts
 These pages explain how Pantavisor works. They are versionless; for
 version-specific behavior and schemas, see the [Reference](/reference).
 
+**New here?** Read [What is Pantavisor?](/concepts/what-is-pantavisor) for the
+architecture, then [Composable firmware — the end-to-end
+workflow](/concepts/composable-firmware) for the build → flash → maintain golden
+path with canonical commands.
+
 ## Core ideas
 
 - **Pantavisor as PID 1 and whole-device runtime** — Pantavisor is the init

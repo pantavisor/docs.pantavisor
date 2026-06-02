@@ -8,9 +8,9 @@ description: Table of supported devices
 
 While Pantavisor can run on virtually any device that supports Linux, we offer official, out-of-the-box support for a wide range of popular hardware through our [meta-pantavisor](https://github.com/pantavisor/meta-pantavisor) Yocto layer. This ensures a smooth and tested experience for developers.
 
-## Pre-build images
+## Pre-built images
 
-If you a quickstart, we have a couple of pre-build images ready for testing and exploring Pantavisor. Head to [downloads](https://pantavisor.io/downloads/).
+If you want a quickstart, we have a couple of pre-built images ready for testing and exploring Pantavisor. Head to [downloads](https://pantavisor.io/downloads/).
 
 ### Officially Supported Devices
 

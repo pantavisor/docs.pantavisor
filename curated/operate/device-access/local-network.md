@@ -48,7 +48,7 @@ Once connected you have a shell inside the pvr-sdk container. From there you can
 With the device's IP, your workstation can clone and manage the device state directly:
 
 ```bash
-pvr clone http://<device-ip>:12368/cgi-bin/pvr my-device
+pvr clone http://<device-ip>:12368/cgi-bin my-device
 ```
 
 Pantavisor exposes the revision management endpoint on port **12368**. All `pvr` operations — adding containers, deploying revisions — communicate through this port.

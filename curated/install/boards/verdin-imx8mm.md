@@ -1,9 +1,12 @@
 ---
+title: Toradex Verdin iMX8M Mini
+sidebar_position: 4
+description: Flash Pantavisor to a Toradex Verdin iMX8M Mini via the Toradex Easy Installer (Tezi), including carrier-board device-tree selection.
 ---
 
 # Flashing: Toradex Verdin iMX8M Mini
 
-**Flash method:** Toradex Easy Installer (Tezi) — see the Tezi section above
+**Flash method:** Toradex Easy Installer (Tezi) — see the [Tezi flashing guide](/install/tezi)
 
 **Image artifact:** `pantavisor-starter-verdin-imx8mm*pv_teziimg.tar.xz`
 
@@ -37,7 +40,7 @@ power-on.
 
 ## Flashing
 
-Follow the Tezi flashing procedure described in the section above.
+Follow the [Tezi flashing procedure](/install/tezi).
 
 ## Notes
 

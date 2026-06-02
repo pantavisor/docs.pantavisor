@@ -1,6 +1,6 @@
 ---
 title: Configure Application Settings
-sidebar_position: 43
+sidebar_position: 41
 description: Configure application settings on Pantavisor Linux. Learn to edit manifests, set environment variables, and manage app configurations.
 ---
 
@@ -15,7 +15,7 @@ The `_config/<container-name>/` directory in a pvr checkout acts as a writable o
 Clone the device's current state to your workstation. The device must be reachable on the local network.
 
 ```bash
-pvr clone http://<device-ip>:12368/cgi-bin/pvr my-device
+pvr clone http://<device-ip>:12368/cgi-bin my-device
 cd my-device
 ```
 
@@ -111,10 +111,10 @@ pvr commit -m "add SSH key and configure auto-recovery for sensor-app"
 
 ## Step 4 — Deploy to the Device
 
-Push the new revision to the device:
+Post the new revision to the device's pvr endpoint — the same URL you cloned from:
 
 ```bash
-pvr deploy trails/0 .
+pvr post http://<device-ip>:12368
 ```
 
 Pantavisor downloads the changed objects, writes them to a pending revision, and reboots. If the new revision boots cleanly and all containers reach their health goal, it is committed as the new permanent state. If it fails, the previous revision is restored automatically.

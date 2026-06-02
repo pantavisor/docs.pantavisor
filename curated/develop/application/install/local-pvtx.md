@@ -1,10 +1,10 @@
 ---
-title: PVTX
+title: Install via the pvtx web UI
 sidebar_position: 42
-description: Install your first application on Pantavisor Linux using PVTX. Step-by-step guide to install Home Assistant from the marketplace.
+description: Install an application on Pantavisor through the pvtx web UI — build a container package with pvr, then upload and commit it from the browser.
 ---
 
-The pvtx web UI lets you upload a container package to a device using only a browser — no `pvr deploy` or direct network access to the pvr endpoint required. You still use the `pvr` CLI on your workstation to build the package, then transfer it via the browser.
+The pvtx web UI lets you upload a container package to a device using only a browser — no `pvr post` or direct network access to the pvr endpoint required. You still use the `pvr` CLI on your workstation to build the package, then transfer it via the browser.
 
 **Prerequisites**: `pvr` installed on your workstation ([install guide](/develop/cli-tools/pvr-cli)) and the device reachable on the local network.
 
@@ -46,12 +46,12 @@ Open a browser and navigate to the device's local web UI:
 http://<device-ip>:12368/app
 ```
 
-1. Click **"Begin Transition"** to open the update panel.
-2. Drag and drop `myapp.tar.gz` into the upload area, or use the file picker.
+1. Click **"Begin new transaction"** to open the update panel.
+2. In the **"Drag or click to upload new part"** area, drop `myapp.tar.gz` or click to pick the file.
 
-![pvtx transaction upload](./pvtx-ui-transaction.png)
+   ![pvtx upload panel — drag or click to upload a new part](./pvtx-ui-transaction.png)
 
-3. Click **"Commit Transaction"** to apply the change.
+3. Commit the transaction from the toolbar to apply the change.
 
 Pantavisor writes the uploaded container as a new pending revision and reboots. If the revision boots cleanly, it becomes the new permanent state.
 

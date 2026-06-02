@@ -48,12 +48,15 @@ as content-addressed objects, so a change ships only what actually changed.
 | I want to… | Go to |
 |---|---|
 | Understand what Pantavisor is | [Concepts](/concepts) |
+| See the full build → flash → update workflow | [Composable firmware](/concepts/composable-firmware) |
 | Try it on my laptop in 30 minutes | [Local emulator quickstart](/start) |
 | Run it on real hardware | [Install on hardware](/install) |
 | Build an image with Yocto | [Build with Yocto](/build) |
 | Ship and update my app | [Develop applications](/develop) |
 | Operate a fleet | [Operate devices](/operate) |
 | Move off Mender/RAUC/SWUpdate | [Migrate to Pantavisor](/migrate) |
+| Compare Pantavisor to Yocto/Balena/Docker/image updaters | [Benchmarks and comparisons](/benchmarks) |
+| Solve a specific problem (size, secure OTA, reproducibility) | [Solutions](/solutions) |
 | Look up a command or schema | [Reference](/reference) |
 
 ## Pantavisor vs Pantahub

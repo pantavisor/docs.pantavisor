@@ -1,4 +1,7 @@
 ---
+title: Flash with Toradex Easy Installer
+sidebar_position: 220
+description: Flash Pantavisor to Toradex module eMMC over USB with the Toradex Easy Installer (Tezi) and the pv_teziimg bundle.
 ---
 
 # Flashing via Toradex Easy Installer (Tezi)

@@ -1,6 +1,6 @@
 ---
 title: What is Pantavisor?
-sidebar_position: 111
+sidebar_position: 1
 description: "Pantavisor is PID 1 and owns the full device update — base, kernel, app containers, and config — as one signed, content-addressed revision."
 ---
 
@@ -67,7 +67,7 @@ The core daemon runs in the initramfs and is responsible for:
 
 - Mounting the storage partition and reading device state from `/trails/`
 - Starting and supervising LXC containers in declared dependency order
-- Polling [Pantahub](https://pantahub.com) for OTA updates and delivering logs
+- Polling [Pantahub](https://hub.pantacor.com) for OTA updates and delivering logs
 - Exposing the local control socket (`pvcontrol`)
 
 ### pvr — Device State CLI
@@ -75,11 +75,11 @@ The core daemon runs in the initramfs and is responsible for:
 `pvr` is the developer-facing tool for Pantavisor state. It is modelled on Git: you `clone` a device, `add` containers (from Docker Hub images or local pvrexport bundles), `commit` changes, and `push` to Pantahub to deliver an OTA update. The pvr workflow works from a developer workstation and integrates naturally into CI/CD pipelines.
 
 ```bash
-pvr clone http://192.168.1.122:12368/cgi-bin/pvr my-device
+pvr clone http://192.168.1.122:12368/cgi-bin my-device
 cd my-device
 pvr app add --from nginx:stable-alpine webserver
 pvr add . && pvr commit -m "add nginx"
-pvr deploy trails/0 .
+pvr post http://192.168.1.122:12368
 ```
 
 ### pvcontrol — Local REST API
@@ -106,7 +106,9 @@ pvcontrol ls            # full device status including auto-recovery counters
 
 ### Pantahub — Cloud Backend
 
-[Pantahub](https://pantahub.com) is the cloud service that devices register with. It stores device state, delivers OTA updates as object diffs, and aggregates logs. The `pvr` CLI authenticates to Pantahub so developers can manage a fleet of devices remotely from their workstation.
+[Pantahub](https://hub.pantacor.com) is the cloud service that devices register with. It stores device state, delivers OTA updates as object diffs, and aggregates logs. The `pvr` CLI authenticates to Pantahub so developers can manage a fleet of devices remotely from their workstation.
+
+Pantahub is **optional**. `pvr` can clone, update, and deploy to a device directly over the local network, so Pantavisor runs fully standalone — Pantahub adds remote fleet operations on top, it is not required for the device to update itself.
 
 ## OTA Updates
 

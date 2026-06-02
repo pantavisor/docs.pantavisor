@@ -46,14 +46,14 @@ This shows each device's nickname, Pantahub ID, current revision, and update sta
 Clone the device's state over the internet, make changes, and deploy back:
 
 ```bash
-pvr clone https://api.pantahub.com/trails/<device-id> my-device
+pvr clone https://pvr.pantahub.com/USERNAME/DEVICE_NAME my-device
 cd my-device
 
 # Make changes — add a container, edit run.json, update config overlays
 pvr app add myapp --from myorg/myapp:latest --platform linux/arm64
 pvr add .
 pvr commit -m "add myapp"
-pvr deploy trails/0 .
+pvr post https://pvr.pantahub.com/USERNAME/DEVICE_NAME
 ```
 
 Pantahub queues the new revision. The device downloads only the changed objects (not a full image) and applies the update on the next poll cycle. Monitor progress from the device dashboard on hub.pantacor.com or with:

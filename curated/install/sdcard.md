@@ -1,4 +1,7 @@
 ---
+title: Flash an SD card (WIC)
+sidebar_position: 210
+description: Write a Pantavisor .wic image to an SD card with pvflasher or dd, including board-specific boot-mode notes.
 ---
 
 # Flashing via SD Card (WIC images)

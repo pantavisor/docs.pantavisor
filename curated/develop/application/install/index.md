@@ -1,7 +1,7 @@
 ---
 title: Install apps
 sidebar_position: 20
-description: Quick start guide for setting up Pantavisor Linux on your device. Flash images, configure network, install applications in just a few minutes.
+description: Install applications on Pantavisor as LXC containers — using the pvr CLI over the local network, the pvtx web UI, or remotely via Pantahub.
 ---
 
 Every application on a Pantavisor device is an LXC container added to the device's revision trail. There are three ways to install a new container, depending on whether you want a command-line-only workflow, a local web upload, or cloud-based remote management.
@@ -22,6 +22,6 @@ The pvtx interface is served directly from the device on port 12368. You build a
 
 ### 3. Remotely via Pantahub
 
-If the device is registered with [Pantahub](https://pantahub.com), you can push updates from anywhere. Claim the device in your Pantahub account, upload the container package through the Pantahub dashboard, and commit the transaction. The device pulls the new revision from the cloud and applies it automatically.
+If the device is registered with [Pantahub](https://hub.pantacor.com), you can push updates from anywhere. Claim the device in your Pantahub account, upload the container package through the Pantahub dashboard, and commit the transaction. The device pulls the new revision from the cloud and applies it automatically.
 
 → [Install via Pantahub](./remote-pantahub/)

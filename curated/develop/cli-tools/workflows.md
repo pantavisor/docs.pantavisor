@@ -22,7 +22,7 @@ pvr add .
 pvr commit -m "Added nginx web server"
 
 # Deploy to device
-pvr deploy trails/0 .
+pvr post http://DEVICE_IP:12368
 ```
 
 #### Variations
@@ -31,7 +31,7 @@ pvr deploy trails/0 .
 ```bash
 pvr app add --from postgres:13 database
 pvr add . && pvr commit -m "Added PostgreSQL database"
-pvr deploy trails/0 .
+pvr post http://DEVICE_IP:12368
 ```
 
 **Add with Custom Configuration:**
@@ -39,7 +39,7 @@ pvr deploy trails/0 .
 pvr app add --from redis:alpine cache-server
 # Edit configuration files
 pvr add . && pvr commit -m "Added Redis cache with custom config"
-pvr deploy trails/0 .
+pvr post http://DEVICE_IP:12368
 ```
 
 ### 2. Updating Existing Applications
@@ -58,7 +58,7 @@ pvr add .
 pvr commit -m "Updated app-name to new version"
 
 # Deploy changes
-pvr deploy trails/0 .
+pvr post http://DEVICE_IP:12368
 ```
 
 ### 3. Removing Applications
@@ -74,7 +74,7 @@ pvr add .
 pvr commit -m "Removed app-name application"
 
 # Deploy changes
-pvr deploy trails/0 .
+pvr post http://DEVICE_IP:12368
 ```
 
 ## Device Management Workflows
@@ -88,7 +88,7 @@ Set up a new Pantavisor device from scratch.
 pvr device scan
 
 # Clone device for initial configuration
-pvr clone http://DEVICE_IP:12368/cgi-bin/pvr my-device
+pvr clone http://DEVICE_IP:12368/cgi-bin my-device
 
 # Navigate to device repository
 cd my-device
@@ -108,7 +108,7 @@ Update device configuration remotely.
 
 ```bash
 # Clone device for editing
-pvr clone http://DEVICE_IP:12368/cgi-bin/pvr device-config
+pvr clone http://DEVICE_IP:12368/cgi-bin device-config
 
 # Edit configuration files
 cd device-config
@@ -119,7 +119,7 @@ pvr add .
 pvr commit -m "Updated device configuration"
 
 # Deploy back to device
-pvr deploy trails/0 .
+pvr post http://DEVICE_IP:12368
 ```
 
 ### 3. Multi-Device Management
@@ -140,7 +140,7 @@ pvr add . && pvr commit -m "Base device configuration"
 
 # Deploy to multiple devices
 for device in device1 device2 device3; do
-    pvr deploy trails/0 . --device $device
+    pvr post https://pvr.pantahub.com/USERNAME/$device
 done
 ```
 
@@ -152,7 +152,7 @@ Develop and test applications locally before deployment.
 
 ```bash
 # Clone production device for testing
-pvr clone http://PROD_DEVICE:12368/cgi-bin/pvr test-environment
+pvr clone http://PROD_DEVICE:12368/cgi-bin test-environment
 
 # Add development applications
 cd test-environment
@@ -160,10 +160,10 @@ pvr app add --from my-app:dev development-app
 
 # Test deployment on development device
 pvr add . && pvr commit -m "Added development application"
-pvr deploy trails/0 . --device DEV_DEVICE
+pvr post https://pvr.pantahub.com/USERNAME/DEV_DEVICE
 
 # After testing, deploy to production
-pvr deploy trails/0 . --device PROD_DEVICE
+pvr post https://pvr.pantahub.com/USERNAME/PROD_DEVICE
 ```
 
 ### 2. Configuration Testing
@@ -172,7 +172,7 @@ Test configuration changes safely.
 
 ```bash
 # Create configuration branch
-pvr clone http://DEVICE_IP:12368/cgi-bin/pvr config-test
+pvr clone http://DEVICE_IP:12368/cgi-bin config-test
 
 # Make experimental changes
 cd config-test
@@ -184,10 +184,10 @@ pvr add .
 pvr commit -m "Test configuration changes"
 
 # Test on development device
-pvr deploy trails/0 . --device DEV_DEVICE
+pvr post https://pvr.pantahub.com/USERNAME/DEV_DEVICE
 
 # If successful, apply to production
-pvr deploy trails/0 . --device PROD_DEVICE
+pvr post https://pvr.pantahub.com/USERNAME/PROD_DEVICE
 ```
 
 ### 3. Application Development Cycle
@@ -213,7 +213,7 @@ while developing; do
 
     # Test deployment
     pvr add . && pvr commit -m "Development iteration"
-    pvr deploy trails/0 . --device DEV_DEVICE
+    pvr post https://pvr.pantahub.com/USERNAME/DEV_DEVICE
 
     # Verify and continue
 done
@@ -221,7 +221,7 @@ done
 # 5. Production deployment
 pvr app update development-env --from my-app:stable
 pvr add . && pvr commit -m "Production release"
-pvr deploy trails/0 . --device PROD_DEVICE
+pvr post https://pvr.pantahub.com/USERNAME/PROD_DEVICE
 ```
 
 ## Maintenance Workflows
@@ -236,14 +236,14 @@ pvr device scan
 pvr device ps
 
 # Clone device for inspection
-pvr clone http://DEVICE_IP:12368/cgi-bin/pvr health-check
+pvr clone http://DEVICE_IP:12368/cgi-bin health-check
 
 # Check system health on device
-pvcontrol status
-pvcontrol logs
+pvcontrol ls
+pvcontrol buildinfo
 
 # Check application status
-pvcontrol ls
+pvcontrol container ls
 pvr app ls
 ```
 
@@ -263,7 +263,7 @@ pvr add .
 pvr commit -m "Security updates applied"
 
 # Deploy to devices
-pvr deploy trails/0 .
+pvr post http://DEVICE_IP:12368
 ```
 
 ### 3. Backup and Recovery
@@ -272,7 +272,7 @@ Backup device configurations and applications.
 
 ```bash
 # Backup device configuration
-pvr clone http://DEVICE_IP:12368/cgi-bin/pvr backup-$(date +%Y%m%d)
+pvr clone http://DEVICE_IP:12368/cgi-bin backup-$(date +%Y%m%d)
 
 # Create recovery image
 cd backup-$(date +%Y%m%d)
@@ -281,7 +281,7 @@ tar -czf device-backup-$(date +%Y%m%d).tar.gz .
 # Recovery process
 tar -xzf device-backup-YYYYMMDD.tar.gz
 cd device-backup-YYYYMMDD
-pvr deploy trails/0 . --device RECOVERY_DEVICE
+pvr post https://pvr.pantahub.com/USERNAME/RECOVERY_DEVICE
 ```
 
 ## Troubleshooting Workflows
@@ -296,19 +296,19 @@ pvr device ps
 pvcontrol ls
 
 # Get application logs
-pvcontrol logs failing-app
+tail /run/pantavisor/pv/logs/0/failing-app/lxc/console.log
 
-# Inspect application configuration
-pvcontrol inspect failing-app
+# Inspect container state
+pvcontrol container ls
 
 # Clone device for detailed inspection
-pvr clone http://DEVICE_IP:12368/cgi-bin/pvr debug-session
+pvr clone http://DEVICE_IP:12368/cgi-bin debug-session
 
 # Make fixes
 cd debug-session
 # Edit configuration or update application
 pvr add . && pvr commit -m "Fixed application issue"
-pvr deploy trails/0 .
+pvr post http://DEVICE_IP:12368
 ```
 
 ### 2. Network Connectivity Issues
@@ -320,7 +320,7 @@ Diagnose and fix network problems.
 pvr device scan
 
 # Clone device state to inspect configuration
-pvr clone http://DEVICE_IP:12368/cgi-bin/pvr debug-network
+pvr clone http://DEVICE_IP:12368/cgi-bin debug-network
 
 cd debug-network
 # Check and fix network configuration manually
@@ -329,7 +329,7 @@ vi bsp/run.json
 # Commit and deploy fixes
 pvr add .
 pvr commit -m "Fix network configuration"
-pvr deploy trails/0 .
+pvr post http://DEVICE_IP:12368
 ```
 
 ### 3. System Recovery
@@ -338,17 +338,15 @@ Recover from system failures.
 
 ```bash
 # Check system status
-pvcontrol status
-pvcontrol logs
+pvcontrol ls
 
-# Attempt service restart
-pvcontrol restart failing-service
+# Attempt container restart
+pvcontrol container restart failing-service
 
-# If restart fails, rollback to previous state
-pvr deploy trails/1 .  # Deploy previous revision
+# If restart fails, roll back by re-posting the previous good revision
+pvr post http://DEVICE_IP:12368
 
 # Monitor recovery
-pvcontrol status
 pvcontrol ls
 ```
 
@@ -371,7 +369,7 @@ pvcontrol ls
 
 ### Monitoring
 - Regularly check device status with `pvr device ps`
-- Monitor application logs with `pvcontrol logs`
+- Monitor application logs under `/run/pantavisor/pv/logs/` (or `pvr device logs` for claimed devices)
 - Set up automated health checks
 
 These workflows provide tested patterns for common Pantavisor operations. Adapt them to your specific use cases and requirements.

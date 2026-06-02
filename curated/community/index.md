@@ -1,6 +1,6 @@
 ---
 title: Community
-sidebar_position: 11
+sidebar_position: 12
 description: Join the Pantavisor community - forums, support, and project submissions
 ---
 

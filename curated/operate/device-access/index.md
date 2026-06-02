@@ -1,7 +1,7 @@
 ---
 title: Device Access
 sidebar_position: 10
-description: Quick start guide for setting up Pantavisor Linux on your device. Flash images, configure network, install applications in just a few minutes.
+description: Ways to access a Pantavisor device — serial console, SSH over the local network, the pvtx web UI, and remote management through Pantahub.
 ---
 
 A Pantavisor device exposes several access points depending on your connectivity and what you need to do.
@@ -23,4 +23,4 @@ Once the device has an IP address (via Ethernet or Wi-Fi), you can reach it over
 
 ### Pantahub
 
-Devices that are claimed on [Pantahub](https://pantahub.com) can be managed from anywhere. The `pvr` CLI authenticates to Pantahub and lets you clone, modify, and push device state remotely — the device polls for updates and applies them as OTA revisions. Logs are streamed to Pantahub in real time.
+Devices that are claimed on [Pantahub](https://hub.pantacor.com) can be managed from anywhere. The `pvr` CLI authenticates to Pantahub and lets you clone, modify, and push device state remotely — the device polls for updates and applies them as OTA revisions. Logs are streamed to Pantahub in real time.

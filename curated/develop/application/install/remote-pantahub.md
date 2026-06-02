@@ -1,7 +1,7 @@
 ---
-title: Pantahub
+title: Install remotely via Pantahub
 sidebar_position: 43
-description: Install your first application on Pantavisor Linux using Pantacor Hub. Step-by-step guide to install Home Assistant from the marketplace.
+description: Install an application on a Pantavisor device remotely through Pantahub — claim the device, upload a container package, and commit the transaction from the cloud dashboard.
 ---
 
 Pantahub is the cloud backend for Pantavisor. Once a device is claimed, you can push application updates to it from anywhere — the device polls Pantahub and applies the new revision automatically.
