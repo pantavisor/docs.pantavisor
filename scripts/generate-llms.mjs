@@ -14,9 +14,8 @@ import {join, relative, sep} from 'node:path';
 const ROOT = new URL('..', import.meta.url).pathname;
 const CURATED = join(ROOT, 'curated');
 const STATIC = join(ROOT, 'static');
-// Must match docusaurus.config.ts url + baseUrl. Switch to
-// 'https://docs.pantavisor.io' when the canonical domain goes live.
-const SITE = 'https://pantavisor.github.io/docs.pantavisor';
+// Must match docusaurus.config.ts url + baseUrl.
+const SITE = 'https://docs.pantavisor.io';
 
 // Section order + labels mirror the curated information architecture.
 const SECTIONS = [

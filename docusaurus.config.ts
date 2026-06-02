@@ -28,11 +28,11 @@ const config: Config = {
     v4: true,
   },
 
-  // GitHub Pages project sub-path for now. Switch url to https://docs.pantavisor.io
-  // and baseUrl to '/' when the canonical domain goes live (also update SITE in
-  // scripts/generate-llms.mjs to match).
-  url: 'https://pantavisor.github.io',
-  baseUrl: '/docs.pantavisor/',
+  // Canonical custom domain. The domain is also pinned via static/CNAME so it
+  // survives every GitHub Pages deploy, and mirrored in scripts/generate-llms.mjs
+  // (SITE) and static/robots.txt (Sitemap).
+  url: 'https://docs.pantavisor.io',
+  baseUrl: '/',
 
   onBrokenLinks: 'warn',
   onBrokenAnchors: 'warn',
