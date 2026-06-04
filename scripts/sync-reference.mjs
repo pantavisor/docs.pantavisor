@@ -21,8 +21,15 @@ import {execFileSync} from 'node:child_process';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const cfg = JSON.parse(readFileSync(join(ROOT, 'releases.json'), 'utf8'));
-const current = cfg.current;
-const versions = cfg.versions ?? [];
+
+// DROP_VERSIONS=028-rc11,028-rc12 npm run build  — exclude versions locally without editing releases.json
+const drop = new Set((process.env.DROP_VERSIONS ?? '').split(',').map(v => v.trim()).filter(Boolean));
+if (drop.size) console.log(`Dropping versions (local override): ${[...drop].join(', ')}`);
+
+let current = cfg.current;
+let versions = (cfg.versions ?? []).filter(v => !drop.has(v));
+if (drop.has(current)) current = versions[0];
+
 if (!versions.length) { console.error('releases.json has no versions'); process.exit(1); }
 if (!versions.includes(current)) { console.error(`releases.json current "${current}" not in versions`); process.exit(1); }
 
