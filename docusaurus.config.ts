@@ -22,7 +22,7 @@ for (const version of releases.versions) {
 const config: Config = {
   title: 'Pantavisor Docs',
   tagline: 'Pantavisor is PID 1 and owns the full device update',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/favicon.png',
 
   future: {
     v4: true,
