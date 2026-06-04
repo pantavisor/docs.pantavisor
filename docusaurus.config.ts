@@ -105,7 +105,7 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/docusaurus-social-card.jpg',
+    image: 'images/Pantacor_Logo_Black.png',
     colorMode: {
       respectPrefersColorScheme: true,
     },
