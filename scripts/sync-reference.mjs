@@ -44,12 +44,21 @@ async function downloadTo(url, dest) {
 }
 
 // Find a version's docs artifact ({name,url,sha256}) anywhere in the upstream
-// manifest (it groups by channel → version → list of build entries).
+// manifest. Handles two formats:
+//   dict  (current): channel[version] = {release-date, devices, docs:{name,hash,url}}
+//   array (legacy):  channel[version] = [{docs:{name,url,sha256}}, ...]
+// Always returns a normalised {url, sha256, name} object or null.
 function findDocs(manifest, version) {
   for (const channel of Object.values(manifest)) {
-    const entries = channel?.[version];
-    if (!Array.isArray(entries)) continue;
-    for (const e of entries) if (e && e.docs && e.docs.url) return e.docs;
+    const entry = channel?.[version];
+    if (!entry) continue;
+    let d = null;
+    if (!Array.isArray(entry) && entry.docs?.url) {
+      d = entry.docs;
+    } else if (Array.isArray(entry)) {
+      d = entry.find(e => e?.docs?.url)?.docs ?? null;
+    }
+    if (d) return {url: d.url, sha256: d.sha256 ?? d.hash, name: d.name};
   }
   return null;
 }
