@@ -5,7 +5,7 @@ apply them to the local releases.json.
 
 The upstream manifest groups versions under two channels:
   stable           – keys like "024", "025"
-  release-candidate – keys like "028-rc10", "028-rc11"
+  release-candidate – keys like "028-rc10", "028-rc10.1", "028-rc11"
 
 Only versions that contain a "docs" entry are eligible: the build
 (sync-reference.mjs) requires a docs tarball URL + sha256 at build time.
@@ -33,18 +33,20 @@ import os
 import re
 import sys
 
-VERSION_RE = re.compile(r"^(0\d+)(?:-rc(\d+))?$")
+VERSION_RE = re.compile(r"^(0\d+)(?:-rc(\d+)(?:\.(\d+))?)?$")
 
 
-def parse_ver(v: str) -> tuple[int, float]:
-    """Return (base, rc) for sorting. Stable releases use math.inf as rc
-    so they rank above all RC builds of the same base number."""
+def parse_ver(v: str) -> tuple[int, float, float]:
+    """Return (base, rc, patch) for sorting. Stable releases use math.inf as rc
+    so they rank above all RC builds of the same base number. Patch releases
+    (e.g. 028-rc10.1) sort between their base RC and the next RC."""
     m = VERSION_RE.match(v)
     if not m:
         raise ValueError(f"Unexpected version format: {v!r}")
-    base = int(m.group(1))
-    rc   = int(m.group(2)) if m.group(2) else math.inf
-    return (base, rc)
+    base  = int(m.group(1))
+    rc    = int(m.group(2)) if m.group(2) else math.inf
+    patch = int(m.group(3)) if m.group(3) else 0
+    return (base, rc, patch)
 
 
 def main() -> None:
@@ -64,7 +66,7 @@ def main() -> None:
         ver
         for channel in ("stable", "release-candidate")
         for ver, items in upstream.get(channel, {}).items()
-        if VERSION_RE.match(ver) and any("docs" in item for item in items)
+        if VERSION_RE.match(ver) and "docs" in items
     ]
     known             = set(local.get("versions") or [])
     new_versions      = [v for v in upstream_versions if v not in known]
