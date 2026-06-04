@@ -17,7 +17,7 @@ name: "Docs: release sync"
 #   Mixed:   026-rc* < 026 (stable supersedes its own RCs)
 
 on:
-  workflow_dispatch: {}        # allow manual trigger
+  workflow_dispatch:             # allow manual trigger
   repository_dispatch:
     types: [docs-release]      # triggered by meta-pantavisor tag workflow
 
