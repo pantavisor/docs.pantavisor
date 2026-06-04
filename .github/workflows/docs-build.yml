@@ -22,7 +22,7 @@ on:
       - 'migrate-docs.js'
       - 'scripts/**'
       - 'package*.json'
-      - '.github/workflows/**'
+      - '!.github/workflows/**'
 
 permissions:
   contents: read
