@@ -109,6 +109,25 @@ The set of versions and which one is `current` come from `releases.json`;
 `docusaurus.config.ts` reads it to build the `docsVersionDropdown`
 (`docsPluginId: 'reference'`).
 
+## Removing a reference version
+
+To hide a version from the published site, remove it from `releases.json`
+`versions` (and update `current` if needed), then commit.
+
+To exclude a version **locally** without touching `releases.json`:
+
+```bash
+DROP_VERSIONS=028-rc11 npm start
+DROP_VERSIONS=028-rc11,028-rc12 npm run build
+```
+
+`sync-reference.mjs` reads `DROP_VERSIONS` at generate time and skips those
+versions. If the dropped version is `current`, the next newest remaining
+version is promoted automatically. The env var has no effect in CI unless
+explicitly set.
+
+---
+
 ## Broken links / warnings
 
 Some generated reference documents contain cross-repository links (e.g.
