@@ -1,4 +1,4 @@
-name: Docs – release sync
+name: "Docs: release sync"
 
 # Triggered by a repository_dispatch event from meta-pantavisor (docs-release)
 # or manually via workflow_dispatch. Fetches the upstream Pantavisor release
