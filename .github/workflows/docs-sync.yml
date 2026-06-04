@@ -1,8 +1,9 @@
 name: Docs – release sync
 
-# Polls the upstream Pantavisor release manifest every 12 hours and registers
-# any new docs versions (stable 0XX or release-candidate 0XX-rcN) that are not
-# yet recorded in the local releases.json.
+# Triggered by a repository_dispatch event from meta-pantavisor (docs-release)
+# or manually via workflow_dispatch. Fetches the upstream Pantavisor release
+# manifest and registers any new docs versions (stable 0XX or release-candidate
+# 0XX-rcN / 0XX-rcN.P) that are not yet recorded in the local releases.json.
 #
 # When new versions are found the workflow:
 #   1. Merges them into releases.json (all versions sorted newest-first).
@@ -16,9 +17,9 @@ name: Docs – release sync
 #   Mixed:   026-rc* < 026 (stable supersedes its own RCs)
 
 on:
-  schedule:
-    - cron: '0 */12 * * *'   # every 12 hours
   workflow_dispatch: {}        # allow manual trigger
+  repository_dispatch:
+    types: [docs-release]      # triggered by meta-pantavisor tag workflow
 
 jobs:
   sync:
