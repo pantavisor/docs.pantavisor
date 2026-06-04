@@ -27,6 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout
@@ -49,6 +50,7 @@ jobs:
         env:
           NEW_VERSIONS: ${{ steps.detect.outputs.new_versions }}
           CURRENT:      ${{ steps.detect.outputs.current }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BRANCH="release/auto-sync-$(date -u +%Y%m%d-%H%M%S)"
           git config user.name  "Pantavisor Docs CI"
@@ -57,4 +59,11 @@ jobs:
           git add releases.json
           git commit -m "release: register docs version(s) ${NEW_VERSIONS}"
           git push origin "$BRANCH"
-          echo "Pushed branch: $BRANCH  (current → ${CURRENT})"
+          gh pr create \
+            --title "release: register docs version(s) ${NEW_VERSIONS}" \
+            --body "Automated sync from upstream meta-pantavisor manifest.
+
+**New versions:** \`${NEW_VERSIONS}\`
+**Current after merge:** \`${CURRENT}\`" \
+            --base master \
+            --head "$BRANCH"
