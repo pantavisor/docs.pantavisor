@@ -133,7 +133,6 @@ const config: Config = {
             {to: '/reference', label: 'Reference home'},
             {to: '/reference/meta-pantavisor', label: 'meta-pantavisor'},
             {to: '/reference/pantavisor', label: 'pantavisor'},
-            {to: '/reference/pvr', label: 'pvr'},
           ],
         },
         {

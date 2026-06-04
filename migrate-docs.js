@@ -164,9 +164,6 @@ function processMarkdown(content) {
 const EXCLUDE_FROM_REFERENCE = new Set([
   // Curated narrative/guides — maintained by hand in curated/, not generated.
   'meta-pantavisor/learn',
-  'meta-pantavisor/overview',
-  'meta-pantavisor/how-to-build',
-  'meta-pantavisor/how-to-install',
   'meta-pantavisor/supported-devices',
   // The upstream tarball ships the entire previous (MkDocs-era) docs site under
   // legacy/. It is not repo-shaped reference material — it is archived narrative.
