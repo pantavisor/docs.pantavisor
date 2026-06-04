@@ -59,11 +59,9 @@ jobs:
           git add releases.json
           git commit -m "release: register docs version(s) ${NEW_VERSIONS}"
           git push origin "$BRANCH"
+          PR_BODY=$(printf 'Automated sync from upstream meta-pantavisor manifest.\n\nNew versions: %s\nCurrent after merge: %s' "${NEW_VERSIONS}" "${CURRENT}")
           gh pr create \
             --title "release: register docs version(s) ${NEW_VERSIONS}" \
-            --body "Automated sync from upstream meta-pantavisor manifest.
-
-**New versions:** \`${NEW_VERSIONS}\`
-**Current after merge:** \`${CURRENT}\`" \
+            --body "$PR_BODY" \
             --base master \
             --head "$BRANCH"
