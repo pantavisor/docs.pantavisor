@@ -2,6 +2,7 @@ import {readFileSync} from 'fs';
 import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+import rehypeMaterialIcons from './src/plugins/rehype-material-icons.mjs';
 
 // Reference versions are derived from releases.json (the single source of
 // truth). scripts/sync-reference.mjs generates the matching reference/ and
@@ -52,6 +53,13 @@ const config: Config = {
     locales: ['en'],
   },
 
+  stylesheets: [
+    {
+      href: 'https://cdn.jsdelivr.net/npm/@mdi/font@7.x/css/materialdesignicons.min.css',
+      type: 'text/css',
+    },
+  ],
+
   presets: [
     [
       'classic',
@@ -62,6 +70,7 @@ const config: Config = {
           path: 'curated',
           routeBasePath: '/',
           sidebarPath: './sidebarsCurated.ts',
+          rehypePlugins: [rehypeMaterialIcons],
         },
         blog: false,
         theme: {
@@ -83,6 +92,7 @@ const config: Config = {
         sidebarPath: './sidebarsReference.ts',
         lastVersion: 'current',
         versions: referenceVersions,
+        rehypePlugins: [rehypeMaterialIcons],
       },
     ],
   ],
