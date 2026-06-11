@@ -12,7 +12,7 @@ Connect a USB-to-TTY adapter to the device's TX/RX/GND serial pins. Open a termi
 
 ```bash
 # Linux — adjust device node as needed (ttyUSB0, ttyUSB1, ttyACM0, …)
-sudo minicom -D /dev/ttyUSB0
+sudo minicom -b 115200 -D /dev/ttyUSB0
 
 # Alternative
 screen /dev/ttyUSB0 115200
@@ -64,19 +64,24 @@ Drops you into the container's filesystem, process, and network namespaces. Exit
 ### Query device status
 
 ```bash
-pvcontrol ls                  # full device status, auto-recovery counters
-pvcontrol container ls        # container list
-pvcontrol daemons ls          # daemon containers
-pvcontrol graph ls            # pv-xconnect service mesh
-pvcontrol buildinfo           # Pantavisor build info and current revision
+pvcontrol ls                            # list containers: status, group, status goal, restart policy
+pvcontrol container ls                  # same container list
+pvcontrol daemons ls                    # Pantavisor internal daemons
+pvcontrol graph ls                      # xconnect service graph
+pvcontrol steps show-progress current   # progress of the current revision
+pvcontrol buildinfo                     # Pantavisor build info dump
 ```
 
 ### View logs
 
 ```bash
-tail -f /run/pantavisor/pv/logs/0/pantavisor/pantavisor.log
-tail -f /run/pantavisor/pv/logs/0/<container>/lxc/console.log
+tail -f /pv/logs/<revision>/pantavisor/pantavisor.log
+tail -f /pv/logs/<revision>/<container>/lxc/console.log
 ```
+
+The `/pv/` tree (logs, device-id, challenge, metadata, the pv-ctrl socket) is
+how the debug shell sees Pantavisor's control directory; inside a container
+the same tree is mounted at `/pantavisor/`.
 
 ### Find credentials for Pantahub claiming
 
@@ -89,4 +94,4 @@ Use these when claiming the device on [hub.pantacor.com](https://hub.pantacor.co
 
 ## Exiting the Debug Shell
 
-Type `exit` or press `Ctrl-D`. Pantavisor continues starting containers normally after the shell exits. Pressing **Enter** again reopens the shell at any time.
+Type `exit` or press `Ctrl-D`. Containers start regardless of whether the shell is open, but an open debug shell blocks reboot and power-off — Pantavisor waits for a debug-shell timeout before a reboot proceeds. Pressing **Enter** again reopens the shell at any time.

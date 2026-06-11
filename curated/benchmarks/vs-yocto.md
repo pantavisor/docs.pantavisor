@@ -27,7 +27,7 @@ updates, and fleet management to your existing Yocto-built firmware.
 | Atomic OTA updates | ⚠️ Bolt-on (Mender, SWUpdate, RAUC) | ✅ Built-in |
 | Fleet management | ❌ Not included | ✅ Pantahub (open source) |
 | Signed system state | ⚠️ Image signing only | ✅ PVS over state JSON |
-| Independent app updates | ❌ Requires full rebuild | ✅ Update a single container |
+| Independent app updates | ⚠️ No built-in mechanism (package feeds possible) | ✅ Update a single container |
 | Kernel as a container | ❌ No | ✅ Yes (BSP container) |
 
 ## The problem with Yocto alone
@@ -35,7 +35,9 @@ updates, and fleet management to your existing Yocto-built firmware.
 Yocto is excellent at building firmware, but on its own it has limitations:
 
 1. **Monolithic updates** — every change requires rebuilding and reflashing the entire image.
-2. **Slow iteration** — 30–60 minute build cycles for small app changes.
+2. **Slow iteration** — full cold builds take 30–60 minutes; sstate-cache brings
+   incremental rebuilds down to minutes, but every app change still means a
+   rebuild-and-reflash cycle.
 3. **Risky deployments** — no automatic rollback if an update fails.
 4. **No fleet visibility** — managing thousands of devices requires external tools.
 
@@ -54,7 +56,7 @@ Two phases, two tools, one workflow:
 
 - Clone the device state with `pvr clone`.
 - Compose / update / remove containers (`pvr app add|update|rm`).
-- Sign and push (`pvr sig add`, `pvr commit`, `pvr post`).
+- Sign, stage, and push (`pvr sig add`, `pvr add .`, `pvr commit`, `pvr post`).
 - Pantavisor switches atomically and rolls back if any container fails its `status_goal`.
 
 ## How it works in practice
@@ -68,7 +70,7 @@ git clone https://github.com/pantavisor/meta-pantavisor.git
 cd meta-pantavisor
 
 # Builds BSP + Pantavisor + initial container composition into a flashable .wic
-kas build kas/scarthgap.yaml:kas/machines/raspberrypi-armv8.yaml:kas/bsp-base.yaml
+./kas-container build kas/build-configs/release/raspberrypi-armv8-scarthgap.yaml
 ```
 
 See [Build with Yocto](/build) for the full guide.
@@ -76,9 +78,8 @@ See [Build with Yocto](/build) for the full guide.
 ### 2. Flash and boot
 
 ```bash
-sudo pvflasher copy \
-  build/tmp-scarthgap/deploy/images/raspberrypi-armv8/pantavisor-starter-raspberrypi-armv8.wic \
-  /dev/sdX
+# from the build's deploy/images/raspberrypi-armv8/ directory
+pvflasher copy pantavisor-starter-raspberrypi-armv8*.wic.bz2 /dev/sdX
 ```
 
 On first boot the device can register with Pantahub and get a nickname.
@@ -93,19 +94,20 @@ cd my-device
 # Add / update / remove containers
 pvr app add wificonnect --from gitlab.com/pantacor/pvwificonnect:latest
 
-# Sign, commit, push
+# Sign, stage, commit, push
 pvr sig add --part wificonnect
+pvr add .
 pvr commit -m "Add wificonnect"
 pvr post https://pvr.pantahub.com/USERNAME/DEVICE_NAME
 ```
 
 ## With vs without Pantavisor
 
-| Scenario | Yocto only | Yocto + Pantavisor |
+| Scenario | Yocto + typical image updater | Yocto + Pantavisor |
 |---|---|---|
-| Update a Python app | Rebuild entire image (30–60 min) | Update container (2–5 min) |
-| Deploy to 10,000 devices | Flash all devices | `pvr post` to the fleet |
-| Update fails | Device bricked | Automatic rollback |
+| Update a Python app | Rebuild image (30–60 min cold, minutes with sstate-cache) | Update container (2–5 min) |
+| Deploy to 10,000 devices | Full-image OTA to all devices | `pvr post` only the changed objects |
+| Update fails | Recovery depends on the updater's rollback integration | Automatic, health-gated rollback |
 | Add a new service | Rebuild image | `pvr app add` |
 | Team A updates kernel | Affects Team B's apps | Isolated container updates |
 

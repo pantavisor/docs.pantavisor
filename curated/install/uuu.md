@@ -34,7 +34,7 @@ After a successful build, the WIC image and SPL/u-boot binaries are at:
 ```
 build/tmp-scarthgap/deploy/images/<machine>/
   pantavisor-starter-<machine>*.wic
-  imx-boot-<machine>*.bin       # SPL + u-boot FIT image
+  imx-boot                      # SPL + u-boot FIT image (symlink)
 ```
 
 ## Flashing procedure
@@ -50,14 +50,14 @@ See the board-specific page for the exact switch/jumper settings.
 sudo uuu -lsusb
 ```
 
-You should see an `SE Blank` or `SDP:MX8M*` device listed.
+You should see an `SDP:` entry for the i.MX8M device listed.
 
 ### 3. Flash with uuu
 
 #### Option A — using the WIC image directly
 
 ```bash
-sudo uuu -b emmc_all imx-boot-<machine>*.bin pantavisor-starter-<machine>*.wic
+sudo uuu -b emmc_all imx-boot pantavisor-starter-<machine>*.wic
 ```
 
 #### Option B — using a board-vendor uuu script (Variscite)
@@ -79,5 +79,5 @@ boot from eMMC.
       | sudo tee /etc/udev/rules.d/70-nxp-uuu.rules
   sudo udevadm control --reload-rules
   ```
-- The `emmc_all` profile writes the full WIC image (boot partitions + rootfs).
-  Use `emmc` if you only want to update the rootfs partition.
+- The `emmc` built-in script writes only the bootloader; use `emmc_all` to
+  write the full image. There is no built-in rootfs-only script.

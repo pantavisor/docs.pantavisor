@@ -42,8 +42,10 @@ that model — it owns PID 1 and ships every change as a content-addressed
 
 - **No update script to maintain.** The revision manifest describes the whole
   device declaratively; you do not hand-write per-partition image lists.
-- **Updates are object-level**, so unrelated partitions are not rewritten for a
-  small change. See the [benchmarks](/benchmarks).
+- **Updates are object-level in transfer and on flash.** SWUpdate's delta
+  handler (zchunk) can shrink downloads, but a changed partition is still
+  rewritten whole; Pantavisor writes only the changed objects. See the
+  [benchmarks](/benchmarks).
 - **Rollback is automatic and health-gated** rather than dependent on your
   `sw-description` logic and bootloader scripting.
 

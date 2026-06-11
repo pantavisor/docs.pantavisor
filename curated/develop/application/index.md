@@ -4,9 +4,9 @@ sidebar_position: 20
 description: Comprehensive guide on managing applications within Pantavisor Linux. Learn how to install, configure, access, view, and remove containerized services on your device.
 ---
 
-In Pantavisor, every piece of user space — applications, system services, even OS components — runs as an isolated **LXC container**. Each container has its own read-only root filesystem (a SquashFS image), its own LXC configuration, and an optional `run.json` manifest that controls restart policy, auto-recovery, and service-mesh wiring.
+In Pantavisor, every piece of user space — applications, system services, even OS components — runs as an isolated **LXC container**. Each container has its own read-only root filesystem (a SquashFS image), its own LXC configuration, and a `run.json` manifest that controls restart policy, auto-recovery, and service-mesh wiring.
 
-Containers are versioned as part of the device's **revision trail** (`/trails/`). Any change — adding an app, updating a config file, removing a service — produces a new revision that Pantavisor applies atomically. If anything goes wrong, it rolls back to the previous good revision automatically.
+Containers are versioned as part of the device's **revision trail** (the `trails/` directory on storage). Any change — adding an app, updating a config file, removing a service — produces a new revision that Pantavisor applies atomically. If anything goes wrong, it rolls back to the previous good revision automatically.
 
 This section covers the complete lifecycle of managing applications on a Pantavisor device:
 

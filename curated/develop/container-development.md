@@ -6,6 +6,8 @@ description: Create and build example containers in meta-pantavisor — recipes,
 
 # Container Development
 
+The steps on this page assume a checkout of the [meta-pantavisor Yocto layer](/build/get-started) and are aimed at image and container integrators.
+
 ## Creating Example Containers
 
 Example containers live in `recipes-containers/pv-examples/`. Each container needs:
@@ -105,6 +107,8 @@ EOF
 cp build/tmp-scarthgap/deploy/images/docker-x86_64/pv-example-mytest.pvrexport.tgz pvtx.d/
 ```
 
+The appengine picks up exports dropped in `pvtx.d/` at start — see [Pantavisor runtime development](./pantavisor-development).
+
 ## Inspecting Pvrexports
 
 Use `pvr` tools to inspect pvrexports — do not manually extract tarballs:
@@ -126,8 +130,9 @@ Errors like `path mismatch [1 link]: ino XXXXX db '...' req '...'` during image 
 
 **Fix:**
 ```bash
-kas shell <config.yaml> -c "bitbake -c cleansstate <recipe-name>"
-kas build <config.yaml>
+./kas-container shell kas/build-configs/release/docker-x86_64-scarthgap.yaml:kas/with-workspace.yaml \
+    -c "bitbake -c cleansstate <recipe-name>"
+./kas-container build kas/build-configs/release/docker-x86_64-scarthgap.yaml:kas/with-workspace.yaml
 ```
 
 The `pvroot-image.bbclass` includes `PSEUDO_IGNORE_PATHS` entries to mitigate this for pvr working directories.

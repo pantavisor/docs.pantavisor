@@ -39,6 +39,8 @@ pvr app add tailscale --from tailscale/tailscale --platform linux/arm/v7
 tailscale/
 ├── root.squashfs               ← container filesystem
 ├── root.squashfs.docker-digest ← image digest for update tracking
+├── src.json                    ← image source and template arguments
+├── run.json                    ← Pantavisor runtime manifest
 └── lxc.container.conf          ← LXC runtime configuration
 ```
 
@@ -56,6 +58,8 @@ Expected output:
 A tailscale/lxc.container.conf
 A tailscale/root.squashfs
 A tailscale/root.squashfs.docker-digest
+A tailscale/run.json
+A tailscale/src.json
 ```
 
 Stage and commit the new revision:
@@ -73,11 +77,11 @@ Post the new revision to the device's pvr endpoint — the same URL you cloned f
 pvr post http://<device-ip>:12368
 ```
 
-Pantavisor downloads the new container objects, writes them as a pending revision, and reboots. If the revision boots cleanly, it becomes the new permanent state.
+Pantavisor downloads the new container objects, writes them as a pending revision, and transitions into it — a full reboot only happens when a `system` restart-policy container or the BSP changed. If the new revision runs cleanly, it becomes the new permanent state.
 
 ## 5 — Verify
 
-After the device reboots, confirm the container is running:
+After the transition, confirm the container is running:
 
 ```bash
 # From the device console (serial or SSH)

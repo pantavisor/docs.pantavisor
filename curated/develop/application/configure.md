@@ -48,13 +48,12 @@ cat ~/.ssh/id_ed25519.pub >> _config/sensor-app/home/root/.ssh/authorized_keys
 
 ### Edit a container's run manifest
 
-Each container directory contains a `run.json` (or `args.json`) that controls Pantavisor-level behaviour: restart policy, auto-recovery, environment variables, and pv-xconnect wiring. Edit it directly in the checked-out directory.
+Each container directory contains a `run.json` that controls Pantavisor-level behaviour: restart policy, auto-recovery, and pv-xconnect wiring. Edit it directly in the checked-out directory.
 
-Example — set an environment variable in `sensor-app/run.json`:
+Example — configure auto-recovery in `sensor-app/run.json`:
 
 ```json
 {
-  "Env": ["SENSOR_INTERVAL=10", "LOG_LEVEL=info"],
   "auto_recovery": {
     "policy": "on-failure",
     "max_retries": 5,
@@ -64,6 +63,8 @@ Example — set an environment variable in `sensor-app/run.json`:
   }
 }
 ```
+
+`run.json` does not control environment variables. Env vars come from the container image's config and are compiled into `lxc.container.conf` when you run `pvr app add` or `pvr app update` — to change them, update the app's source image (see below) rather than hand-editing `run.json`.
 
 ### Replace the container image
 
@@ -117,20 +118,20 @@ Post the new revision to the device's pvr endpoint — the same URL you cloned f
 pvr post http://<device-ip>:12368
 ```
 
-Pantavisor downloads the changed objects, writes them to a pending revision, and reboots. If the new revision boots cleanly and all containers reach their health goal, it is committed as the new permanent state. If it fails, the previous revision is restored automatically.
+Pantavisor downloads the changed objects, writes them to a pending revision, and restarts the affected containers (a full reboot only happens when a `system` restart-policy container or the BSP changed). If the new revision starts cleanly and all containers reach their status goal, it is committed as the new permanent state. If it fails, the previous revision is restored automatically.
 
 ---
 
 ## Step 5 — Verify
 
-After the device reboots, confirm the changes are live:
+After the update is applied, confirm the changes are live:
 
 ```bash
 # Check the container is running
 pvcontrol container ls
 
 # Inspect logs
-tail -f /run/pantavisor/pv/logs/0/sensor-app/lxc/console.log
+tail -f /pantavisor/logs/<revision>/sensor-app/lxc/console.log
 
 # SSH into the device if you added a key
 ssh root@<device-ip>

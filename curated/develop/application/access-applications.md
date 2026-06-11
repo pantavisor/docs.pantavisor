@@ -8,7 +8,7 @@ Pantavisor containers are isolated LXC namespaces. There are three ways to inter
 
 ## Enter a Container with pventer
 
-`pventer` drops you into a running container's namespace — the embedded equivalent of `docker exec`:
+`pventer` drops you into a running container's namespace — the embedded equivalent of `docker exec`. On the device console (serial or SSH):
 
 ```bash
 pventer -c sensor-app
@@ -50,9 +50,12 @@ When containers need to communicate with each other without sharing a network na
 The provider declares what it exports in `services.json`:
 
 ```json
-[
-  {"name": "api", "type": "rest", "socket": "/run/myapp/api.sock"}
-]
+{
+  "#spec": "service-manifest-xconnect@1",
+  "services": [
+    {"name": "api", "type": "rest", "socket": "/run/myapp/api.sock"}
+  ]
+}
 ```
 
 The consumer declares what it requires in `args.json`:
@@ -64,6 +67,8 @@ The consumer declares what it requires in `args.json`:
   ]
 }
 ```
+
+`args.json` is a build-time input: `pvr app add` compiles it into the container's `run.json` (`services.required`). At runtime Pantavisor reads `run.json`, not `args.json`.
 
 Pantavisor's `pv-xconnect` daemon proxies the connection and injects the socket into the consumer's namespace at `/run/pv/services/api.sock`. No shared network namespace or port exposure is needed.
 
@@ -85,9 +90,10 @@ Supported service types:
 
 ## Remote Access via Tailscale
 
-If the Tailscale container is installed on the device, every container that uses the host network namespace is reachable over the Tailscale mesh network — no router port-forwarding required. Install Tailscale as a regular pvr application:
+If the Tailscale container is installed on the device, every container that uses the host network namespace is reachable over the Tailscale mesh network — no router port-forwarding required. Install Tailscale as a regular pvr application; these commands run on your workstation:
 
 ```bash
+pvr clone http://<device-ip>:12368/cgi-bin device && cd device
 pvr app add tailscale --from tailscale/tailscale --platform linux/arm64
 pvr add . && pvr commit -m "add Tailscale"
 pvr post http://<device-ip>:12368
@@ -100,4 +106,4 @@ pvr post http://<device-ip>:12368
 | Container not responding | `pvcontrol container ls` — verify state is RUNNING |
 | Port unreachable from host | `pventer -c <app>` then `ss -tlnp` to confirm the port is bound |
 | xconnect socket missing | `pvcontrol graph ls` — check link is present; `pvcontrol daemons ls` — confirm pv-xconnect is running |
-| Container crashed | `tail /run/pantavisor/pv/logs/0/<app>/lxc/console.log` for the exit reason |
+| Container crashed | `tail /pantavisor/logs/<revision>/<app>/lxc/console.log` for the exit reason |

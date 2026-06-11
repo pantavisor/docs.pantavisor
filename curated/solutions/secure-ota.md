@@ -32,7 +32,7 @@ JSON is a flat list of `(path, hash)` pairs for binaries plus inlined JSON:
 }
 ```
 
-To tamper with an object you'd need a SHA256 collision. Differential transfer
+To tamper with an object you'd need a SHA-256 second-preimage attack. Differential transfer
 (only changed hashes) doesn't weaken integrity — every object's hash is checked
 on the device after fetch.
 
@@ -81,18 +81,19 @@ cd ws
 
 # ... modify containers, configs ...
 
-pvr add .
-pvr commit -m "Security update"
-
-# Sign each part that ships
+# Sign each part that ships (signature files are created untracked)
 pvr sig add --part os
 pvr sig add --part bsp
 
-# Push
+# Stage everything — including the new signatures — then commit and push
+pvr add .
+pvr commit -m "Security update"
 pvr post https://pvr.pantahub.com/USERNAME/DEVICE_NAME
 ```
 
-The device verifies signatures against its baked-in trust root before applying.
+Sign *before* `pvr add .` and `pvr commit` — `pvr sig add` leaves the signature
+files untracked, so committing first would post an unsigned state. The device
+verifies signatures against its baked-in trust root before applying.
 
 ## Layer 5 — audit trail (non-repudiation)
 
@@ -115,9 +116,10 @@ them. See the [trust model](/security/trust-model) for the full chain.
 ## Defending against replay
 
 Pantavisor doesn't blindly accept any signed state — the device tracks the
-current trail step and only applies updates targeted at it. To roll back to an
-older signed state you must **re-post it as a new revision** (which appears in the
-audit log). Silent replay is not possible.
+current trail step and only applies updates targeted at it. Within the
+Pantahub-managed flow, re-posting an old revision requires a **new, logged post**
+that appears in the audit trail. Note that Pantavisor itself does not maintain an
+anti-rollback counter, so protect local access to the device accordingly.
 
 ## Defending against compromised sources
 

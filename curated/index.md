@@ -49,8 +49,8 @@ as content-addressed objects, so a change ships only what actually changed.
 |---|---|
 | Understand what Pantavisor is | [Concepts](/concepts) |
 | See the full build → flash → update workflow | [Composable firmware](/concepts/composable-firmware) |
-| Try it on my laptop in 30 minutes | [Local emulator quickstart](/start) |
-| Run it on real hardware | [Install on hardware](/install) |
+| Run it on real hardware in 30 minutes | [Download and flash](/start/download-and-flash) |
+| Install on other hardware | [Install on hardware](/install) |
 | Build an image with Yocto | [Build with Yocto](/build) |
 | Ship and update my app | [Develop applications](/develop) |
 | Operate a fleet | [Operate devices](/operate) |
@@ -61,7 +61,8 @@ as content-addressed objects, so a change ships only what actually changed.
 
 ## Pantavisor vs Pantahub
 
-**Pantavisor** is the on-device runtime (this documentation). **Pantahub** is the
-optional cloud backend for fleet management, hosted at
+**Pantavisor** is the on-device runtime (this documentation). **Pantahub** (also
+branded Pantacor Hub) is the optional cloud backend at
+[hub.pantacor.com](https://hub.pantacor.com); its documentation lives at
 [docs.pantahub.com](https://docs.pantahub.com). Pantavisor works fully
 standalone; Pantahub adds remote fleet operations on top.

@@ -27,7 +27,7 @@ and no separate updater running on top of the OS.
 | Update Modules (partial/app updates) | [Containers](/develop) | Every component is already an independent container; app updates never touch the base. |
 | Mender client (a service on the OS) | Pantavisor **is** PID 1 | No agent layered on top — the runtime and the updater are the same process. |
 | Mender server / Hosted Mender | [Pantahub](/operate/device-access/remote-pantahub) (optional) | Or deploy directly over the local network with `pvr`; the cloud is not required. |
-| Bootloader bootcount rollback | [Health-gated commit + bootloader try/rollback](/security/atomicity-and-trust) | A trial revision must pass health checks before it is marked good. |
+| Commit after successful boot (+ state scripts) | [Health-gated commit + bootloader try/rollback](/security/atomicity-and-trust) | Both gate the commit on a healthy boot; Pantavisor gates per container on its `status_goal`, with no scripts to write. |
 
 ## Migration path
 
@@ -51,7 +51,8 @@ and no separate updater running on top of the OS.
   [benchmarks](/benchmarks) for the size and time difference.
 - **The base and kernel are updated the same way** — as containers in a
   revision — so you do not run an A/B image updater underneath Pantavisor.
-- **Rollback is automatic and health-gated**, not just a bootcount flip.
+- **Rollback stays automatic** — and health gating is per container
+  (`status_goal`) rather than per boot, with no state scripts to maintain.
 
 > **⚠️ Warning — No hybrid stacks**
 >

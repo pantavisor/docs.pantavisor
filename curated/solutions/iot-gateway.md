@@ -39,8 +39,9 @@ my-iot-gateway/ (state JSON)
 ```
 
 Each container is built and versioned independently, has its own `run.json` and
-`_config/<container>/` overlays, declares dependencies on other containers via the
-[pv-xconnect](/develop/application/access-applications) service mesh, and has its
+`_config/<container>/` overlays, reaches the services of other containers through
+[pv-xconnect](/develop/application/access-applications) inter-container
+networking (startup ordering comes from container groups/runlevels), and has its
 own `status_goal` so failures are caught and rolled back automatically.
 
 ## Why composability matters here
@@ -102,8 +103,9 @@ doesn't take down the whole gateway.
 pvr clone https://pvr.pantahub.com/USERNAME/DEVICE_NAME ws
 cd ws
 pvr app update modbus --from gitlab.com/myorg/modbus-adapter:1.4.2
-pvr commit -m "Modbus 1.4.2 — fix register decode"
 pvr sig add --part modbus
+pvr add .
+pvr commit -m "Modbus 1.4.2 — fix register decode"
 pvr post https://pvr.pantahub.com/USERNAME/DEVICE_NAME
 ```
 

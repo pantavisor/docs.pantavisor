@@ -1,7 +1,7 @@
 ---
 title: Pantavisor vs Balena
 sidebar_position: 2
-description: Pantavisor and Balena both deliver containerized embedded Linux plus OTA, but the architectures diverge — LXC vs Docker, kernel-as-container vs app-only, 100% open vs open-core.
+description: Pantavisor and Balena both deliver containerized embedded Linux plus OTA, but the architectures diverge — LXC vs Docker, kernel-as-container vs app-only, open-source self-hostable backend vs open-core.
 ---
 
 # Pantavisor vs Balena — lightweight LXC vs Docker for embedded
@@ -28,10 +28,10 @@ containers, choose Pantavisor.
 | Update unit | Docker image layers | Content-addressed state objects |
 | OTA rollback | Built-in (per release) | Built-in, atomic, signed, automatic |
 | Footprint | Tens of MB (Docker stack) | ~1 MB Pantavisor + LXC |
-| Cloud | balenaCloud (open-core, paid) | Pantahub (100% open source) |
-| Self-hosting | openBalena (limited features) | Self-hosted Pantahub, full feature set |
-| License | Open-core | 100% open source |
-| Signed states | ❌ | ✅ PVS (signatures over state JSON) |
+| Cloud | balenaCloud (open-core, commercial; free tier available) | Pantahub (backend open source, Apache-2.0) |
+| Self-hosting | openBalena (core device/fleet API) | Self-hosted pantahub-base backend |
+| License | Open-core | Runtime 100% open source; Hub backend Apache-2.0 |
+| Signed states | Registry digests + TLS, not user-signed release states | ✅ PVS (signatures over state JSON) |
 
 ## Architectural differences
 
@@ -67,8 +67,9 @@ Updating the kernel, swapping the network stack, or shipping a new app are all
 ## Footprint and resource use
 
 balenaEngine trims Docker but still pulls in containerd-style assumptions,
-overlayfs, image caches, and a long-running daemon. Practical balenaOS images sit
-in the 80–200 MB range and consume non-trivial RAM at idle.
+overlayfs, image caches, and a long-running daemon. Practical balenaOS images are
+an order of magnitude larger than Pantavisor's ~1 MB runtime and consume
+non-trivial RAM at idle.
 
 Pantavisor itself is a **single ~1 MB binary** running as PID 1, plus
 per-container LXC processes. There is no container daemon, no image cache, and no
@@ -83,21 +84,21 @@ etc.). This matters on devices with 64–256 MB of RAM, no swap, and limited eMM
 | Updates kernel without re-flash | ⚠️ Host OS update | ✅ Container in state |
 | Automatic boot rollback | ✅ Host OS | ✅ Whole state, every revision |
 | Signed update payload | Image trust | ✅ PVS signatures over state JSON |
-| Differential transfer | Docker layer dedup | Content-addressed object dedup |
+| Differential transfer | ✅ Binary deltas between releases | ✅ Content-addressed objects (dedup in transfer *and* storage), signed states |
 | Offline / air-gapped flow | ⚠️ Limited | ✅ Local clone, USB push, mirrored Pantahub |
 
 Both roll back automatically on boot failure. Pantavisor additionally rolls back
-when **containers fail their declared `status_goal`** at runtime, not just on
-boot panics.
+when **containers fail their declared `status_goal`** during the update trial
+window; after a revision is committed, each container's `restart_policy` governs
+recovery.
 
 ## Cloud and lock-in
 
-- **Balena**: balenaCloud is the production control plane. openBalena is a
-  stripped-down self-hosted variant; several fleet features and the dashboard
-  remain proprietary.
-- **Pantavisor**: Pantahub is 100% open source and self-hostable with full
-  functionality. You can run Pantahub on your own infra, mirror it, or air-gap it
-  without losing features.
+- **Balena**: balenaCloud is the production control plane. openBalena is the
+  self-hosted variant covering the core device/fleet API; the dashboard and some
+  fleet features are part of the commercial offering.
+- **Pantavisor**: the Hub backend (pantahub-base) is open source (Apache-2.0) and
+  self-hostable. You can run it on your own infra, mirror it, or air-gap it.
 
 ## When Balena fits
 
@@ -113,7 +114,7 @@ boot panics.
 - The **kernel/BSP itself must be updateable** as part of a normal release
   (industrial, automotive, certified devices).
 - You want **signed, content-addressed state revisions** with PVS.
-- You require **fully open source** and self-hostable cloud (Pantahub).
+- You require an **open-source, self-hostable backend** (pantahub-base, Apache-2.0).
 - You're building on **custom hardware** with Yocto and want first-class
   integration via [meta-pantavisor](/build).
 - You want **system containers** (init + services + filesystem) rather than

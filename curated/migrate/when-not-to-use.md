@@ -37,11 +37,12 @@ boundaries is part of earning trust at PID 1.
   converts them to containers — see the
   [FAQ](/troubleshooting/faq).
 - *"I need signed, secure updates."* Pantavisor signs whole revisions with X.509
-  keys and supports dm-verity, dm-crypt, and secure boot. See
+  keys and supports dm-verity, dm-crypt, and secure boot (on boards with
+  verified-boot support). See
   [Security and compliance](/security).
 - *"I need the base/kernel updated too."* That is exactly what Pantavisor does —
   the BSP and kernel ship as containers in the same revision as your apps.
 
 If you are unsure whether your case fits, ask in the
-[community](/community/support) — a short description of your device and update
+[community](/community) — a short description of your device and update
 constraints is usually enough to get a clear answer.

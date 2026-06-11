@@ -95,6 +95,21 @@ const config: Config = {
         rehypePlugins: [rehypeMaterialIcons],
       },
     ],
+    [
+      '@docusaurus/plugin-client-redirects',
+      {
+        // Old URLs of pages that were merged into other pages.
+        redirects: [
+          {
+            from: '/concepts/meta-pantavisor-overview',
+            to: '/build/build-system',
+          },
+          {from: '/community/support', to: '/community'},
+          {from: '/community/projects', to: '/community'},
+          {from: '/community/contribute', to: '/community'},
+        ],
+      },
+    ],
   ],
 
   themes: [

@@ -1,7 +1,7 @@
 ---
 title: Solutions
 description: How Pantavisor solves recurring embedded Linux problems — firmware size, reproducible builds, secure OTA, and composable IoT gateways.
-sidebar_position: 10
+sidebar_position: 9
 slug: /solutions
 ---
 

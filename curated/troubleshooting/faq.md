@@ -19,7 +19,7 @@ pvr commit -m "remove my-old-app"
 pvr post http://<device-ip>:12368
 ```
 
-Pantavisor stops the container and removes it from the trail on the next boot.
+Pantavisor stops the container and removes it from the trail when the device runs the new revision (which may not require a reboot).
 
 ### How do I edit an application's configuration?
 
@@ -48,7 +48,7 @@ pvr post http://<device-ip>:12368
 
 ### What happens if an OTA update fails?
 
-Pantavisor automatically rolls back to the previous revision if the new one fails to boot or any container does not reach its health goal within the configured timeout. No manual intervention is needed. The previous revision is kept in `/trails/` and restored on the next boot.
+Pantavisor automatically rolls back to the previous revision if the new one fails to boot or any container does not reach its health goal within the configured timeout. No manual intervention is needed. The previous revision is kept in `/storage/trails` and restored on the next boot.
 
 ---
 
@@ -61,7 +61,7 @@ Pantavisor automatically rolls back to the previous revision if the new one fail
 3. Scan from your workstation: `pvr device scan`
 4. Check the Pantavisor log for DHCP or network container errors:
    ```bash
-   tail /run/pantavisor/pv/logs/0/pantavisor/pantavisor.log
+   tail /pv/logs/<revision>/pantavisor/pantavisor.log
    ```
 
 ### pvr clone fails with "connection refused".
@@ -71,6 +71,9 @@ Pantavisor serves the state API on port **12368**. Confirm:
 - The device has a network address: `ip addr show`
 - The pvr-sdk (or network) container is running: `lxc-ls -f`
 - You are using the full URL: `pvr clone http://<device-ip>:12368/cgi-bin <dir>`
+- The endpoint is not bound to localhost only — on images where it is, expose it
+  with a `_config/pvr-sdk/etc/pvr-sdk/config.json` overlay setting
+  `"listen": "0.0.0.0"` (see [Local Network](/operate/device-access/local-network))
 
 ---
 
@@ -82,7 +85,7 @@ Pantavisor does not use the Docker runtime. `pvr app add --from <image>` pulls a
 
 1. The image layers are merged into a single SquashFS rootfs (`root.squashfs`)
 2. An `lxc.container.conf` is generated with appropriate mount and namespace settings
-3. An optional `run.json` is created for Pantavisor-level metadata
+3. A `run.json` with Pantavisor-level metadata is created
 
 The container runs under LXC, not Docker. There is no Docker daemon on the device.
 

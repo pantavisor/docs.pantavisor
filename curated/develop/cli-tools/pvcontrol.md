@@ -19,7 +19,7 @@ revision with [`pvr`](/develop/cli-tools/pvr-cli) and post it.
 ## Status and inspection
 
 ```bash
-# Full device status — current revision, container states, auto-recovery counters
+# List containers — name, group, status, status goal, restart policy
 pvcontrol ls
 
 # Pantavisor build and current revision info
@@ -28,13 +28,13 @@ pvcontrol buildinfo
 # Containers and their Pantavisor status
 pvcontrol container ls
 
-# Long-running daemon containers
+# Pantavisor internal daemons (e.g. pv-xconnect)
 pvcontrol daemons ls
 
 # Container groups and their restart policy
 pvcontrol groups ls
 
-# Active pv-xconnect service-mesh links
+# xconnect service graph (GET /xconnect-graph)
 pvcontrol graph ls
 ```
 
@@ -62,7 +62,16 @@ pvcontrol steps ls
 
 # Show a specific revision
 pvcontrol steps get <rev>
+
+# Install or upload a revision and watch its progress
+pvcontrol steps install <rev>
+pvcontrol steps put <rev> <file>
+pvcontrol steps show-progress <rev>
 ```
+
+Related plumbing: `pvcontrol objects ls|get|put` manages content-addressed
+objects directly, and `pvcontrol config ls` dumps the running Pantavisor
+configuration.
 
 ## Metadata
 
@@ -72,6 +81,14 @@ pvcontrol devmeta ls
 
 # User metadata key/value entries
 pvcontrol usrmeta ls
+
+# Write or remove a user metadata entry
+pvcontrol usrmeta save <key> <value>
+pvcontrol usrmeta delete <key>
+
+# Same for device metadata
+pvcontrol devmeta save <key> <value>
+pvcontrol devmeta delete <key>
 ```
 
 ## Device commands
@@ -82,6 +99,10 @@ pvcontrol cmd poweroff      # power the device off
 pvcontrol cmd run-gc        # run garbage collection on the object store
 pvcontrol cmd enable-ssh    # enable the SSH debug access
 pvcontrol cmd disable-ssh   # disable SSH debug access
+
+pvcontrol cmd run <rev>         # run a local revision without committing it
+pvcontrol cmd run-commit <rev>  # run a local revision and commit it as the rollback point
+pvcontrol cmd make-factory      # mark the current revision as the factory revision
 ```
 
 ## Signals
@@ -111,14 +132,12 @@ curl -X GET --unix-socket /run/pantavisor/pv/pv-ctrl \
 
 # Send a device command
 curl -X POST --header "Content-Type: application/json" \
-  --data '{"cmd":"REBOOT_DEVICE"}' \
+  --data '{"op":"REBOOT_DEVICE","payload":""}' \
   --unix-socket /run/pantavisor/pv/pv-ctrl \
   "http://localhost/commands"
 ```
 
 ## Official documentation
 
-For the complete control-socket reference:
-
-- **[Pantavisor commands](https://docs.pantahub.com/pantavisor-commands/)** — the full command interface
-- **[Local control guide](https://docs.pantahub.com/local-control/)** — device management overview
+For the complete on-device tooling reference, see
+[Pantavisor tools](/reference/pantavisor/reference/pantavisor-tools).

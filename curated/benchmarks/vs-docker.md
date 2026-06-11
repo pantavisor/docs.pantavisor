@@ -24,7 +24,7 @@ investment — but the runtime, update model, and lifecycle are firmware-grade.
 | Aspect | Docker | Pantavisor |
 |---|---|---|
 | Runtime | `dockerd` daemon + containerd | LXC, no daemon |
-| Footprint | ~50–100 MB just for the engine | ~1 MB Pantavisor + LXC |
+| Footprint | ~50–100 MB for a typical engine install | ~1 MB Pantavisor + LXC |
 | Container model | Single-process app containers | System containers (init + services + fs) |
 | Kernel/BSP | Lives on the host, not Docker's concern | A container in the same state |
 | Update unit | Docker image layers | Content-addressed state objects |
@@ -32,7 +32,7 @@ investment — but the runtime, update model, and lifecycle are firmware-grade.
 | Automatic rollback on failure | ❌ DIY | ✅ Built-in (boot + `status_goal`) |
 | Signed system state | ⚠️ Image signing only | ✅ PVS over state JSON |
 | Offline / air-gapped use | ⚠️ Possible but awkward | ✅ Native (local clone, USB push, mirrored Pantahub) |
-| Storage backend | overlayfs required | overlayfs / squashfs / dm-verity / raw block |
+| Storage backend | overlay2 by default, ample writable storage assumed | overlayfs / squashfs / dm-verity / raw block |
 | Boot dependency | Boots after host OS and host services | **Pantavisor *is* PID 1** |
 
 ## Why Docker hurts on embedded
@@ -69,7 +69,7 @@ scripts required.
 
 ### 5. Storage assumptions don't hold
 
-Docker expects overlayfs and ample writable space for layer caches. Industrial
+Docker defaults to overlay2 and assumes ample writable space for layer caches. Industrial
 flash often is read-mostly, dm-verity protected, or organized as squashfs for
 size. Pantavisor's volume model is flexible: containers can mount squashfs root
 volumes, dm-verity-checked overlays, or persistent permanent volumes — whatever

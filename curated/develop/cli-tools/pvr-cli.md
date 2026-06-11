@@ -1,12 +1,17 @@
 ---
 title: PVR CLI
 sidebar_position: 210
-description: Complete reference for the PVR command-line tool
+description: Essential pvr commands and workflows
 ---
 
 ## Overview
 
 The **pvr** command-line tool is your primary interface for managing Pantavisor repositories and devices. It enables repository management, application deployment, device interaction, and system configuration.
+
+This page covers the essential commands and workflows. For the full command set,
+run `pvr help` (or `pvr help <command>`); other day-to-day commands not covered
+here include `pvr status`, `pvr diff`, `pvr export`/`pvr import`, and
+`pvr login`/`pvr whoami`.
 
 ## Installation
 
@@ -108,11 +113,10 @@ pvr add . && pvr commit -m "Added new application"
 ```bash
 # Add container from Docker Hub
 pvr app add --from nginx:stable-alpine webserver
-pvr app add --from nginx:latest web-server
-pvr app add --from postgres:13 database
 
-# Add application with specific configuration
-pvr app add --from redis:alpine cache-server
+# Pick the target architecture explicitly — usually needed when adding
+# images for an ARM device from an x86 workstation
+pvr app add --from nginx:stable-alpine --platform linux/arm64 webserver
 ```
 
 #### List Applications
@@ -138,13 +142,17 @@ pvr app rm app-name
 
 ### Device Operations
 
-#### Network Discovery
+#### Local network
 ```bash
-# Scan for Pantavisor devices on network
+# Scan for Pantavisor devices on the local network (mDNS)
 pvr device scan
 ```
 
-#### Device Management
+#### Pantacor Hub (requires `pvr login`)
+
+These commands talk to the Pantahub cloud API, so you must be logged in
+(`pvr login`) and the device must be claimed:
+
 ```bash
 # Create a new device
 pvr device create mydevice1
@@ -152,8 +160,14 @@ pvr device create mydevice1
 # Get device information
 pvr device get DEVICE_ID
 
-# Retrieve device logs
-pvr device logs
+# Retrieve logs for a device
+pvr device logs <device-nick>
+
+# Only errors
+pvr device logs -l ERROR <device-nick>
+
+# List your devices and their status
+pvr device ps
 ```
 
 ### Deployment
@@ -197,7 +211,7 @@ pvr deploy trails/0 /path/to/repo/.pvr#os /tmp/export.tgz#bsp
 pvr sig ls
 
 # Show signatures with full JOSE serialization
-pvr sig ls --with-sig
+pvr sig ls --with-sigs
 ```
 
 #### Add Signatures
@@ -206,8 +220,8 @@ pvr sig ls --with-sig
 pvr sig add --part component-name
 pvr sig add --part nginx
 
-# Show signature with payload
-pvr sig --with-payload ls --with-sig _sigs/awconnect.json
+# show the full JOSE envelope incl. payload for one component
+pvr sig --with-payload ls --with-sigs <component>
 ```
 
 ## Configuration
@@ -291,5 +305,5 @@ pvr post http://DEVICE_IP:12368
 ## Official Documentation
 
 For complete command reference and advanced usage:
-- **[PVR CLI Reference](https://docs.pantahub.com/pvr/)** - Official documentation
-- **Installation Guide** - Download and setup
+- `pvr help` / `pvr help <command>` - Built-in command reference
+- **[PVR CLI Reference](https://docs.pantahub.com/pvr/)** - Legacy Pantahub documentation

@@ -4,7 +4,7 @@ sidebar_position: 42
 description: Install an application on Pantavisor through the pvtx web UI — build a container package with pvr, then upload and commit it from the browser.
 ---
 
-The pvtx web UI lets you upload a container package to a device using only a browser — no `pvr post` or direct network access to the pvr endpoint required. You still use the `pvr` CLI on your workstation to build the package, then transfer it via the browser.
+pvtx, Pantavisor's on-device update-transaction tool, serves a web UI that lets you upload a container package to a device using only a browser — no `pvr post` or direct network access to the pvr endpoint required. You still use the `pvr` CLI on your workstation to build the package, then transfer it via the browser.
 
 **Prerequisites**: `pvr` installed on your workstation ([install guide](/develop/cli-tools/pvr-cli)) and the device reachable on the local network.
 
@@ -69,4 +69,4 @@ The new container should appear as `RUNNING`. You can also confirm in the pvtx U
 
 ---
 
-**Note**: If a debug shell appears on the serial console after the reboot, the device is waiting for confirmation before committing. Follow the on-screen instructions to proceed or roll back..
+**Note**: If a debug shell appears on the serial console after the reboot, the device is waiting for confirmation before committing. Follow the on-screen instructions to proceed or roll back.

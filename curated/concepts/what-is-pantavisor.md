@@ -6,7 +6,7 @@ description: "Pantavisor is PID 1 and owns the full device update — base, kern
 
 ## What Pantavisor Is
 
-**Pantavisor is PID 1.** It is the init process and the whole-device runtime. It boots from a minimal initramfs — there is no conventional root filesystem — and owns the entire device lifecycle: starting LXC containers in dependency order, delivering the **complete framework/OTA update** atomically, and exposing a local REST API for control. Every piece of user space (applications, OS services, BSP components like kernel modules and firmware) lives in its own LXC container. The host initramfs contains only Pantavisor itself.
+**Pantavisor is PID 1.** It is the init process and the whole-device runtime. It boots from a minimal initramfs — there is no conventional root filesystem — and owns the entire device lifecycle: starting LXC containers in dependency order, delivering the **complete framework/OTA update** atomically, and exposing a local REST API for control. Every piece of user space (applications, OS services, BSP components like kernel modules and firmware) lives in its own LXC container. The host initramfs contains only Pantavisor and the minimal tooling it needs (BusyBox, LXC) — no general-purpose rootfs.
 
 Because Pantavisor owns the base/BSP and kernel as containers, it manages the **full device update by itself** — and **replaces** Mender, RAUC, and SWUpdate rather than layering on top of them. There is no hybrid where an A/B image updater sits underneath for the kernel while Pantavisor handles apps. See [Migrate to Pantavisor](/migrate).
 
@@ -31,9 +31,9 @@ Pantavisor breaks that monolith apart:
 ├───────────────────────────────────────────────┤
 │  BSP (LXC container)                          │ ← kernel modules, firmware squashfs
 ├───────────────────────────────────────────────┤
-│  Pantavisor runtime  (~1 MB)                  │ ← container orchestrator + OTA agent
+│  Pantavisor runtime (single C binary, ~1 MB)  │ ← container orchestrator + OTA agent
 ├───────────────────────────────────────────────┤
-│  Minimal initramfs                            │ ← contains only Pantavisor itself
+│  Minimal initramfs                            │ ← Pantavisor + minimal tooling (BusyBox, LXC); no general-purpose rootfs
 ├───────────────────────────────────────────────┤
 │  Linux kernel                                 │
 ├───────────────────────────────────────────────┤
@@ -49,15 +49,15 @@ A Pantavisor device maintains a versioned trail of *revisions* in `/trails/`. Ea
 
 ```
 /trails/
-└── 0/              ← current revision
+└── 0/              ← a revision (0 = factory state)
     ├── bsp/        ← kernel image, modules.squashfs, firmware.squashfs, DTBs
     ├── network/    ← network container rootfs and metadata
     ├── app/        ← application container rootfs and metadata
     ├── device.json ← device-level configuration (groups, auto-recovery policy)
-    └── #spec       ← format version marker used by pvr
+    └── #spec       ← state format version (`pantavisor-service-system@1`)
 ```
 
-When an OTA update arrives, Pantavisor writes the incoming objects to a *pending* revision, reboots into it, and — if the new revision reports healthy — promotes it to current. If not, it rolls back to the previous revision automatically, without operator intervention.
+When an OTA update arrives, Pantavisor writes the incoming objects to a *pending* revision, reboots into it (or, if only containers with `restart_policy: container` changed, restarts just those containers without a reboot), and — if the new revision reports healthy — promotes it to current. If not, it rolls back to the previous revision automatically, without operator intervention.
 
 ## Key Components
 
@@ -72,24 +72,25 @@ The core daemon runs in the initramfs and is responsible for:
 
 ### pvr — Device State CLI
 
-`pvr` is the developer-facing tool for Pantavisor state. It is modelled on Git: you `clone` a device, `add` containers (from Docker Hub images or local pvrexport bundles), `commit` changes, and `push` to Pantahub to deliver an OTA update. The pvr workflow works from a developer workstation and integrates naturally into CI/CD pipelines.
+`pvr` is the developer-facing tool for Pantavisor state. It is modelled on Git: you `clone` a device, `add` containers (from Docker Hub images or local pvrexport bundles), `commit` changes, and `post` them to the device (directly or via Pantahub) to deliver an OTA update. The pvr workflow works from a developer workstation and integrates naturally into CI/CD pipelines.
 
 ```bash
 pvr clone http://192.168.1.122:12368/cgi-bin my-device
 cd my-device
-pvr app add --from nginx:stable-alpine webserver
+pvr app add webserver --from nginx:stable-alpine
 pvr add . && pvr commit -m "add nginx"
 pvr post http://192.168.1.122:12368
 ```
 
 ### pvcontrol — Local REST API
 
-The `pvcontrol` socket exposes a REST API for querying and controlling the running device state without cloud connectivity:
+Pantavisor exposes a REST API on the local `pv-ctrl` socket for querying and controlling the running device state without cloud connectivity; `pvcontrol` is the CLI client for it:
 
 ```bash
-pvcontrol daemons ls    # list running containers
-pvcontrol graph ls      # inspect the xconnect service mesh
-pvcontrol ls            # full device status including auto-recovery counters
+pvcontrol container ls   # list containers
+pvcontrol daemons ls     # list Pantavisor internal daemons
+pvcontrol graph ls       # inspect the xconnect service mesh
+pvcontrol ls             # full device status including auto-recovery counters
 ```
 
 ### pv-xconnect — Container Service Mesh
@@ -117,22 +118,35 @@ Updates are delivered as diffs, not full images. Only the objects (container roo
 1. Developer commits and pushes new state with `pvr`
 2. Device polls Pantahub and downloads the diff
 3. Pantavisor writes the new objects to a pending revision
-4. Device reboots into the pending revision
+4. Pantavisor reboots into the pending revision — or, if only containers with `restart_policy: container` changed, restarts just those containers without a reboot
 5. If the revision boots cleanly and all containers reach their health goal, it is committed as the new current state
 6. If any step fails, Pantavisor restores the previous revision and reboots
 
 ## Auto-Recovery
 
-Each container (or container group) can declare a recovery policy in `device.json` or `run.json`:
+Each container (or container group) can declare a recovery policy in `device.json` or `run.json`.
 
-| Policy | Behaviour |
-|--------|-----------|
-| `on-failure` | Restart on non-zero exit only |
+**Policy values** (`policy`):
+
+| Value | Behaviour |
+|-------|-----------|
+| `no` (default) | Do not restart automatically |
 | `always` | Restart on any exit |
-| Exponential backoff | Configurable `retry_delay` and `backoff_factor` |
-| `backoff_policy: "reboot"` | Reboot device after max retries |
-| `backoff_policy: "10min"` | Wait 10 minutes, then reset retry counter and try again |
-| `backoff_policy: "never"` | Leave container stopped; do not reboot |
+| `on-failure` | Restart on failure |
+| `unless-stopped` | Restart unless the container was explicitly stopped |
+
+> **Note**: the current implementation does not distinguish exit codes, so `on-failure` behaves like `always`.
+
+**Tuning keys**:
+
+| Key | Purpose |
+|-----|---------|
+| `max_retries` | Maximum restart attempts before the backoff policy applies |
+| `retry_delay` | Initial delay between restart attempts |
+| `backoff_factor` | Multiplier applied to the delay after each retry |
+| `reset_window` | Clean-run time after which the retry counter resets |
+| `stable_timeout` | Time a container must run cleanly before the update is committed |
+| `backoff_policy` | What happens after max retries: `"reboot"` the device, a duration such as `"10min"` (wait, reset the counter, retry), or `"never"` (leave the container stopped) |
 
 Containers with a `stable_timeout` hold the OTA commit until they have run cleanly for the configured window, preventing a bad update from being permanently committed.
 
@@ -149,12 +163,15 @@ Containers with a `stable_timeout` hold the OTA commit until they have run clean
 
 | Aspect | Traditional | Pantavisor |
 |--------|-------------|------------|
-| **Update unit** | Full image (100–500 MB) | Changed containers only (1–50 MB) |
-| **Update time** | 5–30 minutes | 30 seconds – 5 minutes |
+| **Update unit** | Full image (typically 100–500 MB) | Changed containers only (typically 1–50 MB) |
+| **Update time** | Typically 5–30 minutes | Typically 30 seconds – 5 minutes |
 | **Rollback** | Complete reflash | Automatic on next boot |
 | **Component isolation** | Monolithic process tree | Separate LXC namespace per container |
 | **Failed-update recovery** | Manual intervention | Automatic rollback to previous revision |
 | **Build model** | Single monolithic build | Independent container builds |
+
+The size and time figures are illustrative ballparks; see the
+[benchmarks](/benchmarks) for measured numbers.
 
 ## Real-World Example
 
@@ -177,4 +194,4 @@ Updating the dashboard means transferring only the changed `web-ui` objects. The
 
 - **Get Started**: Follow the [Quick Start Guide](/start/download-and-flash) to flash your first Pantavisor image.
 - **pvr CLI**: See the [pvr CLI reference](/develop/cli-tools/pvr-cli) for the full command set.
-- **Deep Dive**: The [Pantahub documentation](https://docs.pantahub.com/) covers the API, container authoring, and BSP integration in detail.
+- **Deep dive**: [Build with Yocto](/build) for BSP integration, [Develop applications](/develop) for container authoring, and [docs.pantahub.com](https://docs.pantahub.com/) for the cloud API.

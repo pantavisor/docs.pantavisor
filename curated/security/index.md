@@ -1,32 +1,30 @@
 ---
 title: Security and compliance
 description: Trust model, signed revisions, secure boot, SBOM/CVE, and recertification.
-sidebar_position: 11
+sidebar_position: 10
 slug: /security
 ---
 
 # Security and compliance
 
 Because Pantavisor owns PID 1, it is held to a higher trust bar than a deletable
-updater — and the docs back that up with evidence.
+updater — these pages spell out the trust model and how its guarantees are
+tested.
 
 ## Pages
 
-- **[Trust model](/security/trust-model)** — what Pantavisor protects, the trust
+- **[Trust model](./trust-model.md)** — what Pantavisor protects, the trust
   boundaries from secure boot to per-container integrity, and the end-to-end
   verification chain.
-- **[Atomicity and trust evidence](/security/atomicity-and-trust)** — published
-  power-fail and rollback test methodology and results.
-- **Signed revisions** and artifact verification — one signature transitively
-  covers the whole device state.
-- **Secure boot chain** — SoC ROM → signed bootloader → signed FIT → dm-verity
-  rootfs.
-- **dm-verity** and **dm-crypt**
-- **Secret handling**
-- **SBOM** and the **CVE / update workflow**
-- **Recertification model (lead item)** — a frozen, certified base/BSP plus
-  app-only container updates preserves the safety case. This is the moat image
-  updaters cannot offer: updating an app container does not alter the certified
-  base container's hashes.
-- **Cyber Resilience Act readiness**
-- **IEC 62304 / IEC 62443 positioning**
+- **[Atomicity and trust evidence](./atomicity-and-trust.md)** — a documented,
+  reproducible power-fail and rollback test methodology (results forthcoming).
+- **[Secure OTA updates](/solutions/secure-ota)** — content-addressed object
+  integrity, PVS signatures over the state JSON, x5c certificate chains, and the
+  tamper-evident audit trail.
+
+## Planned coverage
+
+Future pages will cover secret handling, SBOM generation and the CVE/update
+workflow, the recertification model (a frozen, certified base/BSP plus app-only
+container updates that preserve the safety case), Cyber Resilience Act
+readiness, and IEC 62304 / IEC 62443 positioning.

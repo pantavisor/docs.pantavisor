@@ -28,9 +28,9 @@ device including the base).
 | Delta updates | `mender-binary-delta` (commercial add-on) | Built-in object-level diffs |
 | Kernel/BSP updates | Part of the rootfs image | A container in the same state |
 | Partial / app updates | Update Modules | Native — every component is a container |
-| Rollback | Bootloader bootcount | Health-gated commit + bootloader rollback |
+| Rollback | Commit after successful boot (+ state scripts) | Per-container health-gated commit + bootloader rollback |
 | Update agent | Mender client (a service on the OS) | Pantavisor **is** PID 1 |
-| Server | Mender / Hosted Mender | Pantahub (optional, 100% open source) |
+| Server | Mender Server (open-source edition available) / Hosted Mender | Pantahub (optional, open-source backend) |
 | Storage cost | ~2× rootfs (A/B slots) | No full-rootfs mirror |
 | Yocto layer | `meta-mender` | [`meta-pantavisor`](/build) |
 
@@ -46,9 +46,11 @@ device including the base).
   inside the rootfs image and apps that need independent cadence use Update
   Modules. With Pantavisor, the BSP, kernel, services, and apps are all
   containers in one signed revision.
-- **Health-gated rollback.** Mender rolls back via bootloader bootcount.
-  Pantavisor additionally holds the commit until each container reaches its
-  `status_goal`, reverting if any fails — not just on a boot panic.
+- **Per-container health gating.** Mender also commits only after a successful
+  boot, and state scripts can add custom checks. Pantavisor's edge is
+  granularity: each container declares a `status_goal`, and the commit is held
+  until every container reaches it — per-component health gating with no
+  scripting.
 
 ## When Mender fits
 

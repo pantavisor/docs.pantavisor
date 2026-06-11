@@ -1,7 +1,7 @@
 ---
 title: Migrate to Pantavisor
 description: Move from Mender, RAUC, SWUpdate, Balena, or Docker Compose to Pantavisor.
-sidebar_position: 8
+sidebar_position: 7
 slug: /migrate
 ---
 

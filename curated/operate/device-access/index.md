@@ -15,11 +15,11 @@ A Pantavisor device exposes several access points depending on your connectivity
 
 ### Serial Console
 
-The serial console is the lowest-level access path and works without any network configuration. Pantavisor prints a debug shell prompt shortly after boot — pressing **Enter** drops you into a root shell where you can run `lxc-ls`, `pventer`, and `pvcontrol` directly on the device.
+The serial console is the lowest-level access path and works without any network configuration. Pantavisor prints a debug shell prompt shortly after boot — pressing **Enter** drops you into a root shell where you can run `lxc-ls`, `pventer`, and `pvcontrol` directly on the device. Note that the prompt varies by Pantavisor version and configuration — older images show "Press [d] for debug ash shell" instead.
 
 ### Local Network
 
-Once the device has an IP address (via Ethernet or Wi-Fi), you can reach it over SSH and via `pvr` on your workstation. The `pvr` CLI clones the device state, lets you add or modify containers, and deploys the new revision back over the network. The pvtx web UI is also reachable on port **12368**.
+Once the device has an IP address (via Ethernet or Wi-Fi), you can reach it over SSH and via `pvr` on your workstation. The `pvr` CLI clones the device state, lets you add or modify containers, and deploys the new revision back over the network. The pvtx web UI on port **12368** is served by the pvr-sdk container; on images that bind it to localhost only, expose it with a `_config/pvr-sdk/etc/pvr-sdk/config.json` overlay setting `"listen": "0.0.0.0"`.
 
 ### Pantahub
 

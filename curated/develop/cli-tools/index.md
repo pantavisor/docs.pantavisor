@@ -24,11 +24,7 @@ Practical workflows and examples for common development tasks.
 
 ## Quick Start
 
-New to Pantavisor? Start with these essentials:
+New to Pantavisor?
 
-1. **Install PVR CLI** - Download and set up the primary command-line tool
-2. **Learn Basic Commands** - Repository management, device scanning, and application deployment
-3. **Try Common Workflows** - Add applications, configure devices, and manage containers
-4. **Explore Configuration** - Understand JSON formats and repository structure
-
-Each section provides practical examples and real-world usage patterns to help you get productive quickly.
+1. [Install the PVR CLI](./pvr-cli#installation)
+2. Learn the essential `pvr` commands, then try the [common workflows](workflows/)

@@ -31,7 +31,7 @@ container. For the power-fail evidence behind the atomicity claims, see
 | Bootloader → kernel/initramfs | Signed FIT image | The bootloader only boots a signed image. |
 | Initramfs → device state | Signed revision (`pvr sig`, X.509) | One signature transitively covers the whole revision. |
 | Mount → running container | dm-verity | Per-container rootfs integrity is checked at mount time. |
-| Storage at rest | dm-crypt | Full-disk encryption of the trails partition. |
+| Storage at rest | dm-crypt | Encryption of the storage partition (dm-crypt). |
 | Update commit | Health-gated commit + bootloader try/rollback | A trial revision must pass readiness probes before it is marked good. |
 | Liveness backstop | Hardware watchdog fed by PID 1 | If Pantavisor stops feeding it, the device resets. |
 
@@ -57,9 +57,9 @@ guarantees end where the surrounding OS begins. Because Pantavisor *is* the init
 system and the update path, its atomicity and rollback guarantees apply to the
 **whole device**, including the base and kernel, and they are held to a higher
 standard precisely because there is no layer underneath to fall back on. That is
-why the trust story is backed by published
-[power-fail and rollback evidence](/security/atomicity-and-trust) rather than
-assertion alone.
+why the trust story is backed by a documented, reproducible
+[power-fail and rollback test methodology](/security/atomicity-and-trust)
+(results forthcoming) rather than assertion alone.
 
 ## The recertification advantage
 

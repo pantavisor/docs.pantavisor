@@ -115,6 +115,23 @@ Run a specific test:
 ./test.docker.sh -v run remote/core/encrypted-pantahub-config
 ```
 
+## Standalone container
+
+Besides the test harness, you can run the appengine image as a standalone
+container named `pva-test`, with a `pvtx.d` directory of `.pvrexport.tgz`
+bundles to provision and a `storage-test` volume for persistent state:
+
+```bash
+docker run --name pva-test -d --privileged \
+    -v $(pwd)/pvtx.d:/usr/lib/pantavisor/pvtx.d \
+    -v storage-test:/var/pantavisor/storage \
+    --entrypoint /bin/sh pantavisor-appengine:latest -c "sleep infinity"
+
+docker exec pva-test sh -c 'pv-appengine &'
+```
+
+The debug and reset commands below operate on this container.
+
 ## Debug commands
 
 ```bash

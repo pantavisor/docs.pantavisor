@@ -25,8 +25,9 @@ For board-specific hardware setup (boot switches, recovery mode) see:
 ## Prerequisites
 
 - USB Type-A to Micro-USB or USB-C cable (depends on carrier board)
-- Host PC with Tezi running, **or** use the Tezi USB recovery mode
-- [Toradex Easy Installer](https://developer.toradex.com/easy-installer/toradex-easy-installer/) installed on the host
+- Host PC to run the Toradex recovery procedure that loads
+  [Toradex Easy Installer](https://developer.toradex.com/easy-installer/toradex-easy-installer/)
+  into the module's RAM
 
 ## Locating the image
 
@@ -40,28 +41,31 @@ build/tmp-scarthgap/deploy/images/<machine>/pantavisor-starter-<machine>*pv_tezi
 
 ### 1. Put the module into recovery mode
 
-Each carrier board has a different way to enter Tezi recovery mode. See the
+Each carrier board has a different way to enter recovery mode. See the
 board-specific page linked above.
 
-### 2. Open Toradex Easy Installer on the host
+### 2. Load Toradex Easy Installer into the module's RAM
 
-Tezi detects the module automatically over USB when it is in recovery mode.
+With the module in recovery mode and connected over USB, run Toradex's
+recovery procedure on the host (see the
+[Toradex Easy Installer documentation](https://developer.toradex.com/easy-installer/toradex-easy-installer/)).
+It downloads Tezi over USB into the module's RAM and starts it.
 
-### 3. Load the Pantavisor bundle
+### 3. Open the Tezi UI
 
-In the Tezi UI:
+Tezi runs on the module itself. Its UI appears on the module's display, or
+remotely via VNC if no display is attached.
 
-1. Click **Upload Image**
-2. Select the `*pv_teziimg.tar.xz` file
-3. Tezi extracts and lists the image
+### 4. Provide the Pantavisor bundle
 
-Alternatively, place the `.tar.xz` in a directory served by a local HTTP
-server and point Tezi at that URL.
+Make the `*pv_teziimg.tar.xz` image available to Tezi via a USB stick, an SD
+card, or a directory served by a local HTTP server configured as an image
+feed.
 
-### 4. Flash
+### 5. Flash
 
 Select the Pantavisor image in the Tezi UI and click **Install**. Tezi writes
-the image to eMMC and reboots the module automatically.
+the image to eMMC and offers to reboot when done.
 
 ## Notes
 

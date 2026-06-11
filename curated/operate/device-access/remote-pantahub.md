@@ -8,14 +8,14 @@ Once a device is claimed on Pantahub and connected to the internet, you can mana
 
 ## 1 — Claim the Device
 
-Before remote management is possible the device must be registered. Read the device ID and challenge token from the serial console:
+Before remote management is possible the device must be registered. Read the device ID and challenge token from the [serial console debug shell](./serial-port):
 
 ```bash
 cat /pv/device-id
 cat /pv/challenge
 ```
 
-Log in to [hub.pantacor.com](https://hub.pantacor.com), go to **Claim Device**, and enter both values. Once claimed the device appears in your account and its online status updates in real time.
+Log in to [hub.pantacor.com](https://hub.pantacor.com), go to **Claim a Device** on the Devices page, and enter both values. Once claimed the device appears in your account and its online status updates in real time.
 
 ## 2 — Authenticate pvr
 
@@ -70,17 +70,17 @@ Pantahub streams logs from the device to the cloud. Use `pvr device logs` to rea
 # All recent logs
 pvr device logs my-device
 
-# Filter by container or source
-pvr device logs my-device/pantavisor.log
-pvr device logs my-device/sensor-app.log
+# Filter by source — sources are log paths, e.g. /pantavisor.log for the
+# Pantavisor runtime, or a container's console log
+pvr device logs --source=/pantavisor.log my-device
 
 # Filter by severity
-pvr device logs my-device@ERROR
+pvr device logs -l ERROR my-device
 ```
 
 ## 6 — Device Metadata
 
-Attach labels to devices to organize your fleet:
+Attach user-metadata key/values to devices to organize your fleet:
 
 ```bash
 pvr device set <device-id> location=warehouse tier=production

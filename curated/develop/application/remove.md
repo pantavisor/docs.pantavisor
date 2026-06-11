@@ -38,11 +38,11 @@ Use `pvr app rm` to remove the container from the local state:
 pvr app rm my-old-app
 ```
 
-This deletes the container's directory from your checkout and stages the removal.
+This deletes the container's directory from your checkout.
 
 ## Step 3 — Commit and Deploy
 
-Stage any remaining changes, commit, and deploy to the device:
+Then stage and commit the removal, and deploy to the device:
 
 ```bash
 pvr add .
@@ -52,10 +52,6 @@ pvr post http://<device-ip>:12368
 
 ## Step 4 — What Happens on the Device
 
-When Pantavisor receives the new revision it:
+Pantavisor installs the new revision, then transitions into it — stopping and discarding the removed container. A reboot happens only if a `system` restart-policy container (or the BSP) changed.
 
-1. Stops the removed container
-2. Writes the new revision to `/trails/`
-3. Reboots into the new state
-
-After the reboot, `pvcontrol container ls` and `lxc-ls -f` will no longer show the removed container. The previous revision (with the container) is kept in the trail and can be restored by rolling back if needed.
+After the transition, `pvcontrol container ls` and `lxc-ls -f` will no longer show the removed container. The previous revision (with the container) is kept in the trail: to restore it, roll back by running that revision on the device (`pvcontrol cmd run <revision>`), or redeploy it from Pantahub's revision history.

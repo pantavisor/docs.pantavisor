@@ -54,15 +54,16 @@ licenses — for example the container runtime and base userland:
 
 | Component | Typical license |
 |---|---|
-| LXC (Pantavisor's build) | GPL-2.0 |
+| LXC (Pantavisor's build) | LGPL-2.1-or-later (some bundled tools GPL-2.0) |
 | BusyBox (`busybox-pv`) | GPL-2.0 |
 | `libthttp` | MIT |
 | `kas` (build tool) | MIT |
 
 These are not Pantacor-authored, and their terms govern the corresponding files
-in an image. Pantavisor can generate a per-target **SPDX SBOM** so you can
-enumerate the exact components and licenses in any image you ship — see the
-SBOM/build tooling in the reference for how to produce it.
+in an image. To enumerate the exact components and licenses in any image you
+ship, enable Yocto's `create-spdx` class in your meta-pantavisor build (e.g.
+`INHERIT += "create-spdx"` in `local.conf`) to generate a per-image **SPDX
+SBOM**.
 
 :::note[Verify before redistribution]
 Licenses can change between releases. For any image you redistribute, treat the

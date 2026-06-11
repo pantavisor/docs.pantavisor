@@ -23,7 +23,7 @@ bundle vs the entire device state).
 | Aspect | RAUC | Pantavisor |
 |---|---|---|
 | Update model | A/B slots, signed bundle | Content-addressed state objects |
-| Update unit | Slot image (`.raucb`) | Changed objects only |
+| Update unit | Slot image (`.raucb`; adaptive updates shrink downloads) | Changed objects only (transfer *and* storage) |
 | Signing | X.509 over the bundle | PVS over the whole state JSON |
 | Kernel/BSP updates | A slot image | A container in the same state |
 | Rollback | Bootloader slot switch | Health-gated commit + bootloader rollback |
@@ -37,9 +37,11 @@ bundle vs the entire device state).
 - **One signature for the whole device.** RAUC signs each bundle. Pantavisor
   signs the entire revision (PVS over the state JSON), so one signature
   transitively covers every object on the device.
-- **No doubled slots.** RAUC's A/B layout reserves two full slots. Pantavisor's
-  revision trail shares content-addressed objects, so only changed objects are
-  written.
+- **No doubled slots.** RAUC's adaptive updates (block-hash-index) can reduce
+  the *download* size, but each update still writes a whole slot and the A/B
+  layout reserves roughly 2× storage. Pantavisor's revision trail shares
+  content-addressed objects, so only changed objects are transferred *and*
+  stored.
 - **The base is part of the same state.** A RAUC rootfs slot becomes a BSP
   container; application slots become application containers — all in one
   revision instead of separate slot images.

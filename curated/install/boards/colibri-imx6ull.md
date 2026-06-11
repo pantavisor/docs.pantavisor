@@ -26,13 +26,15 @@ Standard Toradex carrier boards:
    mode — consult the EVB schematic for the exact jumper location.
 2. Connect a USB Micro-B cable from the EVB's USB OTG port to your host PC.
 3. Power on the EVB.
-4. Tezi on the host should detect the module automatically.
+4. Run Toradex's recovery script on the host to load Tezi into the module's
+   RAM — see the [Tezi flashing guide](/install/tezi). Tezi then runs on the
+   module itself.
 
 ### Other carrier boards
 
 Refer to the carrier board datasheet for the correct boot-mode configuration.
 The general principle is the same: force the i.MX6ULL into USB serial download
-mode by pulling `BOOT_MODE[1:0]` to `10b`.
+mode by pulling `BOOT_MODE[1:0]` to `01b` (BOOT_MODE1=0, BOOT_MODE0=1).
 
 ## Flashing
 
@@ -44,3 +46,9 @@ Follow the [Tezi flashing procedure](/install/tezi).
   directly to eMMC; no SD card is needed.
 - After flashing, remove the boot-mode jumper before the next power cycle so
   the module boots from eMMC.
+
+## Console and next steps
+
+The serial console runs at **115200 8N1** — see
+[serial port access](/operate/device-access/serial-port) for how to connect.
+Once the device boots, [install your first app](/develop/application/install/).

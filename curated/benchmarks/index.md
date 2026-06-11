@@ -1,15 +1,15 @@
 ---
 title: Benchmarks and comparisons
 description: How Pantavisor compares to Yocto, Balena, Buildroot, Docker, and image updaters — capability matrix plus reproducible payload/time/flash numbers.
-sidebar_position: 9
+sidebar_position: 8
 slug: /benchmarks
 ---
 
 # Benchmarks and comparisons
 
 Choosing an embedded Linux approach is a long-lived decision. This section
-compares Pantavisor to the common alternatives on capability, and backs the
-efficiency claims with reproducible numbers.
+compares Pantavisor to the common alternatives on capability, and will back the
+efficiency claims with reproducible numbers (methodology below).
 
 ## Pantavisor vs alternatives
 
@@ -20,10 +20,10 @@ build systems and container platforms.
 | Feature | Pantavisor | Yocto | Balena | Buildroot | Docker |
 |---|---|---|---|---|---|
 | Composable architecture | ✅ Full stack | ❌ Monolithic | ⚠️ App-only | ❌ Monolithic | ⚠️ App-only |
-| Container runtime | ✅ LXC (~1 MB) | ❌ None | ✅ Docker | ❌ None | ✅ Docker |
+| Container runtime | ✅ LXC (~1 MB) | ⚠️ Not built-in (meta-virtualization exists) | ✅ Docker | ❌ None | ✅ Docker |
 | Kernel as a container | ✅ Yes | ❌ No | ❌ No | ❌ No | ❌ No |
 | Atomic OTA rollback | ✅ Built-in | ⚠️ Bolt-on | ✅ Yes | ⚠️ Manual | ⚠️ Partial |
-| Resource constrained | ✅ ~1 MB core | ⚠️ Heavy | ⚠️ Heavy | ✅ Minimal | ⚠️ Heavy |
+| Resource constrained | ✅ ~1 MB core | N/A (build system) | ⚠️ Heavy | N/A (build system) | ⚠️ Heavy |
 | Bare-metal performance | ✅ Yes | ✅ Yes | ⚠️ Overhead | ✅ Yes | ⚠️ Overhead |
 | Offline operation | ✅ Full | ✅ Yes | ⚠️ Limited | ✅ Yes | ⚠️ Limited |
 | Open source | ✅ 100% | ✅ Yes | ⚠️ Open-core | ✅ Yes | ✅ Yes |

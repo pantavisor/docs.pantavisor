@@ -27,7 +27,7 @@ state manager that owns the device as PID 1.
 | Update unit | Partition images per `sw-description` | Changed objects only |
 | Configuration | Hand-written `sw-description` + handlers | Declarative state JSON |
 | Kernel/BSP updates | A partition image | A container in the same state |
-| Rollback | DIY in `sw-description` + bootloader | Health-gated commit + bootloader rollback |
+| Rollback | Requires bootloader-environment integration (built-in `ustate` support) | Health-gated commit + bootloader rollback |
 | Update agent | SWUpdate (a service on the OS) | Pantavisor **is** PID 1 |
 | Server | hawkBit / custom | Pantahub (optional, open source) |
 | A/B | Optional double-copy partitions | Revisions in the trail |
@@ -38,14 +38,15 @@ state manager that owns the device as PID 1.
 - **Declarative vs scripted.** SWUpdate's `sw-description` is a per-update recipe
   of images and handlers you maintain. Pantavisor's revision is a declarative
   manifest of the whole device — there is no per-update script to write.
-- **Object-level, not partition-level.** SWUpdate rewrites partition images;
-  unrelated partitions are untouched but a changed one is rewritten whole.
-  Pantavisor transfers only the changed content-addressed objects.
+- **Object-level, not partition-level.** SWUpdate's open-source delta handler
+  (zchunk-based) can shrink downloads, but a changed partition is still
+  rewritten whole on flash. Pantavisor transfers *and* writes only the changed
+  content-addressed objects.
 - **The base is part of the same state.** A SWUpdate image/handler entry becomes
   a container or a `_config/` overlay rather than a partition write.
-- **Rollback is built in.** SWUpdate rollback depends on your `sw-description`
-  logic and bootloader scripting. Pantavisor's rollback is automatic and
-  health-gated on each container's `status_goal`.
+- **Rollback is built in.** SWUpdate provides `ustate` support, but rollback
+  still requires bootloader-environment integration. Pantavisor's rollback is
+  automatic and health-gated on each container's `status_goal`.
 
 ## When SWUpdate fits
 

@@ -1,7 +1,7 @@
 ---
 title: Reproducible builds
 sidebar_position: 2
-description: Pantavisor delivers bit-exact reproducibility through content-addressed state revisions — every state JSON is hashed over its objects, so re-cloning a historical revision yields byte-identical artifacts.
+description: Pantavisor delivers bit-exact recovery of any deployed state through content-addressed state revisions — every state JSON is hashed over its objects, so re-cloning a historical revision yields byte-identical artifacts.
 ---
 
 # Reproducible embedded Linux builds
@@ -11,14 +11,16 @@ description: Pantavisor delivers bit-exact reproducibility through content-addre
 Embedded Linux builds drift. The same `bitbake` invocation today and a year from
 now can produce subtly different artifacts: package versions move, mirror
 tarballs change, build hosts differ. For compliance audits, security forensics,
-regulatory submissions, and post-incident debugging, you need to **rebuild the
+regulatory submissions, and post-incident debugging, you need to **recover the
 exact firmware that was running on a specific device at a specific moment** — bit
 for bit.
 
-Yocto and Buildroot offer reproducibility *if* you pin everything carefully.
-Pantavisor enforces it at the runtime/state layer.
+Yocto and Buildroot offer reproducible *rebuilds* if you pin everything
+carefully. Pantavisor attacks the problem from the other end: every deployed
+state is content-addressed and immutable, so you can **recover any revision a
+device ever ran, bit for bit, without rebuilding anything**.
 
-## How Pantavisor achieves reproducibility
+## How Pantavisor achieves bit-exact recovery
 
 ### Content-addressed state
 
@@ -45,11 +47,13 @@ step is permanent and content-addressed. Re-cloning a step produces
 byte-identical artifacts (as long as Pantahub still hosts the objects):
 
 ```bash
-# Clone the exact firmware that ran on this device at a given step
-pvr clone https://pvr.pantahub.com/USERNAME/DEVICE_NAME/steps/<REV> audit-ws
+# Recover the exact firmware deployed to this device
+pvr clone https://pvr.pantahub.com/USERNAME/DEVICE_NAME audit-ws
 ```
 
-The workspace is bit-identical to what the device booted.
+then check out the historical step you need — see the Pantahub documentation for
+how to address a specific revision. The resulting workspace is bit-identical to
+what the device booted.
 
 ## What this buys you
 

@@ -56,7 +56,7 @@ Yocto for custom hardware:
 ```bash
 git clone https://github.com/pantavisor/meta-pantavisor.git
 cd meta-pantavisor
-kas build kas/scarthgap.yaml:kas/machines/raspberrypi-armv8.yaml:kas/bsp-base.yaml
+./kas-container build kas/build-configs/release/raspberrypi-armv8-scarthgap.yaml
 ```
 
 → [Build with Yocto](/build) · [Get started with meta-pantavisor](/build/get-started)
@@ -64,7 +64,7 @@ kas build kas/scarthgap.yaml:kas/machines/raspberrypi-armv8.yaml:kas/bsp-base.ya
 ### 2. Flash it
 
 ```bash
-sudo pvflasher copy pantavisor-starter-<machine>.wic.bz2 /dev/sdX
+sudo pvflasher copy pantavisor-starter-<machine>*.wic.bz2 /dev/sdX
 ```
 
 → [Download and flash](/start/download-and-flash) · [Install on hardware](/install)
@@ -114,7 +114,7 @@ pvr post https://pvr.pantahub.com/USERNAME/DEVICE_NAME
 
 ```bash
 # Build phase (Yocto) — produces the initial flashable image
-kas build kas/scarthgap.yaml:kas/machines/<machine>.yaml:kas/bsp-base.yaml
+./kas-container build kas/build-configs/release/<machine>-scarthgap.yaml
 
 # Maintain phase (pvr) — updates a running device
 pvr clone http://<device-ip>:12368/cgi-bin my-device   # local clone (note: /cgi-bin)
@@ -127,5 +127,6 @@ pvr post http://<device-ip>:12368                      # push to a local device 
 pvr post https://pvr.pantahub.com/USERNAME/DEVICE_NAME # push via Pantahub
 ```
 
-For the full command set see the [`pvr` CLI reference](/develop/cli-tools/pvr-cli)
-and the [state format](/develop/cli-tools/configuration).
+For the full command set see the [`pvr` CLI reference](/develop/cli-tools/pvr-cli),
+the [on-disk layout](/develop/cli-tools/configuration), and the
+[state format schema](/reference/pantavisor/reference/pantavisor-state-format-v2).

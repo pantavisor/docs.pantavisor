@@ -4,76 +4,31 @@ sidebar_position: 240
 description: Step-by-step guides for frequent Pantavisor tasks
 ---
 
-## Application Management Workflows
+## Application Management Cheatsheet
 
-### 1. Adding a New Application
+The canonical guides are [Install applications](/develop/application/install/local-pvr),
+[Configure applications](/develop/application/configure), and
+[Remove applications](/develop/application/remove). The short version, from
+inside your `pvr` checkout:
 
-Complete workflow for adding and deploying a new containerized application.
-
+**Add an application:**
 ```bash
-# Navigate to your Pantavisor repository
-cd my-pantavisor-project
-
-# Add application from Docker Hub
-pvr app add --from nginx:latest web-server
-
-# Stage and commit changes
-pvr add .
-pvr commit -m "Added nginx web server"
-
-# Deploy to device
+pvr app add --from nginx:stable-alpine web-server
+pvr add . && pvr commit -m "Added nginx web server"
 pvr post http://DEVICE_IP:12368
 ```
 
-#### Variations
-
-**Add Database Application:**
+**Update an application:**
 ```bash
-pvr app add --from postgres:13 database
-pvr add . && pvr commit -m "Added PostgreSQL database"
+pvr app update web-server --from nginx:1.27-alpine
+pvr add . && pvr commit -m "Updated web-server"
 pvr post http://DEVICE_IP:12368
 ```
 
-**Add with Custom Configuration:**
+**Remove an application:**
 ```bash
-pvr app add --from redis:alpine cache-server
-# Edit configuration files
-pvr add . && pvr commit -m "Added Redis cache with custom config"
-pvr post http://DEVICE_IP:12368
-```
-
-### 2. Updating Existing Applications
-
-Update application versions and configurations.
-
-```bash
-# List current applications
-pvr app ls
-
-# Update container version
-pvr app update app-name --from new-image:tag
-
-# Stage and commit
-pvr add .
-pvr commit -m "Updated app-name to new version"
-
-# Deploy changes
-pvr post http://DEVICE_IP:12368
-```
-
-### 3. Removing Applications
-
-Safely remove applications from your system.
-
-```bash
-# Remove application
-pvr app rm app-name
-
-# Commit removal
-pvr add .
-pvr commit -m "Removed app-name application"
-
-# Deploy changes
+pvr app rm web-server
+pvr add . && pvr commit -m "Removed web-server"
 pvr post http://DEVICE_IP:12368
 ```
 
@@ -94,49 +49,46 @@ pvr clone http://DEVICE_IP:12368/cgi-bin my-device
 cd my-device
 
 # Configure device settings manually
-# Edit run.json or other configuration files
-vi run.json
+# Edit a container's run.json or other configuration files
+vi <container>/run.json
 
 # Commit changes
 pvr add .
 pvr commit -m "Updated device configuration"
+
+# Deploy back to the device
+pvr post http://DEVICE_IP:12368
 ```
 
 ### 2. Device Configuration Updates
 
-Update device configuration remotely.
+Updating a device's configuration is the same clone → edit → commit → post loop
+shown above and in the [PVR CLI guide](/develop/cli-tools/pvr-cli):
 
 ```bash
-# Clone device for editing
 pvr clone http://DEVICE_IP:12368/cgi-bin device-config
-
-# Edit configuration files
 cd device-config
-# Modify settings, network config, etc.
-
-# Commit changes
-pvr add .
-pvr commit -m "Updated device configuration"
-
-# Deploy back to device
+# Edit configuration files (run.json, _config/ overlays, ...)
+pvr add . && pvr commit -m "Updated device configuration"
 pvr post http://DEVICE_IP:12368
 ```
 
 ### 3. Multi-Device Management
 
-Manage multiple devices with consistent configuration.
+Manage multiple devices with consistent configuration. Start from a known-good
+("golden") device so your base state already carries a working BSP, then add the
+common applications and post to each target:
 
 ```bash
-# Create base configuration repository
-pvr init multi-device-config
-cd multi-device-config
+# Clone the golden device as the base configuration
+pvr clone http://GOLDEN_DEVICE_IP:12368/cgi-bin golden
+cd golden
 
-# Add common applications
-pvr app add --from nginx:stable web-server
-pvr app add --from node:alpine app-runtime
+# Add the applications every device should run
+pvr app add --from nginx:stable-alpine web-server
 
 # Commit base configuration
-pvr add . && pvr commit -m "Base device configuration"
+pvr add . && pvr commit -m "Base fleet configuration"
 
 # Deploy to multiple devices
 for device in device1 device2 device3; do
@@ -177,7 +129,7 @@ pvr clone http://DEVICE_IP:12368/cgi-bin config-test
 # Make experimental changes
 cd config-test
 # Edit configuration files manually
-vi run.json
+vi <container>/run.json
 
 # Commit changes
 pvr add .
@@ -195,31 +147,26 @@ pvr post https://pvr.pantahub.com/USERNAME/PROD_DEVICE
 Complete development cycle for custom applications.
 
 ```bash
-# 1. Initial setup
-pvr init my-app-development
-cd my-app-development
+# 1. Initial setup — pvr init pvr-izes the current directory
+mkdir my-app-development && cd my-app-development
+pvr init
 
-# 2. Add base system
-pvr app add --from ubuntu:20.04 base-system
+# 2. Add your application container
+pvr app add --from my-app:dev my-app
+```
 
-# 3. Add development tools
-pvr app add --from node:16 development-env
+Then iterate — this is the development loop, repeated until you are happy:
 
-# 4. Iterative development
-while developing; do
-    # Make code changes
-    # Update container
-    pvr app update development-env --from my-app:latest
+1. Make code changes and rebuild your container image (`my-app:latest`).
+2. Update the checkout: `pvr app update my-app --from my-app:latest`
+3. Commit and post: `pvr add . && pvr commit -m "Development iteration"` then
+   `pvr post https://pvr.pantahub.com/USERNAME/DEV_DEVICE`
+4. Verify on the device and go back to step 1.
 
-    # Test deployment
-    pvr add . && pvr commit -m "Development iteration"
-    pvr post https://pvr.pantahub.com/USERNAME/DEV_DEVICE
+When the application is ready, deploy the stable image to production:
 
-    # Verify and continue
-done
-
-# 5. Production deployment
-pvr app update development-env --from my-app:stable
+```bash
+pvr app update my-app --from my-app:stable
 pvr add . && pvr commit -m "Production release"
 pvr post https://pvr.pantahub.com/USERNAME/PROD_DEVICE
 ```
@@ -231,20 +178,16 @@ pvr post https://pvr.pantahub.com/USERNAME/PROD_DEVICE
 Regular system health checks and maintenance.
 
 ```bash
-# Check device status
+# Find devices on the local network
 pvr device scan
+
+# Fleet listing of claimed devices (requires pvr login)
 pvr device ps
 
-# Clone device for inspection
-pvr clone http://DEVICE_IP:12368/cgi-bin health-check
-
-# Check system health on device
+# On the device: containers, status, and build info
 pvcontrol ls
 pvcontrol buildinfo
-
-# Check application status
 pvcontrol container ls
-pvr app ls
 ```
 
 ### 2. Security Updates
@@ -252,11 +195,9 @@ pvr app ls
 Apply security updates to devices.
 
 ```bash
-# Update base system images
-pvr app update base-system --from ubuntu:20.04-security
-
-# Update application images
+# Update application images to patched versions
 pvr app update web-server --from nginx:stable-alpine
+pvr app update cache-server --from redis:7-alpine
 
 # Stage and commit updates
 pvr add .
@@ -291,12 +232,11 @@ pvr post https://pvr.pantahub.com/USERNAME/RECOVERY_DEVICE
 Debug failing applications systematically.
 
 ```bash
-# Check application status
-pvr device ps
+# Check application status (on the device)
 pvcontrol ls
 
-# Get application logs
-tail /run/pantavisor/pv/logs/0/failing-app/lxc/console.log
+# Get application logs (on the device)
+tail /pantavisor/logs/<revision>/failing-app/lxc/console.log
 
 # Inspect container state
 pvcontrol container ls
@@ -343,12 +283,17 @@ pvcontrol ls
 # Attempt container restart
 pvcontrol container restart failing-service
 
-# If restart fails, roll back by re-posting the previous good revision
+# If restart fails, roll back: check out the last known-good revision
+# (clone it from the device or use your saved checkout) and post it
 pvr post http://DEVICE_IP:12368
 
 # Monitor recovery
 pvcontrol ls
 ```
+
+Note that Pantavisor automatically rolls back failed updates that never reach
+their status goal — manual rollback is for revisions that came up but
+misbehave.
 
 ## Best Practices
 
@@ -368,8 +313,8 @@ pvcontrol ls
 - Use specific image tags instead of `latest`
 
 ### Monitoring
-- Regularly check device status with `pvr device ps`
-- Monitor application logs under `/run/pantavisor/pv/logs/` (or `pvr device logs` for claimed devices)
+- Check on-device health with `pvcontrol ls` and `pvcontrol buildinfo`; use `pvr device ps` for fleet listing (requires `pvr login`)
+- Monitor application logs under `/pantavisor/logs/<revision>/` on the device (or `pvr device logs` for claimed devices)
 - Set up automated health checks
 
 These workflows provide tested patterns for common Pantavisor operations. Adapt them to your specific use cases and requirements.

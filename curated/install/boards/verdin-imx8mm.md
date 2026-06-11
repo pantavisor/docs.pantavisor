@@ -30,7 +30,9 @@ to match your carrier board:
 1. Connect a USB-C cable from the board's **USB-C (OTG)** port to your host PC.
 2. Hold the **Recovery** button (or short the RECOVERY pin) while powering on
    the board.
-3. The Verdin enters USB serial download mode and Tezi detects it on the host.
+3. The Verdin enters USB serial download mode. Run Toradex's recovery script
+   on the host to load Tezi into the module's RAM — see the
+   [Tezi flashing guide](/install/tezi). Tezi then runs on the module itself.
 
 ### Other carrier boards
 
@@ -50,3 +52,9 @@ Follow the [Tezi flashing procedure](/install/tezi).
   If you switch carrier boards, update both `UBOOT_DTB_NAME` and
   `PV_INITIAL_DTB` in the machine YAML.
 - eMMC is the primary storage; Tezi writes to it directly.
+
+## Console and next steps
+
+The serial console runs at **115200 8N1** — see
+[serial port access](/operate/device-access/serial-port) for how to connect.
+Once the device boots, [install your first app](/develop/application/install/).

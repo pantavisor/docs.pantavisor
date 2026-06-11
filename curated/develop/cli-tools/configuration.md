@@ -9,8 +9,9 @@ key is a **file path** and every value is either a nested configuration object o
 the SHA256 of a binary artifact. When you `pvr clone` a device, that manifest is
 expanded into a working directory you can edit. This page covers the real
 layout; for the exhaustive field-by-field schema see the reference
-[state format](/reference/pantavisor/reference/pantavisor-state-format-v2) and
-[`run.json`](/reference/pantavisor/reference/pantavisor-tools).
+[state format](/reference/pantavisor/reference/pantavisor-state-format-v2), and see the
+[on-device tools (pvtx, pvcontrol)](/reference/pantavisor/reference/pantavisor-tools)
+reference for working with revisions on the device itself.
 
 ## Repository layout
 
@@ -100,6 +101,11 @@ inherits the policy of its `group` (all-or-nothing).
 | `reset_window` | `0` | Uptime (s) after which the retry counter resets. |
 | `stable_timeout` | `0` | Seconds the container must survive to gate the update commit. |
 | `backoff_policy` | `reboot` | After retries exhausted — `reboot`, `never`, or a duration (`10min`, `1h`). |
+
+> **📝 Note**
+>
+> The current implementation of `on-failure` does not distinguish exit codes —
+> it behaves like `always`.
 
 ## Device manifest — `device.json`
 

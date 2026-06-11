@@ -20,7 +20,7 @@ Pantavisor itself is a **single ~1 MB binary** that runs as PID 1. There is:
 
 - **No container daemon** — no `dockerd`, no `containerd`. Each LXC container is a normal supervised process tree.
 - **No image cache** — content-addressed objects are stored once in `objects/`, referenced by hash from any state revision.
-- **No mandatory overlay layer cache** — Docker requires overlayfs and bookkeeping; Pantavisor doesn't.
+- **No mandatory overlay layer cache** — Docker defaults to overlayfs and assumes ample writable-layer storage; Pantavisor doesn't.
 
 A realistic minimal Pantavisor system:
 
@@ -32,8 +32,11 @@ A realistic minimal Pantavisor system:
 | Minimal BSP container (Alpine + ConnMan style) | 8–20 MB |
 | Per-app container (typical) | 5–30 MB |
 
-A complete Raspberry Pi gateway image with BSP + connectivity + a single app
-commonly fits in **~50–80 MB** of flash.
+The runtime itself stays around a megabyte, and squashfs container volumes are
+typically 50–70% smaller than a plain rootfs. Total image size then depends on
+which factory containers you bundle — the default CI starter images bundle
+several factory containers and are correspondingly larger (a few hundred MB
+compressed).
 
 ## Why it stays small
 
@@ -58,12 +61,13 @@ commonly fits in **~50–80 MB** of flash.
 1. **Use squashfs root volumes** in your container recipes for a 50–70% size
    reduction vs a plain rootfs.
 2. **Strip the BSP** — disable kernel features you don't use;
-   [`PANTAVISOR_FEATURES`](/concepts/meta-pantavisor-overview) toggles what's compiled in.
+   [`PANTAVISOR_FEATURES`](/build/build-system#pantavisor_features) toggles what's compiled in.
 3. **Share base layers across containers** — use the `--base` flag with
    `pvr app add` to create overlay containers that diff against a shared base.
-4. **Distinguish core from optional containers** — `PVROOT_CONTAINERS_CORE`
-   (always present) vs `PVROOT_CONTAINERS` (optional, installed on first boot).
-   Optional containers don't bloat the initial flash.
+4. **Ship only what every unit needs** — containers listed in
+   `PVROOT_CONTAINERS_CORE` and `PVROOT_CONTAINERS` are both deployed into the
+   image. The saving comes from leaving optional apps out of the factory image
+   entirely and installing them later over OTA.
 5. **Compress on transfer** — `pvflasher` accepts `.bz2`, `.xz`, `.zst`, and
    `.gz` directly; ship images compressed and decompress on the device.
 

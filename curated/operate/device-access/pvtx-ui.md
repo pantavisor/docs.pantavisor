@@ -50,7 +50,7 @@ The **Stats & Config** page shows live resource usage, device metadata, and the 
 | RAM | Used / total memory |
 | Swap | Swap space usage |
 | Disk usage | Storage partition used / total |
-| Reserved | Space reserved by Pantavisor for revision objects |
+| Reserved | Storage reserved by Pantavisor |
 
 ### Device Meta and Device Config
 
@@ -67,7 +67,7 @@ Below the stats are two tables:
 
 ## API documentation — the pvtx REST API
 
-The **API documentation** page documents the on-device **PVTX REST API** — the same actions available from the `pvtx` CLI, exposed over HTTP so you can manage the device without any cloud service or Docker container source.
+The **API documentation** page documents the on-device **PVTX REST API** — the same actions available from the `pvtx` CLI, exposed over HTTP so you can manage the device without any cloud service — you upload pvr export packages directly to the device.
 
 ![PVTX REST API documentation in the pvtx app](./pvtx-ui-api-docs.png)
 
@@ -94,4 +94,4 @@ The **Logs** page streams Pantavisor runtime and container logs directly in the 
 - **System Logs** header — shows the selected revision and source scope (e.g. **All Sources**), with a **Live** indicator and line count.
 - **Toolbar** (top-right of the log pane) — filter, search, pause/resume the live stream, download, copy, and full-screen.
 
-This view mirrors the on-device log files under `/storage/logs` (configurable via the `log.dir` config key).
+This view mirrors the on-device log files under `/pantavisor/logs` (configurable via the `log.dir` config key).

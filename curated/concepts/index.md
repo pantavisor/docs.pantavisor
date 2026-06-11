@@ -1,7 +1,7 @@
 ---
 title: Concepts
 description: How Pantavisor works — PID 1, content-addressed revisions, atomic updates, and rollback.
-sidebar_position: 2
+sidebar_position: 1
 slug: /concepts
 ---
 
@@ -14,6 +14,10 @@ version-specific behavior and schemas, see the [Reference](/reference).
 architecture, then [Composable firmware — the end-to-end
 workflow](/concepts/composable-firmware) for the build → flash → maintain golden
 path with canonical commands.
+
+Building images? See the [build system
+overview](/build/build-system) for the meta-pantavisor Yocto layer behind the
+build phase. Stuck on a term? Check the [glossary](/concepts/glossary).
 
 ## Core ideas
 
