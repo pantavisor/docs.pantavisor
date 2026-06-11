@@ -1,8 +1,9 @@
 # Dependencies
 node_modules/
 
-# Production build
-build/
+# Production build (Docusaurus output at repo root — anchored with a leading
+# slash so it does not also ignore the curated/build/ docs section)
+/build/
 
 # Docusaurus cache
 .docusaurus/
