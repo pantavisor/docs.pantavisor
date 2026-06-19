@@ -146,7 +146,10 @@ const config: Config = {
       items: [
         {to: '/concepts', label: 'Concepts', position: 'left'},
         {to: '/start', label: 'Start', position: 'left'},
+        {to: '/develop', label: 'Develop', position: 'left'},
+        {to: '/operate', label: 'Operate', position: 'left'},
         {to: '/migrate', label: 'Migrate', position: 'left'},
+        {to: '/solutions', label: 'Solutions', position: 'left'},
         {
           // The reference instance is repo-shaped; surface its top-level
           // sections directly so they are reachable without drilling in.
