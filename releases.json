@@ -3,6 +3,7 @@
   "manifest": "https://pantavisor-ci.s3.amazonaws.com/meta-pantavisor/releases.json",
   "current": "028",
   "versions": [
+    "029-rc1",
     "028",
     "028-rc16",
     "028-rc15",
