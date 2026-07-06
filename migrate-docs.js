@@ -124,10 +124,68 @@ function rewriteLegacyReferenceLinks(content) {
     (match, name, anchor = '') => {
       if (LEGACY_LINK_IN_REFERENCE.has(name))
         return `](/reference/pantavisor/reference/${name}${anchor})`;
+      if (name === 'pantavisor-configuration-legacy')
+        return `](/reference/pantavisor/reference/pantavisor-configuration${anchor})`;
       if (name === 'customize-build-pantavisor') return '](/build)';
       return match; // unknown legacy target — leave as-is
     },
   );
+}
+
+// Upstream reference Markdown also links back to source repositories and to
+// legacy curated pages that no longer exist on this site. Rewrite those to the
+// current curated/reference targets so the generated docs stop 404ing.
+const DOTDOT = '(?:\\.\\./)*';
+const CROSS_REPO_LINKS = [
+  // Curated pages referenced by generated docs.
+  { from: new RegExp(`\\]\\((${DOTDOT})initial-devices\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/start/download-and-flash$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})inspect-device\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/operate/device-access$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})environment-setup\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/build/get-started$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})navigating-console\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/operate/device-access/serial-port$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})make-a-new-revision\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/develop/application/install/local-pvr$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})claim-device\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/operate/device-access/remote-pantahub$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})deploy-a-new-revision\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/develop/application/install/local-pvr$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})choose-device\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/install/supported-devices$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})choose-way\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/start$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})debug-pantavisor\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/troubleshooting/faq$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})clone-your-system\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/develop/application/install/local-pvr$2' },
+  // Source-repo paths that map to existing reference overview pages.
+  { from: new RegExp(`\\]\\((${DOTDOT})pantavisor-src/docs/overview/pantavisor-architecture\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/reference/pantavisor/overview/pantavisor-architecture$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})pantavisor-src/docs/overview/bsp\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/reference/pantavisor/overview/bsp$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})pantavisor-src/docs/overview/init-mode\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/reference/pantavisor/overview/init-mode$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})pantavisor-src/docs/overview/xconnect\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/reference/pantavisor/overview/xconnect$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})pantavisor/docs/overview/xconnect\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/reference/pantavisor/overview/xconnect$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})pantavisor/overview/xconnect\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/reference/pantavisor/overview/xconnect$2' },
+  // Source-repo paths that map to curated task pages.
+  { from: new RegExp(`\\]\\((${DOTDOT})pantavisor-src/docs/overview/remote-control\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/operate/device-access/remote-pantahub$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})pantavisor-src/docs/overview/pantavisor-configuration-levels\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/reference/pantavisor/reference/pantavisor-configuration$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})pantavisor-src/docs/overview/containers\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/develop/container-development$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})pantavisor-src/docs/overview/updates\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/concepts/composable-firmware$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})pantavisor-src/docs/overview/storage\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/operate/device-access/pvtx-ui$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})pantavisor-src/docs/overview/local-control\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/operate/device-access/local-network$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})pantavisor-src/docs/overview/watchdog\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/reference/pantavisor/reference/pantavisor-tools$2' },
+  // Source-repo paths that map to current reference pages.
+  { from: new RegExp(`\\]\\((${DOTDOT})pantavisor/docs/reference/pantavisor-xconnect\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/reference/pantavisor/reference/pantavisor-xconnect$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})pantavisor/docs/reference/pantavisor-commands\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/reference/pantavisor/reference/pantavisor-commands$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})pantavisor/reference/pantavisor-commands\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/reference/pantavisor/reference/pantavisor-commands$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})pantavisor/reference/pantavisor-xconnect\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/reference/pantavisor/reference/pantavisor-xconnect$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})reference/027/pantavisor-commands\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/reference/pantavisor/reference/pantavisor-commands$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})reference/027/logserver-sockets\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/reference/pantavisor/reference/logserver-sockets$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})pvr-sdk/reference/pvcontrol\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/develop/cli-tools/pvcontrol$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})pvr-sdk/reference/pantabox\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/reference$2' },
+  // Misc README / old paths.
+  { from: new RegExp(`\\]\\((${DOTDOT})pvr/README\\.md(#[^)\\s]*)?\\)`, 'g'), to: '/develop/cli-tools/pvr-cli$2' },
+  { from: new RegExp(`\\]\\((${DOTDOT})pantahub-base/README\\.md(#[^)\\s]*)?\\)`, 'g'), to: 'https://docs.pantahub.com$2' },
+  // Anchors on pages that have no such heading — drop the anchor so the link
+  // at least resolves to the right file.
+  { from: new RegExp(`\\]\\((${DOTDOT})pantavisor-state-format-v2\\.md#[^)\\s]+\\)`, 'g'), to: '](/reference/pantavisor/reference/pantavisor-state-format-v2)' },
+  { from: new RegExp(`\\]\\((${DOTDOT})pantavisor-configuration\\.md#[^)\\s]+\\)`, 'g'), to: '](/reference/pantavisor/reference/pantavisor-configuration)' },
+];
+function rewriteCrossRepoLinks(content) {
+  for (const { from, to } of CROSS_REPO_LINKS) {
+    content = content.replace(from, to);
+  }
+  return content;
 }
 
 function processMarkdown(content) {
@@ -140,7 +198,7 @@ function processMarkdown(content) {
       const parsed = parseTomlFrontmatter(toml);
       const fm = buildDocuFrontmatter(parsed);
       const fmStr = serializeFrontmatter(fm);
-      return rewriteLegacyReferenceLinks(`---\n${fmStr}\n---\n\n${body}`);
+      return rewriteCrossRepoLinks(rewriteLegacyReferenceLinks(`---\n${fmStr}\n---\n\n${body}`));
     }
   }
   // YAML frontmatter
@@ -152,10 +210,10 @@ function processMarkdown(content) {
       const parsed = parseYamlFrontmatter(yaml);
       const fm = buildDocuFrontmatter(parsed);
       const fmStr = serializeFrontmatter(fm);
-      return rewriteLegacyReferenceLinks(`---\n${fmStr}\n---\n\n${body}`);
+      return rewriteCrossRepoLinks(rewriteLegacyReferenceLinks(`---\n${fmStr}\n---\n\n${body}`));
     }
   }
-  return rewriteLegacyReferenceLinks(content);
+  return rewriteCrossRepoLinks(rewriteLegacyReferenceLinks(content));
 }
 
 // Paths (relative to the release root) that are NOT reference material and are
@@ -213,6 +271,20 @@ if (fs.existsSync(PLACEHOLDER)) {
       fs.mkdirSync(path.dirname(img), { recursive: true });
       fs.copyFileSync(PLACEHOLDER, img);
     }
+  }
+}
+
+// Some release versions renamed meta-pantavisor/how-to-install/tezi.md to
+// toradex.md but left tezi.md links behind. If this version only has toradex.md,
+// rewrite the links so they resolve.
+const teziPath = path.join(DEST, 'meta-pantavisor', 'how-to-install', 'tezi.md');
+const toradexPath = path.join(DEST, 'meta-pantavisor', 'how-to-install', 'toradex.md');
+if (!fs.existsSync(teziPath) && fs.existsSync(toradexPath)) {
+  const installDir = path.join(DEST, 'meta-pantavisor', 'how-to-install');
+  for (const entry of fs.readdirSync(installDir, { withFileTypes: true })) {
+    if (!entry.name.endsWith('.md')) continue;
+    const p = path.join(installDir, entry.name);
+    fs.writeFileSync(p, fs.readFileSync(p, 'utf8').replace(/]\((tezi\.md)(#[^)\s]*)?\)/g, (_, file, anchor) => '](./toradex.md' + (anchor || '') + ')'));
   }
 }
 
