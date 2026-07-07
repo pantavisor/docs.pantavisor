@@ -5,6 +5,20 @@ import ThemedImage from '@theme/ThemedImage';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import styles from './styles.module.css';
 
+// Illustrative excerpt of a real state.json shape — keys and truncated hash
+// prefixes lifted from the worked example in
+// pantavisor/docs/overview/revisions.md (#spec, the bsp/pantavisor binary,
+// bsp/kernel.img, and one container's run.json + root.squashfs). The
+// container is renamed from that doc's "awconnect" to the more generic
+// "webserver" for a first-time visitor.
+const manifestEntries: Array<[string, string]> = [
+  ['#spec', 'pantavisor-service-system@1'],
+  ['bsp/pantavisor', '1e6561f75c…'],
+  ['bsp/kernel.img', '990f8b0fca…'],
+  ['webserver/run.json', '153d58588b…'],
+  ['webserver/root.squashfs', 'e1ddabe573…'],
+];
+
 export default function HomepageHero(): ReactNode {
   return (
     <header className={styles.hero}>
@@ -59,18 +73,13 @@ export default function HomepageHero(): ReactNode {
           </div>
           <div className={styles.manifestBody}>
             <div>{'{'}</div>
-            <div className={styles.indent}>
-              <span className={styles.key}>&quot;bsp/run.json&quot;</span>:{' '}
-              <span className={styles.sha}>&quot;a3f9c1e…&quot;</span>,
-            </div>
-            <div className={styles.indent}>
-              <span className={styles.key}>&quot;app/run.json&quot;</span>:{' '}
-              <span className={styles.sha}>&quot;7be402d…&quot;</span>,
-            </div>
-            <div className={styles.indent}>
-              <span className={styles.key}>&quot;device.json&quot;</span>:{' '}
-              <span className={styles.sha}>&quot;51c0aa8…&quot;</span>
-            </div>
+            {manifestEntries.map(([key, value], i) => (
+              <div className={styles.indent} key={key}>
+                <span className={styles.key}>&quot;{key}&quot;</span>:{' '}
+                <span className={styles.sha}>&quot;{value}&quot;</span>
+                {i < manifestEntries.length - 1 && ','}
+              </div>
+            ))}
             <div>{'}'}</div>
             <div className={styles.revChip}>signed · rev 028</div>
           </div>
