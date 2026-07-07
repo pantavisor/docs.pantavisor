@@ -79,3 +79,18 @@
   :is(th, td):not(:first-child):not(:last-child) {
   width: 8rem;
 }
+
+/* Homepage (curated/index.mdx, doc id "index") is a hero landing page, not a
+   topic to navigate within — drop the topic sidebar and the breadcrumb pill.
+   Hiding the sidebar element alone isn't enough: DocRoot/Layout/Main reserves
+   its width via the --doc-sidebar-width custom property regardless of
+   whether the sidebar is actually rendered, so the content area would be
+   left with a dead gap on the right unless that variable is zeroed too. */
+.docs-doc-id-index {
+  --doc-sidebar-width: 0px;
+}
+
+.docs-doc-id-index .theme-doc-sidebar-container,
+.docs-doc-id-index .theme-doc-breadcrumbs {
+  display: none;
+}
