@@ -12,14 +12,6 @@ import HomepageCards from '@site/src/components/HomepageCards';
 <HomepageHero />
 <HomepageCards />
 
-> **💡 Tip — Pantavisor replaces image updaters — it does not layer on them**
->
-> Pantavisor is a replacement for Mender, RAUC, and SWUpdate, not something you
-> run on top of them. There is no hybrid model where an A/B image updater sits
-> underneath for the kernel/BSP while Pantavisor handles apps. Pantavisor owns the
-> whole device, including the base and kernel. The image updaters appear in these
-> docs only as [comparisons and migration sources](/migrate).
-
 ## Why Pantavisor over an image updater
 
 Image updaters (Mender, RAUC, SWUpdate) update **the image**: every change —
@@ -38,26 +30,20 @@ as content-addressed objects, so a change ships only what actually changed.
   containers without re-touching the certified image. See
   [security and compliance](/security).
 
-## Start here
+Already running Mender, RAUC, or SWUpdate? Pantavisor is a replacement, not
+something you layer on top — see [migrating to Pantavisor](/migrate) for a
+side-by-side comparison and a path off your current updater.
 
-| I want to… | Go to |
-|---|---|
-| Understand what Pantavisor is | [Concepts](/concepts) |
-| See the full build → flash → update workflow | [Composable firmware](/concepts/composable-firmware) |
-| Run it on real hardware in 30 minutes | [Download and flash](/start/download-and-flash) |
-| Install on other hardware | [Install on hardware](/install) |
-| Build an image with Yocto | [Build with Yocto](/build) |
-| Ship and update my app | [Develop applications](/develop) |
-| Operate a fleet | [Operate devices](/operate) |
-| Move off Mender/RAUC/SWUpdate | [Migrate to Pantavisor](/migrate) |
-| Compare Pantavisor to Yocto/Balena/Docker/image updaters | [Benchmarks and comparisons](/benchmarks) |
-| Solve a specific problem (size, secure OTA, reproducibility) | [Solutions](/solutions) |
-| Look up a command or schema | [Reference](/reference/pantavisor) |
+## Pantahub
 
-## Pantavisor vs Pantahub
+This site documents **Pantavisor**, the on-device runtime. **Pantahub** (also
+branded Pantacor Hub) is the cloud service devices can register with: it
+stores device state, delivers OTA updates as object diffs, and aggregates
+logs across a fleet — claim a device, push a new revision, and watch it
+roll out.
 
-**Pantavisor** is the on-device runtime (this documentation). **Pantahub** (also
-branded Pantacor Hub) is the optional cloud backend at
-[hub.pantacor.com](https://hub.pantacor.com); its documentation lives at
-[docs.pantahub.com](https://docs.pantahub.com). Pantavisor works fully
-standalone; Pantahub adds remote fleet operations on top.
+Pantahub is optional. Pantavisor updates a device fully standalone over the
+local network; Pantahub adds remote, fleet-scale operations on top when you
+need them. To manage devices remotely, sign up at
+[hub.pantacor.com](https://hub.pantacor.com) — its documentation lives at
+[docs.pantahub.com](https://docs.pantahub.com).
