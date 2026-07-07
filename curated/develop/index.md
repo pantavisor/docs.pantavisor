@@ -26,4 +26,4 @@ difference.
 - [Container development](./container-development.md) — build example containers in the meta-pantavisor Yocto layer
 - [Pantavisor runtime development](./pantavisor-development.md) — hack on the Pantavisor runtime itself with the kas workspace
 
-For exhaustive, generated CLI documentation, see the [Reference](/reference).
+For exhaustive, generated CLI documentation, see the [Reference](/reference/pantavisor).

@@ -9,7 +9,7 @@ slug: /build
 
 `meta-pantavisor` is the Yocto/OpenEmbedded layer that builds a Pantavisor
 image for your board. The generated layer and recipe reference is kept in the
-versioned [Reference → meta-pantavisor](/reference) docs; this section is the
+versioned [Reference → meta-pantavisor](/reference/meta-pantavisor) docs; this section is the
 task-oriented guide.
 
 ## In this section

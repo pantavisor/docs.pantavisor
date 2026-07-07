@@ -32,7 +32,7 @@ export default function HomepageHero(): ReactNode {
               />
             </svg>
           </Link>
-          <Link className={styles.secondaryLink} to="/reference">
+          <Link className={styles.secondaryLink} to="/reference/pantavisor">
             or browse the reference docs
           </Link>
         </div>

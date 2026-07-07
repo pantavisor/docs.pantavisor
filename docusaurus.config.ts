@@ -128,9 +128,9 @@ const config: Config = {
         // Scope search results to the section the reader is currently in,
         // detected from the URL. Pages under /reference/pantavisor only
         // search that tree; /reference/meta-pantavisor likewise. Everything
-        // else (curated docs: /concepts, /start, etc., plus the /reference
-        // landing page) falls through to the default, unscoped context, so
-        // those pages search each other but not into either reference tree.
+        // else (curated docs: /concepts, /start, etc.) falls through to the
+        // default, unscoped context, so those pages search each other but not
+        // into either reference tree.
         // Only applies to the *current* reference version — older versioned
         // reference pages (/reference/<version>/...) get their own
         // per-version index and aren't split by these paths.
@@ -163,14 +163,15 @@ const config: Config = {
         {
           // The reference instance is repo-shaped; surface its top-level
           // sections directly so they are reachable without drilling in.
+          // There is no landing page at /reference itself, so clicking the
+          // label goes straight to the pantavisor tree.
           type: 'dropdown',
           label: 'Reference',
           position: 'left',
-          to: '/reference',
+          to: '/reference/pantavisor',
           items: [
-            {to: '/reference', label: 'Reference home'},
-            {to: '/reference/meta-pantavisor', label: 'meta-pantavisor'},
             {to: '/reference/pantavisor', label: 'pantavisor'},
+            {to: '/reference/meta-pantavisor', label: 'meta-pantavisor'},
           ],
         },
         {
@@ -195,7 +196,7 @@ const config: Config = {
             {label: 'Concepts', to: '/concepts'},
             {label: 'Start', to: '/start'},
             {label: 'Migrate to Pantavisor', to: '/migrate'},
-            {label: 'Reference', to: '/reference'},
+            {label: 'Reference', to: '/reference/pantavisor'},
           ],
         },
         {

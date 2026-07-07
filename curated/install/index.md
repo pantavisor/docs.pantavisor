@@ -34,4 +34,4 @@ See the [supported devices](/install/supported-devices) list for every machine
 in the meta-pantavisor layer and which ones have pre-built images.
 
 Board-specific generated material is in the
-[Reference → meta-pantavisor install guides](/reference).
+[Reference → meta-pantavisor install guides](/reference/meta-pantavisor).
