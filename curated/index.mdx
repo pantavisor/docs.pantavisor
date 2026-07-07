@@ -3,19 +3,14 @@ title: Pantavisor Documentation
 description: Pantavisor is PID 1 and owns the full device update — base, kernel, app containers, and config — as one signed, content-addressed revision.
 sidebar_position: 0
 slug: /
+hide_title: true
 ---
 
-# Pantavisor
+import HomepageHero from '@site/src/components/HomepageHero';
+import HomepageCards from '@site/src/components/HomepageCards';
 
-**Pantavisor is PID 1.** It is the init process and the whole-device runtime: it
-owns init, the container lifecycle, content-addressed device state, and the
-**complete framework and OTA update flow** end to end.
-
-Pantavisor already manages the **full update** of the device — base/BSP,
-kernel-carrying containers, application containers, and configuration — as one
-signed, content-addressed, atomically-rollback-able **revision**. You do not
-bolt an updater onto an OS. Pantavisor *is* the runtime, and the update is
-intrinsic to it.
+<HomepageHero />
+<HomepageCards />
 
 > **💡 Tip — Pantavisor replaces image updaters — it does not layer on them**
 >
