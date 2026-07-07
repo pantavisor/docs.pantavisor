@@ -8,7 +8,7 @@ slug: /concepts
 # Concepts
 
 These pages explain how Pantavisor works. They are versionless; for
-version-specific behavior and schemas, see the [Reference](/reference).
+version-specific behavior and schemas, see the [Reference](/reference/pantavisor).
 
 **New here?** Read [What is Pantavisor?](/concepts/what-is-pantavisor) for the
 architecture, then [Composable firmware — the end-to-end
@@ -41,4 +41,4 @@ build phase. Stuck on a term? Check the [glossary](/concepts/glossary).
   readiness probes pass, not merely when containers start.
 
 For the exact on-disk formats and schemas behind these concepts, see the
-[state format and configuration reference](/reference).
+[state format and configuration reference](/reference/pantavisor).

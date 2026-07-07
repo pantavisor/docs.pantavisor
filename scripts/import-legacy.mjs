@@ -224,7 +224,7 @@ description: Archived snapshot of the previous Pantavisor documentation site.
 These pages are a snapshot of the **previous** Pantavisor documentation site,
 kept for reference while content is migrated into the current sections. Some of
 it may be outdated. For up-to-date material use the main sections above, and for
-generated, versioned material see the [Reference](/reference).
+generated, versioned material see the [Reference](/reference/pantavisor).
 :::
 
 ${intro}`);

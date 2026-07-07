@@ -12,11 +12,11 @@ type CardItem = {
 
 const cards: CardItem[] = [
   {
-    path: '/reference',
+    path: '/reference/pantavisor',
     title: 'Reference',
     description:
       'Commands, schemas, and configuration keys for Pantavisor and meta-pantavisor — versioned per release.',
-    to: '/reference',
+    to: '/reference/pantavisor',
     cta: 'Browse reference',
   },
   {
