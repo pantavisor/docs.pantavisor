@@ -12,20 +12,28 @@ type CardItem = {
 
 const cards: CardItem[] = [
   {
-    path: '/reference/pantavisor',
-    title: 'Reference',
+    path: '/start',
+    title: 'Get Started',
     description:
-      'Commands, schemas, and configuration keys for Pantavisor and meta-pantavisor — versioned per release.',
+      'New here? Learn the architecture, flash real hardware in 30 minutes, or migrate from Mender, RAUC, or SWUpdate.',
+    to: '/start',
+    cta: 'Start here',
+  },
+  {
+    path: '/reference/pantavisor',
+    title: 'Pantavisor reference',
+    description:
+      'Commands, schemas, and configuration keys for the on-device runtime — versioned per release.',
     to: '/reference/pantavisor',
     cta: 'Browse reference',
   },
   {
-    path: '/concepts',
-    title: 'Concepts',
+    path: '/reference/meta-pantavisor',
+    title: 'meta-pantavisor reference',
     description:
-      'How Pantavisor works — PID 1, content-addressed revisions, atomic updates, and rollback.',
-    to: '/concepts',
-    cta: 'Read concepts',
+      'The Yocto/OpenEmbedded layer: KAS configs, BitBake recipes, the CI pipeline, and board install guides.',
+    to: '/reference/meta-pantavisor',
+    cta: 'Browse reference',
   },
   {
     path: '/benchmarks',
