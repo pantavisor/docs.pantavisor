@@ -125,6 +125,19 @@ const config: Config = {
         docsDir: ['curated', 'reference'],
         highlightSearchTermsOnTargetPage: true,
         searchResultLimits: 8,
+        // Scope search results to the section the reader is currently in,
+        // detected from the URL. Pages under /reference/pantavisor only
+        // search that tree; /reference/meta-pantavisor likewise. Everything
+        // else (curated docs: /concepts, /start, etc., plus the /reference
+        // landing page) falls through to the default, unscoped context, so
+        // those pages search each other but not into either reference tree.
+        // Only applies to the *current* reference version — older versioned
+        // reference pages (/reference/<version>/...) get their own
+        // per-version index and aren't split by these paths.
+        searchContextByPaths: [
+          {label: 'Pantavisor reference', path: 'reference/pantavisor'},
+          {label: 'meta-pantavisor reference', path: 'reference/meta-pantavisor'},
+        ],
       },
     ],
   ],
