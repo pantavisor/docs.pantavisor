@@ -220,7 +220,6 @@ const config: Config = {
           title: 'Community',
           items: [
             {label: 'Pantacor Website', href: 'https://www.pantacor.com'},
-            {label: 'Pantahub Docs', href: 'https://docs.pantahub.com'},
             {label: 'GitHub', href: 'https://github.com/pantavisor'},
           ],
         },
