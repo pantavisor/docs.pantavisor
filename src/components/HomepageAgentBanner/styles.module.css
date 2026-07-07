@@ -1,0 +1,42 @@
+.banner {
+  display: block;
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-left: 3px solid var(--ifm-color-primary);
+  border-radius: 10px;
+  padding: 1.5rem 1.75rem 1.75rem;
+  margin: 0 0 2.5rem;
+}
+
+.eyebrow {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ifm-color-primary);
+  font-weight: 500;
+  margin-bottom: 0.6rem;
+}
+
+.heading {
+  font-size: 1.3rem;
+  margin: 0 0 0.6rem;
+}
+
+.lead {
+  font-size: 0.95rem;
+  color: var(--ifm-color-emphasis-700);
+  margin: 0 0 1.1rem;
+  max-width: 60ch;
+}
+
+.banner :global(.theme-code-block) {
+  margin: 0;
+}
+
+/* This is a prose prompt to copy, not real code — wrap it instead of
+   forcing a horizontal scrollbar on a single long line. */
+.banner :global(.theme-code-block pre) {
+  white-space: pre-wrap;
+  overflow-x: visible;
+}
