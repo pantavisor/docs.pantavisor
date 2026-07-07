@@ -71,6 +71,9 @@ const config: Config = {
           routeBasePath: '/',
           sidebarPath: './sidebarsCurated.ts',
           rehypePlugins: [rehypeMaterialIcons],
+          // Expand every sidebar category by default instead of only the one
+          // containing the current page.
+          sidebarCollapsed: false,
         },
         blog: false,
         theme: {
@@ -93,6 +96,9 @@ const config: Config = {
         lastVersion: 'current',
         versions: referenceVersions,
         rehypePlugins: [rehypeMaterialIcons],
+        // Expand every sidebar category by default instead of only the one
+        // containing the current page.
+        sidebarCollapsed: false,
       },
     ],
     [
