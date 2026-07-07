@@ -163,9 +163,20 @@ const config: Config = {
         height: 32,
       },
       items: [
-        {to: '/concepts', label: 'Concepts', position: 'left'},
-        {to: '/start', label: 'Start', position: 'left'},
-        {to: '/migrate', label: 'Migrate', position: 'left'},
+        {
+          // Groups the three onboarding-flavored sections (understand it,
+          // start it, switch to it) behind one entry. Clicking the label
+          // itself goes straight to the start guide.
+          type: 'dropdown',
+          label: 'Get Started',
+          position: 'left',
+          to: '/start',
+          items: [
+            {to: '/concepts', label: 'Concepts'},
+            {to: '/start', label: 'Start'},
+            {to: '/migrate', label: 'Migrate'},
+          ],
+        },
         {
           // The reference instance is repo-shaped; surface its top-level
           // sections directly so they are reachable without drilling in.
