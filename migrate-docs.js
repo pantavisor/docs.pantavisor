@@ -136,13 +136,23 @@ function rewriteLegacyReferenceLinks(content) {
 
   // Map old MkDocs root how-to guides to their new Curated locations
   const LEGACY_ROOT_LINKS = {
-    'inspect-device': '/operate/device-access/',
-    'initial-devices': '/start/download-and-flash',
-    'make-a-new-revision': '/develop/application/',
+    'automated-workflow': '/develop/',
+    'choose-device': '/start/',
+    'choose-way': '/start/',
     'claim-device': '/operate/device-access/remote-pantahub',
     'clone-your-system': '/operate/',
-    'choose-device': '/start/',
-    'choose-way': '/start/'
+    'colibri-imx6ull': '/reference/meta-pantavisor/',
+    'debug-pantavisor': '/troubleshooting/faq',
+    'deploy-a-new-revision': '/develop/application/',
+    'environment-setup': '/start/',
+    'initial-devices': '/start/download-and-flash',
+    'inspect-device': '/operate/device-access/',
+    'make-a-new-revision': '/develop/application/',
+    'navigating-console': '/operate/device-access/serial-port',
+    'sdcard': '/start/download-and-flash',
+    'testplan-pvctrl': '/develop/cli-tools/pvcontrol',
+    'toradex': '/reference/meta-pantavisor/',
+    'verdin-imx8mm': '/reference/meta-pantavisor/'
   };
   rewritten = rewritten.replace(
     /\]\((?:\.\.\/)+([A-Za-z0-9._-]+)\.md(#[^)\s]*)?\)/g,
