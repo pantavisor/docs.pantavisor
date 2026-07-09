@@ -143,6 +143,7 @@ const config: Config = {
         searchContextByPaths: [
           {label: 'Pantavisor reference', path: 'reference/pantavisor'},
           {label: 'meta-pantavisor reference', path: 'reference/meta-pantavisor'},
+          {label: 'PVR reference', path: 'reference/pvr'},
         ],
       },
     ],
@@ -189,6 +190,7 @@ const config: Config = {
           items: [
             {to: '/reference/pantavisor', label: 'pantavisor'},
             {to: '/reference/meta-pantavisor', label: 'meta-pantavisor'},
+            {to: '/reference/pvr', label: 'pvr'},
           ],
         },
         {

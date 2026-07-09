@@ -37,12 +37,41 @@
    <table> itself) lets wide reference tables (many columns, long
    descriptions) overflow and forces a horizontal scrollbar instead of
    wrapping. Switch to a fixed layout that fills the content width and wraps
-   cell content, so every column stays visible without scrolling. */
-.markdown table {
-  display: table;
-  overflow: visible;
-  table-layout: fixed;
-  width: 100%;
+   cell content, so every column stays visible without scrolling.
+   This fixed layout is applied only on tablet and desktop screens; on mobile,
+   we fall back to the default scrollable table to prevent layout breakage. */
+@media (min-width: 768px) {
+  .markdown table {
+    display: table;
+    overflow: visible;
+    table-layout: fixed;
+    width: 100%;
+  }
+
+  /* Reference tables' first column usually holds a `KEY` identifier (e.g.
+     `PV_BOOTLOADER_UBOOTAB_ENV_BAK_NAME`) — breaking it mid-word makes it hard
+     to read/copy. Give it a bit more of the fixed layout's width and shrink its
+     code font so even the longest keys fit on one line naturally. Some
+     reference tables (e.g. IPAM's Lease Lifecycle/Error Handling) instead put a
+     full prose phrase in the first column, so we deliberately don't force
+     `white-space: nowrap` here — it would make that overflow past the fixed
+     column width and overlap the next column instead of wrapping. */
+  .markdown table th:first-child,
+  .markdown table td:first-child {
+    width: 18rem;
+  }
+
+  /* Key/Value[/Default|Mandatory]/Description tables (state format, config
+     summary, commands, etc.) always end with a prose `Description` column
+     that carries the most information — narrow the short middle columns so
+     Description gets the leftover (and largest) share of the fixed layout.
+     Scoped to 3-4 column tables via :has() so it doesn't touch wider grids
+     like the Configuration Levels matrix, where every column is an equally
+     narrow yes/no cell. */
+  .markdown table:has(th:nth-child(3)):not(:has(th:nth-child(5)))
+    :is(th, td):not(:first-child):not(:last-child) {
+    width: 8rem;
+  }
 }
 
 .markdown table th,
@@ -51,33 +80,8 @@
   word-break: break-word;
 }
 
-/* Reference tables' first column usually holds a `KEY` identifier (e.g.
-   `PV_BOOTLOADER_UBOOTAB_ENV_BAK_NAME`) — breaking it mid-word makes it hard
-   to read/copy. Give it a bit more of the fixed layout's width and shrink its
-   code font so even the longest keys fit on one line naturally. Some
-   reference tables (e.g. IPAM's Lease Lifecycle/Error Handling) instead put a
-   full prose phrase in the first column, so we deliberately don't force
-   `white-space: nowrap` here — it would make that overflow past the fixed
-   column width and overlap the next column instead of wrapping. */
-.markdown table th:first-child,
-.markdown table td:first-child {
-  width: 18rem;
-}
-
 .markdown table td:first-child code {
   font-size: 0.75em;
-}
-
-/* Key/Value[/Default|Mandatory]/Description tables (state format, config
-   summary, commands, etc.) always end with a prose `Description` column
-   that carries the most information — narrow the short middle columns so
-   Description gets the leftover (and largest) share of the fixed layout.
-   Scoped to 3-4 column tables via :has() so it doesn't touch wider grids
-   like the Configuration Levels matrix, where every column is an equally
-   narrow yes/no cell. */
-.markdown table:has(th:nth-child(3)):not(:has(th:nth-child(5)))
-  :is(th, td):not(:first-child):not(:last-child) {
-  width: 8rem;
 }
 
 /* Homepage (curated/index.mdx, doc id "index") is a hero landing page, not a

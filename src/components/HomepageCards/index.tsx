@@ -36,6 +36,14 @@ const cards: CardItem[] = [
     cta: 'Browse reference',
   },
   {
+    path: '/reference/pvr',
+    title: 'pvr reference',
+    description:
+      'The Pantavisor command-line utility for creating, managing, and deploying containerized applications.',
+    to: '/reference/pvr',
+    cta: 'Browse reference',
+  },
+  {
     path: '/benchmarks',
     title: 'Compare to alternatives',
     description:
