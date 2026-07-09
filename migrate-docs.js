@@ -119,7 +119,7 @@ const LEGACY_LINK_IN_REFERENCE = new Set([
   'pantavisor-metadata', 'pantavisor-state-format-v2', 'pantavisor-xconnect',
 ]);
 function rewriteLegacyReferenceLinks(content) {
-  return content.replace(
+  let rewritten = content.replace(
     /\]\((?:\.\.\/)*(?:reference\/)?legacy\/([A-Za-z0-9._-]+)\.md(#[^)\s]*)?\)/g,
     (match, name, anchor = '') => {
       if (LEGACY_LINK_IN_REFERENCE.has(name))
@@ -128,6 +128,38 @@ function rewriteLegacyReferenceLinks(content) {
       return match; // unknown legacy target — leave as-is
     },
   );
+  
+  // Fix broken links to pantavisor-src/docs by pointing directly to the pantavisor section
+  rewritten = rewritten.replace(/((?:\.\.\/)+)pantavisor-src\/docs\//g, (match, prefix) => {
+    return prefix + 'pantavisor/';
+  });
+
+  // Map old MkDocs root how-to guides to their new Curated locations
+  const LEGACY_ROOT_LINKS = {
+    'inspect-device': '/operate/device-access/',
+    'initial-devices': '/start/download-and-flash',
+    'make-a-new-revision': '/develop/application/',
+    'claim-device': '/operate/device-access/remote-pantahub',
+    'clone-your-system': '/operate/',
+    'choose-device': '/start/',
+    'choose-way': '/start/'
+  };
+  rewritten = rewritten.replace(
+    /\]\((?:\.\.\/)+([A-Za-z0-9._-]+)\.md(#[^)\s]*)?\)/g,
+    (match, name, anchor = '') => {
+      if (LEGACY_ROOT_LINKS[name]) {
+        if (name === 'inspect-device') {
+          if (anchor === '#ssh') return '](/operate/device-access/local-network#ssh-access)';
+          if (anchor === '#tty') return '](/operate/device-access/serial-port)';
+          return '](/operate/device-access/)';
+        }
+        return `](${LEGACY_ROOT_LINKS[name]})`;
+      }
+      return match;
+    }
+  );
+
+  return rewritten;
 }
 
 function processMarkdown(content) {
