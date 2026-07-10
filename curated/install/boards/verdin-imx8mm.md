@@ -1,14 +1,17 @@
 ---
 title: Toradex Verdin iMX8M Mini
 sidebar_position: 4
-description: Flash Pantavisor to a Toradex Verdin iMX8M Mini via the Toradex Easy Installer (Tezi), including carrier-board device-tree selection.
+description: Flash Pantavisor to a Toradex Verdin iMX8M Mini via pv-flash-bundle (UUU), including carrier-board device-tree selection.
 ---
 
 # Flashing: Toradex Verdin iMX8M Mini
 
-**Flash method:** Toradex Easy Installer (Tezi) — see the [Tezi flashing guide](/install/tezi)
+**Flash method:** pv-flash-bundle (UUU) — see the [pv-flash-bundle guide](/install/pv-flash-bundle)
 
-**Image artifact:** `pantavisor-starter-verdin-imx8mm*pv_teziimg.tar.xz`
+**Image artifact:** `pv-flash-bundle-verdin-imx8mm.tar.gz`
+
+> This board no longer flashes via Toradex Easy Installer (Tezi). If you have
+> older instructions or a `pv_teziimg.tar.xz` bundle, they are outdated.
 
 ## Supported carrier boards and device trees
 
@@ -23,26 +26,36 @@ to match your carrier board:
 | Mallow board | `imx8mm-verdin-wifi-mallow.dtb` |
 | Yavia board | `imx8mm-verdin-wifi-yavia.dtb` |
 
-## Entering Tezi recovery mode
+## Entering USB serial download (SDP) mode
+
+The Verdin SOM enters SDP mode when the `RECOVERY#` signal is held low during
+power-on. The exact mechanism depends on the carrier board.
 
 ### Verdin Development Board
 
 1. Connect a USB-C cable from the board's **USB-C (OTG)** port to your host PC.
-2. Hold the **Recovery** button (or short the RECOVERY pin) while powering on
-   the board.
-3. The Verdin enters USB serial download mode. Run Toradex's recovery script
-   on the host to load Tezi into the module's RAM — see the
-   [Tezi flashing guide](/install/tezi). Tezi then runs on the module itself.
+2. Hold the **Recovery** button while applying power (or while pressing Reset).
+3. Release the button after ~1 second. The module enumerates on the host as
+   an NXP SDP device (`ID 1fc9:0146`).
+
+Verify detection from inside the extracted bundle:
+
+```bash
+sudo ./uuu -lsusb
+# Expected: SE Blank ARIK  or  SDP:MX8MM
+```
 
 ### Other carrier boards
 
 Consult the Toradex developer documentation for your specific carrier board.
-The Verdin SOM enters recovery mode when `RECOVERY#` is pulled low during
-power-on.
+The general procedure is the same: pull `RECOVERY#` low during power-on.
 
 ## Flashing
 
-Follow the [Tezi flashing procedure](/install/tezi).
+Follow the [pv-flash-bundle procedure](/install/pv-flash-bundle): extract the
+bundle and run `./flash.sh`. UUU boots the recovery U-Boot (SDP then SDPV),
+jumps to fastboot, and writes the disk image directly to eMMC via
+`FB: flash -raw2sparse all`.
 
 ## Notes
 
@@ -51,7 +64,9 @@ Follow the [Tezi flashing procedure](/install/tezi).
 - `PV_UBOOT_AUTOFDT` is disabled; the DTB is fixed by `PV_INITIAL_DTB`.
   If you switch carrier boards, update both `UBOOT_DTB_NAME` and
   `PV_INITIAL_DTB` in the machine YAML.
-- eMMC is the primary storage; Tezi writes to it directly.
+- eMMC is the primary storage. `flash.sh` decompresses the bundled
+  `.wic.gz` to a temporary `.wic` before invoking `uuu`, since UUU's
+  `-raw2sparse` path does not accept gzip input directly.
 
 ## Console and next steps
 

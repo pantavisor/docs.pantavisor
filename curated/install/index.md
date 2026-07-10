@@ -16,7 +16,7 @@ hardware-specific steps such as boot-mode switches or recovery jumpers.
 | Method | Use when | Guide |
 |---|---|---|
 | SD card (WIC image) | The board boots from SD — Raspberry Pi, Variscite, Rockchip, TI, Allwinner, and most others | [Flash an SD card](/install/sdcard) |
-| Toradex Easy Installer (Tezi) | Toradex modules with eMMC (Colibri, Verdin) | [Flash with Tezi](/install/tezi) |
+| pv-flash-bundle | Toradex modules with NAND/eMMC (Colibri, Verdin) — no Tezi needed | [Flash with pv-flash-bundle](/install/pv-flash-bundle) |
 | NXP uuu | i.MX boards with eMMC and a USB download port (Variscite) | [Flash with uuu](/install/uuu) |
 | Docker / AppEngine | No hardware — run Pantavisor inside your existing Linux distro | [Run with AppEngine](/install/docker) |
 

@@ -13,7 +13,7 @@ Note that pre-built, downloadable images only exist for the machines built by CI
 If you want a quickstart, we have a couple of pre-built images ready for testing and exploring Pantavisor. Head to [downloads](https://pantavisor.io/downloads/).
 
 Once you have an image, see the install guides for how to flash it:
-[SD card](/install/sdcard), [Toradex Easy Installer](/install/tezi), or
+[SD card](/install/sdcard), [pv-flash-bundle](/install/pv-flash-bundle) (Toradex), or
 [NXP uuu](/install/uuu).
 
 ## Officially supported devices
