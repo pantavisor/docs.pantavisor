@@ -1,8 +1,9 @@
 {
   "_comment": "We maintain the list of REFERENCE doc versions to publish here. The build (scripts/sync-reference.mjs) fetches the upstream manifest, resolves each version's docs tarball (url + sha256), downloads + verifies it, and regenerates reference/ (current) and reference_versioned_docs/version-<v>/. None of that generated content is committed. To publish a new version, add it to `versions` (newest first) and set `current`.",
   "manifest": "https://pantavisor-ci.s3.amazonaws.com/meta-pantavisor/releases.json",
-  "current": "028",
+  "current": "029-rc2",
   "versions": [
+    "029-rc2",
     "029-rc1",
     "028",
     "028-rc16",
