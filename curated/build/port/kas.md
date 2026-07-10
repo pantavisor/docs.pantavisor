@@ -100,9 +100,9 @@ Some boards use special flashing utilities instead of SD card:
 
 | Board family | Tool / method |
 |---|---|
-| Toradex Verdin / Colibri | Toradex Easy Installer (TEZI) — `*pv_teziimg.tar.xz` |
-| NXP i.MX | `uuu` (Universal Update Utility) |
+| Toradex Verdin / Colibri | pv-flash-bundle — self-contained UUU bundle, no Tezi |
+| NXP i.MX (Variscite) | `uuu` (Universal Update Utility) |
 | Rockchip | SD card via Maskrom-disabled boot |
 | Raspberry Pi | SD card always; all RPi variants supported by `rpi.yaml` multi-kernel build |
 
-See the install guides for details: [SD card](/install/sdcard), [Toradex Easy Installer](/install/tezi), [NXP uuu](/install/uuu), and the [supported boards overview](/install).
+See the install guides for details: [SD card](/install/sdcard), [pv-flash-bundle](/install/pv-flash-bundle), [NXP uuu](/install/uuu), and the [supported boards overview](/install).

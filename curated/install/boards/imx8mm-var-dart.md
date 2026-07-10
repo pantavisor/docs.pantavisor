@@ -1,42 +1,47 @@
 ---
 title: Variscite DART-MX8M-MINI
 sidebar_position: 3
-description: Flash Pantavisor to a Variscite DART-MX8M-MINI (i.MX8M Mini) over uuu to eMMC or via SD card, with DT8MCustomBoard boot-select settings.
+description: Flash Pantavisor to a Variscite DART-MX8M-MINI (i.MX8M Mini) via pv-flash-bundle (UUU) to eMMC or via SD card, with boot-select settings.
 ---
 
 # Flashing: Variscite DART-MX8M-MINI
 
-**Flash methods:** uuu (eMMC) | SD card — see the [uuu](/install/uuu) and [SD card](/install/sdcard) guides
+**Flash methods:** pv-flash-bundle / uuu (eMMC) | SD card — see the
+[uuu](/install/uuu) and [SD card](/install/sdcard) guides
 
-**Image artifact:** `pantavisor-starter-imx8mm-var-dart*.wic`
+**Image artifact:** `pv-flash-bundle-imx8mm-var-dart.tar.gz` (eMMC) or
+`pantavisor-starter-imx8mm-var-dart*.wic` (SD card)
 
 ## Hardware overview
 
 The DART-MX8M-MINI is based on the NXP i.MX8M Mini SoC and is typically used
-with the **DT8MCustomBoard** carrier (the Variscite evaluation-kit carrier;
-the Symphony-Board serves the VAR-SOM family, not DART-form-factor modules).
+with the **Symphony-Board** carrier board or the **DT8MCustomBoard**.
 
 ## SD card boot
 
-On the DT8MCustomBoard, the boot source is selected with the **SW8 "Boot
-select" slide switch** (a two-position switch — there is no boot DIP block):
+SD card boot works out of the box on the Symphony-Board. Set the boot-mode
+switches to select SD:
 
-| SW8 position | Boot source |
-|---|---|
-| **EXT** | microSD card (slot J31) |
-| **INT** | SoM eMMC |
+| Switch | SD boot | eMMC boot |
+|---|---|---|
+| SW4-1 | ON | OFF |
+| SW4-2 | ON | OFF |
+| SW4-3 | OFF | ON |
+| SW4-4 | OFF | OFF |
 
-Power off, set SW8 to **EXT**, insert the flashed SD card, and power on. The
-boot-select designator can differ between carrier revisions — follow the
-"Boot select" silkscreen label on your board. See the [SD card flashing
+Insert the flashed SD card and power on. See the [SD card flashing
 guide](/install/sdcard) for how to write the `.wic` image.
 
 ## uuu (USB download to eMMC)
 
-### 1. Enter USB serial download mode
+### 1. Set boot-mode to USB download
 
-The i.MX8M Mini falls into serial download mode when it finds no boot source:
-set SW8 to **EXT** (SD) with **no SD card inserted**, then power on.
+| Switch | USB download |
+|---|---|
+| SW4-1 | OFF |
+| SW4-2 | OFF |
+| SW4-3 | OFF |
+| SW4-4 | OFF |
 
 ### 2. Connect USB OTG
 
@@ -45,17 +50,30 @@ depending on the carrier board revision) to your host PC.
 
 ### 3. Flash
 
+Using the self-contained bundle (recommended — no `uuu` install needed):
+
+```bash
+tar xzf pv-flash-bundle-imx8mm-var-dart.tar.gz
+cd pv-flash-bundle-imx8mm-var-dart
+./flash.sh
+```
+
+Or manually, with `uuu` already installed on the host:
+
 ```bash
 sudo uuu -b emmc_all \
-    imx-boot \
+    imx-boot-imx8mm-var-dart*.bin \
     pantavisor-starter-imx8mm-var-dart*.wic
 ```
 
-See the [uuu flashing guide](/install/uuu) for full details and troubleshooting.
+See the [uuu flashing guide](/install/uuu) for full details and
+troubleshooting. Variscite's production bootloader already self-enters SDP
+mode, so no separate recovery build is needed — the bundle is built straight
+from the main image.
 
 ### 4. Restore boot-mode to eMMC
 
-Set SW8 back to **INT** and power-cycle.
+Set switches back to eMMC boot mode (table above) and power-cycle.
 
 ## Notes
 
