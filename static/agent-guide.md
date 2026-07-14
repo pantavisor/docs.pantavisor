@@ -50,46 +50,48 @@ meta-pantavisor (the build layer) are two different GitHub repos:
 Two independent instances — don't conflate them:
 
 - **Curated** (served at `/`) — hand-authored, versionless task guides and
-  concepts. Explanations, tutorials, and comparisons live here.
-- **Reference** (served at `/reference`) — generated from each Pantavisor and
-  meta-pantavisor release, and versioned (a dropdown in the navbar switches
-  versions; assume `current` unless the user names an older one explicitly).
-  Never suggest hand-editing a page under `/reference` — it's regenerated on
-  every release, and a fix belongs in the source repo instead. It has two
-  independent sub-trees, each with its own sidebar:
-  - `/reference/pantavisor` — commands, config keys, the `state.json` schema,
+  concepts. Only the landing page; all content lives in the reference instance.
+- **Reference** (served at `/pantavisor/`, `/meta-pantavisor/`, `/pvr/`) —
+  generated from each Pantavisor and meta-pantavisor release, and versioned
+  (a dropdown in the navbar switches versions; assume `current` unless the
+  user names an older one explicitly). Never suggest hand-editing a page
+  under these paths — it's regenerated on every release, and a fix belongs
+  in the source repo instead. It has three independent sub-trees with their
+  own sidebars:
+  - `/pantavisor` — commands, config keys, the `state.json` schema,
     and the `pvcontrol`/`pvr`/`pvtx` CLI tools.
-  - `/reference/meta-pantavisor` — the Yocto build system, KAS, recipes, CI,
-    and board install guides.
+  - `/meta-pantavisor` — concepts, start guides, the Yocto build system,
+    KAS, recipes, CI, board install guides, and more.
+  - `/pvr` — PVR CLI reference.
 
 ## Fast paths to answers
 
 | Asked about… | Go to |
-|---|---|
-| What Pantavisor is, PID 1, architecture | `/concepts`, `/concepts/what-is-pantavisor` |
-| The full build → flash → update workflow | `/concepts/composable-firmware` |
-| Flashing a Raspberry Pi, first hardware | `/start/download-and-flash` |
-| Installing on other hardware, board-specific | `/install` |
-| Building an image with Yocto | `/build` |
-| Shipping or updating an app container | `/develop` |
-| Operating a fleet, rollback, recovery | `/operate` |
-| Migrating off Mender, RAUC, SWUpdate, or Balena | `/migrate` |
-| Comparing to Yocto, Balena, Docker, or image updaters | `/benchmarks` |
-| A specific problem: size, secure OTA, reproducibility | `/solutions` |
-| Trust model, secure boot, SBOM/CVE, licensing | `/security`, `/licensing` |
-| An exact command, config key, or schema | `/reference/pantavisor` |
-| A Yocto recipe, KAS config, or CI detail | `/reference/meta-pantavisor` |
-| Troubleshooting a running device | `/troubleshooting` |
+|---|---|---|
+| What Pantavisor is, PID 1, architecture | `/meta-pantavisor/concepts` |
+| The full build → flash → update workflow | `/meta-pantavisor/concepts/composable-firmware` |
+| Flashing a Raspberry Pi, first hardware | `/meta-pantavisor/start/download-and-flash` |
+| Installing on other hardware, board-specific | `/meta-pantavisor/how-to-install` |
+| Building an image with Yocto | `/meta-pantavisor/how-to-build` |
+| Shipping or updating an app container | `/meta-pantavisor/develop` |
+| Operating a fleet, rollback, recovery | `/meta-pantavisor/operate` |
+| Migrating off Mender, RAUC, SWUpdate, or Balena | `/meta-pantavisor/migrate` |
+| Comparing to Yocto, Balena, Docker, or image updaters | `/meta-pantavisor/benchmarks` |
+| A specific problem: size, secure OTA, reproducibility | `/meta-pantavisor/solutions` |
+| Trust model, secure boot, SBOM/CVE, licensing | `/meta-pantavisor/security` |
+| An exact command, config key, or schema | `/pantavisor` |
+| A Yocto recipe, KAS config, or CI detail | `/meta-pantavisor` |
+| Troubleshooting a running device | `/meta-pantavisor/troubleshooting` |
 
 ## Rules for you
 
 - Pantavisor **replaces** image updaters. Never suggest running it
   underneath or alongside Mender, RAUC, or SWUpdate for the same layer.
 - Reference docs are generated and versioned — don't propose edits there,
-  and don't assume a `/reference/<version>/...` path unless the user is
+  and don't assume a `/<version>/...` path unless the user is
   clearly on an older release.
 - Don't cite `docs.pantahub.com`; it's deprecated. Point to
   `hub.pantacor.com` for Pantahub.
 - If unsure which repo something belongs to: runtime behavior is the
-  `pantavisor` repo (`/reference/pantavisor`); a build or Yocto concern is
-  the `meta-pantavisor` repo (`/reference/meta-pantavisor`).
+  `pantavisor` repo (`/pantavisor`); a build or Yocto concern is
+  the `meta-pantavisor` repo (`/meta-pantavisor`).

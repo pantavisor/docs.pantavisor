@@ -12,43 +12,43 @@ type CardItem = {
 
 const cards: CardItem[] = [
   {
-    path: '/start',
+    path: '/meta-pantavisor/start',
     title: 'Get Started',
     description:
       'New here? Learn the architecture, flash real hardware in 30 minutes, or migrate from Mender, RAUC, or SWUpdate.',
-    to: '/start',
+    to: '/meta-pantavisor/start',
     cta: 'Start here',
   },
   {
-    path: '/reference/pantavisor',
+    path: '/pantavisor',
     title: 'Pantavisor reference',
     description:
       'Commands, schemas, and configuration keys for the on-device runtime — versioned per release.',
-    to: '/reference/pantavisor',
+    to: '/pantavisor',
     cta: 'Browse reference',
   },
   {
-    path: '/reference/meta-pantavisor',
+    path: '/meta-pantavisor',
     title: 'meta-pantavisor reference',
     description:
       'The Yocto/OpenEmbedded layer: KAS configs, BitBake recipes, the CI pipeline, and board install guides.',
-    to: '/reference/meta-pantavisor',
+    to: '/meta-pantavisor',
     cta: 'Browse reference',
   },
   {
-    path: '/reference/pvr',
+    path: '/pvr',
     title: 'pvr reference',
     description:
       'The Pantavisor command-line utility for creating, managing, and deploying containerized applications.',
-    to: '/reference/pvr',
+    to: '/pvr',
     cta: 'Browse reference',
   },
   {
-    path: '/benchmarks',
+    path: '/meta-pantavisor/benchmarks',
     title: 'Compare to alternatives',
     description:
       'Pantavisor against Yocto, Balena, Mender, RAUC, SWUpdate, Buildroot, and Docker.',
-    to: '/benchmarks',
+    to: '/meta-pantavisor/benchmarks',
     cta: 'See the comparison',
   },
 ];
