@@ -14,7 +14,7 @@
 //        - reference/                              (the `current` version)
 //        - reference_versioned_docs/version-<v>/   (every other version)
 // Then write reference_versioned_sidebars/* and reference_versions.json.
-import {readFileSync, writeFileSync, existsSync, mkdirSync, rmSync, readdirSync, renameSync, unlinkSync} from 'node:fs';
+import {readFileSync, writeFileSync, existsSync, mkdirSync, rmSync, readdirSync, renameSync, unlinkSync, copyFileSync, statSync} from 'node:fs';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
@@ -122,22 +122,68 @@ function migrate(version, destRel) {
 // category page with a link to the overview doc so Docusaurus redirects there.
 function removeIndexLandingPages(destRel) {
   const base = join(ROOT, destRel);
-  for (const repo of ['pantavisor', 'meta-pantavisor']) {
-    const idx = join(base, repo, 'index.md');
-    if (existsSync(idx)) {
-      unlinkSync(idx);
-      console.log(`  (removed index landing page: ${destRel}/${repo}/index.md)`);
-    }
+  // pantavisor repo: remove the root index and write a _category_.json that
+  // redirects the top-level category to the overview doc.
+  const pvIdx = join(base, 'pantavisor', 'index.md');
+  if (existsSync(pvIdx)) {
+    unlinkSync(pvIdx);
+    console.log(`  (removed index landing page: ${destRel}/pantavisor/index.md)`);
   }
-  // Make each top-level repo category redirect to its overview doc instead of
-  // showing an auto-generated index page.
-  for (const [repo, docId] of [['pantavisor', 'pantavisor/overview'], ['meta-pantavisor', 'meta-pantavisor/overview']]) {
-    const catFile = join(base, repo, '_category_.json');
-    if (!existsSync(catFile)) {
-      writeFileSync(catFile, JSON.stringify({
-        link: {type: 'doc', id: docId},
-      }, null, 2) + '\n');
-      console.log(`  (wrote _category_.json → ${destRel}/${repo}/ redirects to ${docId})`);
+  const pvCat = join(base, 'pantavisor', '_category_.json');
+  if (!existsSync(pvCat)) {
+    writeFileSync(pvCat, JSON.stringify({
+      link: {type: 'doc', id: 'pantavisor/overview/index'},
+    }, null, 2) + '\n');
+    console.log(`  (wrote _category_.json → ${destRel}/pantavisor/ redirects to pantavisor/overview)`);
+  }
+  // meta-pantavisor: remove the auto-generated root landing page (it shows up
+  // as a separate sidebar entry that the user shouldn't see) and write a
+  // _category_.json that links the top-level category to the overview doc.
+  const metaIdx = join(base, 'meta-pantavisor', 'index.md');
+  if (existsSync(metaIdx)) {
+    unlinkSync(metaIdx);
+    console.log(`  (removed index landing page: ${destRel}/meta-pantavisor/index.md)`);
+  }
+  const metaCat = join(base, 'meta-pantavisor', '_category_.json');
+  if (!existsSync(metaCat)) {
+    writeFileSync(metaCat, JSON.stringify({
+      link: {type: 'doc', id: 'meta-pantavisor/overview/index'},
+    }, null, 2) + '\n');
+    console.log(`  (wrote _category_.json → ${destRel}/meta-pantavisor/ redirects to overview)`);
+  }
+}
+
+// Merge docs from the local pvr source repo (../pvr/docs/) into reference/pvr/.
+// The tarball only carries a single README.md for pvr; the full command reference
+// lives in the source repo. Remove the tarball's README.md to avoid sidebar
+// ordering conflicts — the source repo's simplified README is not in docs/.
+function mergePvrDocs(destRel) {
+  const pvrDocs = join(ROOT, '..', 'pvr', 'docs');
+  if (!existsSync(pvrDocs)) {
+    console.log('  (pvr source repo not found at ../pvr/docs, skipping)');
+    return;
+  }
+  const pvrRef = join(ROOT, destRel, 'pvr');
+  // Remove the tarball's README.md (it was replaced by docs/ structure)
+  const tarballReadme = join(pvrRef, 'README.md');
+  if (existsSync(tarballReadme)) {
+    unlinkSync(tarballReadme);
+    console.log(`  (removed tarball README.md from ${destRel}/pvr/)`);
+  }
+  const cmdSrc = join(pvrDocs, 'commands');
+  if (existsSync(cmdSrc)) {
+    for (const f of readdirSync(cmdSrc)) {
+      if (!f.endsWith('.md')) continue;
+      copyFileSync(join(cmdSrc, f), join(pvrRef, f));
+    }
+    console.log(`  (merged ${readdirSync(cmdSrc).filter(f => f.endsWith('.md')).length} pvr command docs into ${destRel}/pvr/)`);
+  }
+  // Copy top-level docs (index.md, getting-started.md, etc.)
+  for (const f of readdirSync(pvrDocs)) {
+    if (!f.endsWith('.md') || f === 'README.md') continue;
+    const src = join(pvrDocs, f);
+    if (statSync(src).isFile()) {
+      copyFileSync(src, join(pvrRef, f));
     }
   }
 }
@@ -172,9 +218,11 @@ if (LOCAL_META && existsSync(localTarball)) {
     if (version === current) {
       migrate(version, 'reference');
       removeIndexLandingPages('reference');
+      mergePvrDocs('reference');
     } else {
       migrate(version, join('reference_versioned_docs', `version-${version}`));
       removeIndexLandingPages(join('reference_versioned_docs', `version-${version}`));
+      mergePvrDocs(join('reference_versioned_docs', `version-${version}`));
       frozen.push(version);
     }
   }
@@ -200,6 +248,7 @@ async function processLocalTarball(version, tarball) {
   extract(tarball, srcDir);
   migrate(version, 'reference');
   removeIndexLandingPages('reference');
+  mergePvrDocs('reference');
 }
 
 console.log('Reference docs synced.');
