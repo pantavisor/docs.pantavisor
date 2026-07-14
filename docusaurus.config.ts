@@ -115,6 +115,8 @@ const config: Config = {
           {from: '/community', to: '/meta-pantavisor/community'},
           {from: '/build/build-system', to: '/meta-pantavisor/how-to-build'},
           {from: '/concepts/meta-pantavisor-overview', to: '/meta-pantavisor/overview'},
+          {from: '/pantavisor', to: '/pantavisor/overview'},
+          {from: '/meta-pantavisor', to: '/meta-pantavisor/overview'},
         ],
       },
     ],
