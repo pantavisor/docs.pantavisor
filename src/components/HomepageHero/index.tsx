@@ -34,7 +34,7 @@ export default function HomepageHero(): ReactNode {
           <em>is</em> the runtime.
         </p>
         <div className={styles.ctas}>
-          <Link className={styles.primaryButton} to="/start">
+          <Link className={styles.primaryButton} to="/meta-pantavisor/getting-started/start">
             Quick start
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <path
@@ -46,7 +46,7 @@ export default function HomepageHero(): ReactNode {
               />
             </svg>
           </Link>
-          <Link className={styles.secondaryLink} to="/reference/pantavisor">
+          <Link className={styles.secondaryLink} to="/pantavisor/overview">
             or browse the reference docs
           </Link>
         </div>
