@@ -14,7 +14,7 @@
 //        - reference/                              (the `current` version)
 //        - reference_versioned_docs/version-<v>/   (every other version)
 // Then write reference_versioned_sidebars/* and reference_versions.json.
-import {readFileSync, writeFileSync, existsSync, mkdirSync, rmSync, readdirSync, renameSync} from 'node:fs';
+import {readFileSync, writeFileSync, existsSync, mkdirSync, rmSync, readdirSync, renameSync, unlinkSync, copyFileSync, statSync} from 'node:fs';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
@@ -32,6 +32,12 @@ if (drop.has(current)) current = versions[0];
 
 if (!versions.length) { console.error('releases.json has no versions'); process.exit(1); }
 if (!versions.includes(current)) { console.error(`releases.json current "${current}" not in versions`); process.exit(1); }
+
+// LOCAL_META=true — use a local docs tarball (.releases-cache/local-test.tar.zst)
+// as the current version.  Build it from meta-pantavisor with:
+//   ./kas-container build ... -- -c create_pantacor_docs pantavisor-starter
+const LOCAL_META = process.env.LOCAL_META;
+const LOCAL_VERSION = 'local-test';
 
 const CACHE = join(ROOT, '.releases-cache');
 mkdirSync(CACHE, {recursive: true});
@@ -111,8 +117,86 @@ function migrate(version, destRel) {
   execFileSync('node', [join(ROOT, 'migrate-docs.js'), join(ROOT, 'releases', version), join(ROOT, destRel)], {stdio: 'inherit'});
 }
 
-console.log(`Fetching upstream manifest: ${cfg.manifest}`);
-const manifest = await fetchJson(cfg.manifest);
+// Remove index landing pages from repos that should redirect to their first
+// child section instead of showing a generic index. Override the auto-generated
+// category page with a link to the overview doc so Docusaurus redirects there.
+function removeIndexLandingPages(destRel) {
+  const base = join(ROOT, destRel);
+  // pantavisor repo: remove the root index and write a _category_.json that
+  // redirects the top-level category to the overview doc.
+  const pvIdx = join(base, 'pantavisor', 'index.md');
+  if (existsSync(pvIdx)) {
+    unlinkSync(pvIdx);
+    console.log(`  (removed index landing page: ${destRel}/pantavisor/index.md)`);
+  }
+  const pvCat = join(base, 'pantavisor', '_category_.json');
+  if (!existsSync(pvCat)) {
+    writeFileSync(pvCat, JSON.stringify({
+      link: {type: 'doc', id: 'pantavisor/overview/index'},
+    }, null, 2) + '\n');
+    console.log(`  (wrote _category_.json → ${destRel}/pantavisor/ redirects to pantavisor/overview)`);
+  }
+  // meta-pantavisor: remove the auto-generated root landing page (it shows up
+  // as a separate sidebar entry that the user shouldn't see) and write a
+  // _category_.json that links the top-level category to the overview doc.
+  const metaIdx = join(base, 'meta-pantavisor', 'index.md');
+  if (existsSync(metaIdx)) {
+    unlinkSync(metaIdx);
+    console.log(`  (removed index landing page: ${destRel}/meta-pantavisor/index.md)`);
+  }
+  const metaCat = join(base, 'meta-pantavisor', '_category_.json');
+  if (!existsSync(metaCat)) {
+    writeFileSync(metaCat, JSON.stringify({
+      link: {type: 'doc', id: 'meta-pantavisor/overview/index'},
+    }, null, 2) + '\n');
+    console.log(`  (wrote _category_.json → ${destRel}/meta-pantavisor/ redirects to overview)`);
+  }
+}
+
+// Merge docs from the local pvr source repo (../pvr/docs/) into reference/pvr/.
+// The tarball only carries a single README.md for pvr; the full command reference
+// lives in the source repo. Remove the tarball's README.md to avoid sidebar
+// ordering conflicts — the source repo's simplified README is not in docs/.
+function mergePvrDocs(destRel) {
+  const pvrDocs = join(ROOT, '..', 'pvr', 'docs');
+  if (!existsSync(pvrDocs)) {
+    console.log('  (pvr source repo not found at ../pvr/docs, skipping)');
+    return;
+  }
+  const pvrRef = join(ROOT, destRel, 'pvr');
+  // Remove the tarball's README.md (it was replaced by docs/ structure)
+  const tarballReadme = join(pvrRef, 'README.md');
+  if (existsSync(tarballReadme)) {
+    unlinkSync(tarballReadme);
+    console.log(`  (removed tarball README.md from ${destRel}/pvr/)`);
+  }
+  const cmdSrc = join(pvrDocs, 'commands');
+  if (existsSync(cmdSrc)) {
+    for (const f of readdirSync(cmdSrc)) {
+      if (!f.endsWith('.md')) continue;
+      copyFileSync(join(cmdSrc, f), join(pvrRef, f));
+    }
+    console.log(`  (merged ${readdirSync(cmdSrc).filter(f => f.endsWith('.md')).length} pvr command docs into ${destRel}/pvr/)`);
+  }
+  // Copy top-level docs (index.md, getting-started.md, etc.)
+  for (const f of readdirSync(pvrDocs)) {
+    if (!f.endsWith('.md') || f === 'README.md') continue;
+    const src = join(pvrDocs, f);
+    if (statSync(src).isFile()) {
+      copyFileSync(src, join(pvrRef, f));
+    }
+  }
+}
+
+const localTarball = join(CACHE, `${LOCAL_VERSION}.tar.zst`);
+
+// LOCAL_META with a cached tarball — skip the remote manifest entirely
+if (LOCAL_META && existsSync(localTarball)) {
+  console.log('LOCAL_META: using local tarball, skipping remote manifest');
+} else {
+  console.log(`Fetching upstream manifest: ${cfg.manifest}`);
+}
+const manifest = LOCAL_META && existsSync(localTarball) ? {} : await fetchJson(cfg.manifest);
 
 // Clean previous generated output so removed versions don't linger.
 for (const d of ['reference', 'reference_versioned_docs', 'reference_versioned_sidebars']) {
@@ -120,19 +204,39 @@ for (const d of ['reference', 'reference_versioned_docs', 'reference_versioned_s
 }
 
 const frozen = [];
-for (const version of versions) {
-  const docs = findDocs(manifest, version);
-  if (!docs) throw new Error(`No docs tarball for "${version}" in upstream manifest ${cfg.manifest}`);
-  console.log(`Release ${version}${version === current ? ' (current)' : ''}:`);
-  await ensureSource(version, docs);
-  if (version === current) migrate(version, 'reference');
-  else { migrate(version, join('reference_versioned_docs', `version-${version}`)); frozen.push(version); }
+
+// If we have a local tarball, process it as current and we're done
+if (LOCAL_META && existsSync(localTarball)) {
+  await processLocalTarball(LOCAL_VERSION, localTarball);
+} else {
+  // Normal pipeline: process all versions from the manifest
+  for (const version of versions) {
+    console.log(`Release ${version}:`);
+    const docs = findDocs(manifest, version);
+    if (!docs) throw new Error(`No docs tarball for "${version}" in upstream manifest ${cfg.manifest}`);
+    await ensureSource(version, docs);
+    if (version === current) {
+      migrate(version, 'reference');
+      removeIndexLandingPages('reference');
+      mergePvrDocs('reference');
+    } else {
+      migrate(version, join('reference_versioned_docs', `version-${version}`));
+      removeIndexLandingPages(join('reference_versioned_docs', `version-${version}`));
+      mergePvrDocs(join('reference_versioned_docs', `version-${version}`));
+      frozen.push(version);
+    }
+  }
 }
 
 // Versioned sidebars (static autogenerated stub; keys must match sidebarsReference.ts).
 const SIDEBAR_STUB = JSON.stringify({
   pantavisorSidebar: [{type: 'autogenerated', dirName: 'pantavisor'}],
-  metaPantavisorSidebar: [{type: 'autogenerated', dirName: 'meta-pantavisor'}],
+  metaPantavisorGettingStartedSidebar: [
+    {type: 'autogenerated', dirName: 'meta-pantavisor/getting-started'},
+  ],
+  metaPantavisorOverviewSidebar: [
+    {type: 'autogenerated', dirName: 'meta-pantavisor/overview'},
+  ],
   pvrSidebar: [{type: 'autogenerated', dirName: 'pvr'}],
 }, null, 2);
 if (frozen.length) {
@@ -142,4 +246,14 @@ if (frozen.length) {
 }
 writeFileSync(join(ROOT, 'reference_versions.json'), JSON.stringify(frozen, null, 0) + '\n');
 console.log(`Wrote reference_versions.json: ${JSON.stringify(frozen)}`);
+
+async function processLocalTarball(version, tarball) {
+  console.log(`  using local tarball: ${tarball}`);
+  const srcDir = join(ROOT, 'releases', version);
+  extract(tarball, srcDir);
+  migrate(version, 'reference');
+  removeIndexLandingPages('reference');
+  mergePvrDocs('reference');
+}
+
 console.log('Reference docs synced.');

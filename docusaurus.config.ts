@@ -11,8 +11,12 @@ const releases = JSON.parse(readFileSync('./releases.json', 'utf8')) as {
   current: string;
   versions: string[];
 };
+// LOCAL_META=true — only the local tarball is built, skip frozen versions
+const activeVersions = process.env.LOCAL_META
+  ? [releases.current]
+  : releases.versions;
 const referenceVersions: {[v: string]: {label: string; path: string}} = {};
-for (const version of releases.versions) {
+for (const version of activeVersions) {
   if (version === releases.current) {
     referenceVersions.current = {label: version, path: '/'};
   } else {
@@ -64,17 +68,9 @@ const config: Config = {
     [
       'classic',
       {
-        // Default docs instance = CURATED, versionless, user-task IA.
-        // Hand-authored Markdown in curated/. Never touched by release ingest.
-        docs: {
-          path: 'curated',
-          routeBasePath: '/',
-          sidebarPath: './sidebarsCurated.ts',
-          rehypePlugins: [rehypeMaterialIcons],
-          // Expand every sidebar category by default instead of only the one
-          // containing the current page.
-          sidebarCollapsed: false,
-        },
+        // Landing page is at src/pages/index.mdx. Docs are via the reference
+        // plugin below (id: 'reference').
+        docs: false,
         blog: false,
         theme: {
           customCss: './src/css/custom.css',
@@ -91,28 +87,54 @@ const config: Config = {
         // migrate-docs.js writes the current version into reference/.
         id: 'reference',
         path: 'reference',
-        routeBasePath: 'reference',
+        routeBasePath: '/',
         sidebarPath: './sidebarsReference.ts',
         lastVersion: 'current',
         versions: referenceVersions,
         rehypePlugins: [rehypeMaterialIcons],
         // Expand every sidebar category by default instead of only the one
         // containing the current page.
-        sidebarCollapsed: false,
+        sidebarCollapsed: true,
       },
     ],
     [
       '@docusaurus/plugin-client-redirects',
       {
-        // Old URLs of pages that were merged into other pages.
         redirects: [
-          {
-            from: '/concepts/meta-pantavisor-overview',
-            to: '/build/build-system',
-          },
-          {from: '/community/support', to: '/community'},
-          {from: '/community/projects', to: '/community'},
-          {from: '/community/contribute', to: '/community'},
+          // Old curated top-level shortcuts → new Getting Started section
+          {from: '/start', to: '/meta-pantavisor/getting-started/start'},
+          {from: '/install', to: '/meta-pantavisor/getting-started/how-to-install'},
+          {from: '/build', to: '/meta-pantavisor/overview/get-started'},
+          {from: '/develop', to: '/meta-pantavisor/getting-started/develop'},
+          {from: '/operate', to: '/meta-pantavisor/getting-started/operate'},
+          {from: '/migrate', to: '/meta-pantavisor/getting-started/migrate'},
+          {from: '/security', to: '/meta-pantavisor/getting-started/security'},
+          {from: '/benchmarks', to: '/meta-pantavisor/getting-started/benchmarks'},
+          {from: '/solutions', to: '/meta-pantavisor/getting-started/solutions'},
+          {from: '/troubleshooting', to: '/meta-pantavisor/getting-started/troubleshooting'},
+          {from: '/licensing', to: '/meta-pantavisor/getting-started/licensing'},
+          {from: '/community', to: '/meta-pantavisor/getting-started/community'},
+          {from: '/build/build-system', to: '/meta-pantavisor/overview/get-started'},
+          {from: '/concepts/meta-pantavisor-overview', to: '/meta-pantavisor/overview'},
+          // Old flat URLs → new nested URLs
+          {from: '/meta-pantavisor/start', to: '/meta-pantavisor/getting-started/start'},
+          {from: '/meta-pantavisor/develop', to: '/meta-pantavisor/getting-started/develop'},
+          {from: '/meta-pantavisor/how-to-install', to: '/meta-pantavisor/getting-started/how-to-install'},
+          {from: '/meta-pantavisor/operate', to: '/meta-pantavisor/getting-started/operate'},
+          {from: '/meta-pantavisor/migrate', to: '/meta-pantavisor/getting-started/migrate'},
+          {from: '/meta-pantavisor/security', to: '/meta-pantavisor/getting-started/security'},
+          {from: '/meta-pantavisor/benchmarks', to: '/meta-pantavisor/getting-started/benchmarks'},
+          {from: '/meta-pantavisor/solutions', to: '/meta-pantavisor/getting-started/solutions'},
+          {from: '/meta-pantavisor/troubleshooting', to: '/meta-pantavisor/getting-started/troubleshooting'},
+          {from: '/meta-pantavisor/licensing', to: '/meta-pantavisor/getting-started/licensing'},
+          {from: '/meta-pantavisor/community', to: '/meta-pantavisor/getting-started/community'},
+          {from: '/meta-pantavisor/examples', to: '/meta-pantavisor/overview/examples'},
+          {from: '/meta-pantavisor/testing', to: '/meta-pantavisor/overview/testing'},
+          {from: '/meta-pantavisor/ci', to: '/meta-pantavisor/overview/ci'},
+          {from: '/meta-pantavisor/how-to-build', to: '/meta-pantavisor/overview/get-started'},
+          // Repo root → first child
+          {from: '/pantavisor', to: '/pantavisor/overview'},
+          {from: '/meta-pantavisor', to: '/meta-pantavisor/overview'},
         ],
       },
     ],
@@ -127,23 +149,14 @@ const config: Config = {
         hashed: true,
         indexDocs: true,
         indexBlog: false,
-        docsRouteBasePath: ['/', 'reference'],
-        docsDir: ['curated', 'reference'],
+        docsRouteBasePath: ['/'],
+        docsDir: ['reference'],
         highlightSearchTermsOnTargetPage: true,
         searchResultLimits: 8,
-        // Scope search results to the section the reader is currently in,
-        // detected from the URL. Pages under /reference/pantavisor only
-        // search that tree; /reference/meta-pantavisor likewise. Everything
-        // else (curated docs: /concepts, /start, etc.) falls through to the
-        // default, unscoped context, so those pages search each other but not
-        // into either reference tree.
-        // Only applies to the *current* reference version — older versioned
-        // reference pages (/reference/<version>/...) get their own
-        // per-version index and aren't split by these paths.
         searchContextByPaths: [
-          {label: 'Pantavisor reference', path: 'reference/pantavisor'},
-          {label: 'meta-pantavisor reference', path: 'reference/meta-pantavisor'},
-          {label: 'PVR reference', path: 'reference/pvr'},
+          {label: 'Pantavisor runtime', path: 'pantavisor'},
+          {label: 'meta-pantavisor', path: 'meta-pantavisor'},
+          {label: 'PVR CLI', path: 'pvr'},
         ],
       },
     ],
@@ -164,35 +177,10 @@ const config: Config = {
         height: 32,
       },
       items: [
-        {
-          // Groups the three onboarding-flavored sections (understand it,
-          // start it, switch to it) behind one entry. Clicking the label
-          // itself goes straight to the start guide.
-          type: 'dropdown',
-          label: 'Get Started',
-          position: 'left',
-          to: '/start',
-          items: [
-            {to: '/concepts', label: 'Concepts'},
-            {to: '/start', label: 'Start'},
-            {to: '/migrate', label: 'Migrate'},
-          ],
-        },
-        {
-          // The reference instance is repo-shaped; surface its top-level
-          // sections directly so they are reachable without drilling in.
-          // There is no landing page at /reference itself, so clicking the
-          // label goes straight to the pantavisor tree.
-          type: 'dropdown',
-          label: 'Reference',
-          position: 'left',
-          to: '/reference/pantavisor',
-          items: [
-            {to: '/reference/pantavisor', label: 'pantavisor'},
-            {to: '/reference/meta-pantavisor', label: 'meta-pantavisor'},
-            {to: '/reference/pvr', label: 'pvr'},
-          ],
-        },
+        {to: '/meta-pantavisor/getting-started/start', label: 'Getting Started', position: 'left'},
+        {to: '/pantavisor/overview', label: 'Pantavisor Runtime', position: 'left'},
+        {to: '/meta-pantavisor/overview', label: 'meta-pantavisor', position: 'left'},
+        {to: '/pvr', label: 'PVR CLI', position: 'left'},
         {
           type: 'docsVersionDropdown',
           docsPluginId: 'reference',
@@ -212,10 +200,10 @@ const config: Config = {
         {
           title: 'Docs',
           items: [
-            {label: 'Concepts', to: '/concepts'},
-            {label: 'Start', to: '/start'},
-            {label: 'Migrate to Pantavisor', to: '/migrate'},
-            {label: 'Reference', to: '/reference/pantavisor'},
+            {label: 'Getting Started', to: '/meta-pantavisor/getting-started/start'},
+            {label: 'Pantavisor Runtime', to: '/pantavisor/overview'},
+            {label: 'meta-pantavisor', to: '/meta-pantavisor/overview'},
+            {label: 'PVR CLI', to: '/pvr'},
           ],
         },
         {

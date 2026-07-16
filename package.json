@@ -9,6 +9,7 @@
     "generate": "node scripts/sync-reference.mjs && node scripts/generate-llms.mjs",
     "prestart": "npm run generate",
     "start": "docusaurus start",
+    "local": "LOCAL_META=true npm run generate && LOCAL_META=true docusaurus start",
     "prebuild": "npm run generate",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",

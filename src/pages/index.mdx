@@ -1,14 +1,3 @@
----
-title: Pantavisor Documentation
-description: Pantavisor is PID 1 and owns the full device update — base, kernel, app containers, and config — as one signed, content-addressed revision.
-sidebar_position: 0
-slug: /
-hide_title: true
-hide_table_of_contents: true
-pagination_next: null
-pagination_prev: null
----
-
 import HomepageHero from '@site/src/components/HomepageHero';
 import HomepageCards from '@site/src/components/HomepageCards';
 import HomepageAgentBanner from '@site/src/components/HomepageAgentBanner';
@@ -26,13 +15,12 @@ Help me understand and set up Pantavisor. Read https://docs.pantavisor.io/agent-
 
 ## Documentation
 
-- [**Pantavisor runtime**](/docs/pantavisor) — the on-device init process, container
+- [**Pantavisor runtime**](/pantavisor/overview) — the on-device init process, container
   orchestration, and OTA agent
-- [**meta-pantavisor**](/docs/meta-pantavisor) — the Yocto layer for building BSP
-  images, including [concepts](/docs/meta-pantavisor/concepts),
-  [start guide](/docs/meta-pantavisor/start), [install guides](/docs/meta-pantavisor/how-to-install),
-  [migration guides](/docs/meta-pantavisor/migrate), and more
-- [**PVR CLI**](/docs/pvr) — device state management tool
+- [**meta-pantavisor**](/meta-pantavisor/overview) — the Yocto layer for building BSP
+  images, including [start guide](/meta-pantavisor/getting-started/start), [install guides](/meta-pantavisor/getting-started/how-to-install),
+  [migration guides](/meta-pantavisor/getting-started/migrate), and more
+- [**PVR CLI**](/pvr) — device state management tool
 
 ## Why Pantavisor over an image updater
 
@@ -42,18 +30,18 @@ as content-addressed objects, so a change ships only what actually changed.
 
 - **Lifecycle decoupling.** Patch a small container layer, not a 200&nbsp;MB
   rootfs. Update an app without touching the certified base; swap the BSP
-  without rebuilding apps. See the [benchmarks](/docs/meta-pantavisor/benchmarks) for the numbers.
+  without rebuilding apps. See the [benchmarks](/meta-pantavisor/getting-started/benchmarks) for the numbers.
 - **Trust at PID 1.** Because Pantavisor owns init, its atomicity and rollback
   guarantees are held to a higher bar than a deletable updater — and we prove it
-  with published [power-fail and atomicity evidence](/docs/meta-pantavisor/security/atomicity-and-trust).
+  with published [power-fail and atomicity evidence](/meta-pantavisor/getting-started/security/atomicity-and-trust).
 - **Git-like device state.** The whole device — kernel, every container, and
   config — is one signed, inspectable, diffable revision.
 - **Recertification moat.** Freeze and certify the base once; iterate apps in
   containers without re-touching the certified image. See
-  [security and compliance](/docs/meta-pantavisor/security).
+  [security and compliance](/meta-pantavisor/getting-started/security).
 
 Already running Mender, RAUC, or SWUpdate? Pantavisor is a replacement, not
-something you layer on top — see [migrating to Pantavisor](/docs/meta-pantavisor/migrate) for a
+something you layer on top — see [migrating to Pantavisor](/meta-pantavisor/getting-started/migrate) for a
 side-by-side comparison and a path off your current updater.
 
 ## Pantahub
