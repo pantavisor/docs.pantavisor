@@ -15,6 +15,9 @@ name: "Docs: release sync"
 #   Stable:  024 < 025 < 026  →  026 is latest
 #   RC:      026-rc1 < 026-rc2  →  026-rc2 is latest
 #   Mixed:   026-rc* < 026 (stable supersedes its own RCs)
+#
+# The `latest` payload (development docs, no manifest entry) is not handled here
+# — see docs-latest.yml.
 
 on:
   workflow_dispatch:             # allow manual trigger
@@ -24,6 +27,9 @@ on:
 jobs:
   sync:
     name: Detect and register new docs versions
+    # Tagged releases only. `latest` (development) rebuilds go to docs-latest.yml.
+    # workflow_dispatch has no client_payload, so it still runs.
+    if: github.event.client_payload.tag != 'latest'
     runs-on: ubuntu-latest
     permissions:
       contents: write

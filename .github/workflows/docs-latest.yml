@@ -1,0 +1,37 @@
+name: "Docs: latest (development) sync"
+
+# meta-pantavisor's "manual: generate latest docs" workflow rebuilds the docs
+# from master, uploads the tarball to s3://…/meta-pantavisor/docs/latest/,
+# writes docs/latest.json and then notifies this repo with:
+#
+#   {"event_type":"docs-release","client_payload":{"tag":"latest"}}
+#
+# Nothing needs to be committed for that: scripts/sync-reference.mjs fetches
+# docs/latest.json at build time and publishes it as the `development` version
+# already registered in releases.json. So all this workflow has to do is
+# rebuild and redeploy the site.
+#
+# Tagged releases (client_payload.tag = "029-rc5", …) are handled by
+# docs-sync.yml instead, which registers the new version in releases.json.
+
+on:
+  # Manual trigger, e.g. to republish after an out-of-band docs upload.
+  workflow_dispatch:
+  repository_dispatch:
+    # docs-latest is accepted too, so meta-pantavisor can move to a dedicated
+    # event type later without a change here.
+    types: [docs-release, docs-latest]
+
+jobs:
+  publish:
+    name: Rebuild and deploy
+    # Only the `latest` payload belongs here. workflow_dispatch carries no
+    # client_payload, so it always runs.
+    if: >-
+      github.event_name != 'repository_dispatch' ||
+      github.event.client_payload.tag == 'latest'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/docs-build.yml

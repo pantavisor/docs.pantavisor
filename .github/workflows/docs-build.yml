@@ -5,6 +5,10 @@ name: Docs – build and deploy
 on:
   # Manual trigger (e.g. to re-fetch the upstream manifest without a repo change).
   workflow_dispatch:
+  # Callable by docs-latest.yml, which rebuilds the site when meta-pantavisor
+  # publishes fresh development docs. Callers must grant contents:read,
+  # pages:write and id-token:write.
+  workflow_call:
   # Triggers when changes land on master (i.e. a PR is merged). Generated docs
   # (reference/, reference_versioned_*, releases/, llms*.txt) are git-ignored, so
   # only the committed inputs that affect the build are listed here.
