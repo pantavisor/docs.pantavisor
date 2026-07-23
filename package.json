@@ -5,8 +5,7 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "sync:reference": "node scripts/sync-reference.mjs",
-    "gen:llms": "node scripts/generate-llms.mjs",
-    "generate": "node scripts/sync-reference.mjs && node scripts/generate-llms.mjs",
+    "generate": "node scripts/sync-reference.mjs",
     "prestart": "npm run generate",
     "start": "docusaurus start",
     "local": "LOCAL_META=true npm run generate && LOCAL_META=true docusaurus start",

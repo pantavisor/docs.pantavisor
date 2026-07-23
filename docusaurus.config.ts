@@ -61,8 +61,8 @@ const config: Config = {
   },
 
   // Canonical custom domain. The domain is also pinned via static/CNAME so it
-  // survives every GitHub Pages deploy, and mirrored in scripts/generate-llms.mjs
-  // (SITE) and static/robots.txt (Sitemap).
+  // survives every GitHub Pages deploy, and mirrored in static/robots.txt
+  // (Sitemap).
   url: 'https://docs.pantavisor.io',
   baseUrl: '/',
 
