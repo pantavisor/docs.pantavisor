@@ -1,4 +1,4 @@
-import {readFileSync} from 'fs';
+import {readFileSync, existsSync} from 'fs';
 import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
@@ -18,11 +18,27 @@ const activeVersions = process.env.LOCAL_META
 const referenceVersions: {[v: string]: {label: string; path: string}} = {};
 for (const version of activeVersions) {
   if (version === releases.current) {
-    referenceVersions.current = {label: version, path: '/'};
-  } else {
+    referenceVersions.current = {label: version, path: `/${version}`};
+  } else if (version === '028') {
+    referenceVersions[version] = {label: version, path: '/'};
+  } else if (existsSync(`reference_versioned_docs/version-${version}`)) {
     referenceVersions[version] = {label: version, path: `/${version}`};
   }
 }
+
+const stableVersions = [
+  ...(!releases.current.includes('rc') ? ['current'] : []),
+  ...activeVersions.filter(
+    (v) => v !== releases.current && !v.includes('rc') && v !== 'development',
+  ),
+];
+const rcVersions = [
+  ...(releases.current.includes('rc') ? ['current'] : []),
+  ...activeVersions.filter(
+    (v) => v !== releases.current && v.includes('rc'),
+  ),
+];
+const hasDevelopment = existsSync('reference_versioned_docs/version-development');
 
 const config: Config = {
   title: 'Pantavisor Docs',
@@ -89,7 +105,7 @@ const config: Config = {
         path: 'reference',
         routeBasePath: '/',
         sidebarPath: './sidebarsReference.ts',
-        lastVersion: 'current',
+        lastVersion: '028',
         versions: referenceVersions,
         rehypePlugins: [rehypeMaterialIcons],
         // Expand every sidebar category by default instead of only the one
@@ -153,11 +169,6 @@ const config: Config = {
         docsDir: ['reference'],
         highlightSearchTermsOnTargetPage: true,
         searchResultLimits: 8,
-        searchContextByPaths: [
-          {label: 'Pantavisor runtime', path: 'pantavisor'},
-          {label: 'meta-pantavisor', path: 'meta-pantavisor'},
-          {label: 'PVR CLI', path: 'pvr'},
-        ],
       },
     ],
   ],
@@ -177,16 +188,29 @@ const config: Config = {
         height: 32,
       },
       items: [
-        {to: '/meta-pantavisor/getting-started/start', label: 'Getting Started', position: 'left'},
-        {to: '/pantavisor/overview', label: 'Pantavisor Runtime', position: 'left'},
-        {to: '/meta-pantavisor/overview', label: 'meta-pantavisor', position: 'left'},
-        {to: '/pvr', label: 'PVR CLI', position: 'left'},
+        {type: 'custom-versionAwareLink', to: '/meta-pantavisor/getting-started/start', label: 'Getting Started', position: 'left', customComponent: 'VersionAwareLink'},
+        {type: 'custom-versionAwareLink', to: '/pantavisor/overview', label: 'Pantavisor Runtime', position: 'left', customComponent: 'VersionAwareLink'},
+        {type: 'custom-versionAwareLink', to: '/meta-pantavisor/overview', label: 'meta-pantavisor', position: 'left', customComponent: 'VersionAwareLink'},
+        {type: 'custom-versionAwareLink', to: '/pvr', label: 'PVR CLI', position: 'left', customComponent: 'VersionAwareLink'},
         {
           type: 'docsVersionDropdown',
           docsPluginId: 'reference',
           position: 'right',
           dropdownActiveClassDisabled: true,
+          versions: stableVersions,
+          label: 'Stable',
         },
+        {
+          type: 'docsVersionDropdown',
+          docsPluginId: 'reference',
+          position: 'right',
+          dropdownActiveClassDisabled: true,
+          versions: rcVersions,
+          label: 'RC',
+        },
+        ...(hasDevelopment
+          ? [{type: 'custom-developmentLink', to: '/development/pantavisor/overview/', label: 'Development', position: 'right' as const}]
+          : []),
         {
           href: 'https://github.com/pantavisor',
           label: 'GitHub',
