@@ -48,37 +48,69 @@ One instance: **reference** docs generated from each Pantavisor and
 meta-pantavisor release, versioned (a dropdown in the navbar switches
 versions; assume the default/root version unless the user names an older
 one explicitly — it may be prefixed, e.g. `/029-rc4/...` or
-`/development/...`). Never suggest hand-editing a page under these paths —
-it's regenerated on every release, and a fix belongs in the source repo
-instead. Three independent sub-trees, each with its own sidebar:
+`/development/...`). The navbar groups versions as **Stable** (GA releases,
+e.g. `028`), **RC** (release candidates and `current`), and, when present,
+**Development** (the rolling `development` build). Never suggest
+hand-editing a page under these paths — it's regenerated on every release,
+and a fix belongs in the source repo instead. Three independent sub-trees,
+each with its own sidebar:
 
-- `/pantavisor` — commands, config keys, the `state.json` schema,
-  and the `pvcontrol`/`pvr`/`pvtx` CLI tools.
-- `/meta-pantavisor` — two sibling sections:
+- `/pantavisor` — the on-device runtime:
+  - `/pantavisor/overview` — architecture, containers, storage/disks,
+    revisions and updates, local/remote control, networking (`xconnect`,
+    `ipam`), watchdog, hooks, BSP, init-mode, configuration levels.
+  - `/pantavisor/reference` — commands, config keys, the `state.json`
+    schema, metadata, and the on-device CLI tools (`pvcontrol`, `pvcurl`,
+    `pventer`, `pvtx`).
+- `/meta-pantavisor` — the Yocto build layer, two sibling sections:
   - `/meta-pantavisor/getting-started` — start guides, install guides,
     develop/operate/migrate guides, benchmarks, solutions, security,
     troubleshooting, licensing, community.
-  - `/meta-pantavisor/overview` — concepts, architecture, the Yocto build
-    system, KAS, recipes, CI.
+  - `/meta-pantavisor/overview` — concepts, glossary, the Yocto build
+    system, KAS, recipes, CI, supported devices, examples, testing.
 - `/pvr` — PVR CLI reference (only present on releases that ship it).
+
+### Key CLI tools
+
+Don't confuse these — they run in different places:
+
+| Tool | Runs where | Purpose |
+|---|---|---|
+| `pvr` | Host workstation | Build/manage repositories, push app deployments to a device or Pantahub. See `/meta-pantavisor/getting-started/develop/cli-tools/pvr-cli`. |
+| `pvcontrol` | Inside a container, on-device | Shell wrapper for everyday device control (containers, daemons, signals, reboot, metadata). See `/pantavisor/reference/pvcontrol`. |
+| `pvcurl` | Inside a container, on-device | Raw HTTP client for the pv-ctrl Unix-socket API, for endpoints `pvcontrol` doesn't wrap. See `/pantavisor/reference/pantavisor-tools`. |
+| `pventer` | Inside a container, on-device | Enter a running container's namespaces (debug shell). See `/pantavisor/reference/pantavisor-tools`. |
+| `pvtx` | On-device (or via `pvcontrol`) | Build/commit/rollback a `state.json` transaction atomically. See `/pantavisor/reference/pantavisor-tools`. |
 
 ## Fast paths to answers
 
 | Asked about… | Go to |
 |---|---|---|
-| What Pantavisor is, PID 1, architecture | `/meta-pantavisor/overview` |
+| What Pantavisor is, PID 1, high-level architecture | `/meta-pantavisor/overview` |
+| Deep architecture: boot flow, revisions, trails | `/pantavisor/overview/pantavisor-architecture` |
 | The full build → flash → update workflow | `/meta-pantavisor/overview/composable-firmware` |
 | Flashing a Raspberry Pi, first hardware | `/meta-pantavisor/getting-started/start/download-and-flash` |
 | Installing on other hardware, board-specific | `/meta-pantavisor/getting-started/how-to-install` |
 | Building an image with Yocto | `/meta-pantavisor/overview/build-system` |
 | Shipping or updating an app container | `/meta-pantavisor/getting-started/develop` |
+| Container lifecycle, groups, restart policy | `/pantavisor/overview/containers` |
+| Storage layout, disks, partitions | `/pantavisor/overview/storage` |
+| How updates/revisions/rollback work on-device | `/pantavisor/overview/updates` |
+| Local control (device-side) vs remote control (Pantahub) | `/pantavisor/overview/local-control`, `/pantavisor/overview/remote-control` |
+| Networking between containers (service mesh) | `/pantavisor/overview/xconnect` |
+| IP address management for containers | `/pantavisor/overview/ipam` |
+| Watchdog / liveness signaling | `/pantavisor/overview/watchdog` |
+| Term I don't recognize (revision, trail, xconnect, ...) | `/meta-pantavisor/overview/glossary` |
+| Worked app examples | `/meta-pantavisor/overview/examples` |
+| CI/test plans, automated testing workflow | `/meta-pantavisor/overview/testing` |
 | Operating a fleet, rollback, recovery | `/meta-pantavisor/getting-started/operate` |
 | Migrating off Mender, RAUC, SWUpdate, or Balena | `/meta-pantavisor/getting-started/migrate` |
 | Comparing to Yocto, Balena, Docker, or image updaters | `/meta-pantavisor/getting-started/benchmarks` |
 | A specific problem: size, secure OTA, reproducibility | `/meta-pantavisor/getting-started/solutions` |
 | Trust model, secure boot, SBOM/CVE, licensing | `/meta-pantavisor/getting-started/security` |
-| An exact command, config key, or schema | `/pantavisor/reference` |
+| An exact command, config key, or the `state.json` schema | `/pantavisor/reference` |
 | A Yocto recipe, KAS config, or CI detail | `/meta-pantavisor/overview/ci` |
+| Supported/reference devices | `/meta-pantavisor/overview/supported-device` |
 | Troubleshooting a running device | `/meta-pantavisor/getting-started/troubleshooting` |
 
 ## Rules for you
