@@ -1,16 +1,11 @@
 # Dependencies
 node_modules/
 
-# Production build (Docusaurus output at repo root — anchored with a leading
-# slash so it does not also ignore the curated/build/ docs section)
+# Production build (Docusaurus output)
 /build/
 
 # Docusaurus cache
 .docusaurus/
-
-# Generated AI-discoverability files (built by scripts/generate-llms.mjs)
-static/llms.txt
-static/llms-full.txt
 
 # Generated/downloaded REFERENCE docs — rebuilt from releases.json at build time
 # by scripts/sync-reference.mjs. Never committed (see releases.json + README).

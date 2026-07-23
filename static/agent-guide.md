@@ -2,11 +2,8 @@
 
 You're helping someone with **Pantavisor** (an embedded Linux runtime) or
 **meta-pantavisor** (the Yocto layer that builds it). This guide orients you
-fast. For anything beyond it, this site's other AI files are the shortcut:
-[llms.txt](https://docs.pantavisor.io/llms.txt) is a link index of every
-curated page; [llms-full.txt](https://docs.pantavisor.io/llms-full.txt) is
-the entire curated documentation concatenated into one file — fetch that one
-if you want everything in a single request.
+fast; use the fast-path table below to jump straight to the page you need
+rather than crawling the whole site.
 
 ## What Pantavisor is
 
@@ -17,7 +14,7 @@ service running under some other init. Teach these ideas in this order:
    every application container, and configuration — is described by one
    `state.json` manifest: a flat map of paths to either SHA256-addressed
    binary objects or inline JSON. See the
-   [state format reference](https://docs.pantavisor.io/reference/pantavisor/reference/pantavisor-state-format-v2).
+   [state format reference](https://docs.pantavisor.io/pantavisor/reference/pantavisor-state-format-v2).
 2. **Content-addressed, not image-based.** A change ships only the objects
    that actually changed (one container layer, one config file), not a
    monolithic image. This is the core differentiator from Mender, RAUC, and
@@ -47,41 +44,42 @@ meta-pantavisor (the build layer) are two different GitHub repos:
 
 ## How this documentation site is structured
 
-Two independent instances — don't conflate them:
+One instance: **reference** docs generated from each Pantavisor and
+meta-pantavisor release, versioned (a dropdown in the navbar switches
+versions; assume the default/root version unless the user names an older
+one explicitly — it may be prefixed, e.g. `/029-rc4/...` or
+`/development/...`). Never suggest hand-editing a page under these paths —
+it's regenerated on every release, and a fix belongs in the source repo
+instead. Three independent sub-trees, each with its own sidebar:
 
-- **Curated** (served at `/`) — hand-authored, versionless task guides and
-  concepts. Only the landing page; all content lives in the reference instance.
-- **Reference** (served at `/pantavisor/`, `/meta-pantavisor/`, `/pvr/`) —
-  generated from each Pantavisor and meta-pantavisor release, and versioned
-  (a dropdown in the navbar switches versions; assume `current` unless the
-  user names an older one explicitly). Never suggest hand-editing a page
-  under these paths — it's regenerated on every release, and a fix belongs
-  in the source repo instead. It has three independent sub-trees with their
-  own sidebars:
-  - `/pantavisor` — commands, config keys, the `state.json` schema,
-    and the `pvcontrol`/`pvr`/`pvtx` CLI tools.
-  - `/meta-pantavisor` — concepts, start guides, the Yocto build system,
-    KAS, recipes, CI, board install guides, and more.
-  - `/pvr` — PVR CLI reference.
+- `/pantavisor` — commands, config keys, the `state.json` schema,
+  and the `pvcontrol`/`pvr`/`pvtx` CLI tools.
+- `/meta-pantavisor` — two sibling sections:
+  - `/meta-pantavisor/getting-started` — start guides, install guides,
+    develop/operate/migrate guides, benchmarks, solutions, security,
+    troubleshooting, licensing, community.
+  - `/meta-pantavisor/overview` — concepts, architecture, the Yocto build
+    system, KAS, recipes, CI.
+- `/pvr` — PVR CLI reference (only present on releases that ship it).
 
 ## Fast paths to answers
 
 | Asked about… | Go to |
 |---|---|---|
-| What Pantavisor is, PID 1, architecture | `/meta-pantavisor/concepts` |
-| The full build → flash → update workflow | `/meta-pantavisor/concepts/composable-firmware` |
-| Flashing a Raspberry Pi, first hardware | `/meta-pantavisor/start/download-and-flash` |
-| Installing on other hardware, board-specific | `/meta-pantavisor/how-to-install` |
-| Building an image with Yocto | `/meta-pantavisor/how-to-build` |
-| Shipping or updating an app container | `/meta-pantavisor/develop` |
-| Operating a fleet, rollback, recovery | `/meta-pantavisor/operate` |
-| Migrating off Mender, RAUC, SWUpdate, or Balena | `/meta-pantavisor/migrate` |
-| Comparing to Yocto, Balena, Docker, or image updaters | `/meta-pantavisor/benchmarks` |
-| A specific problem: size, secure OTA, reproducibility | `/meta-pantavisor/solutions` |
-| Trust model, secure boot, SBOM/CVE, licensing | `/meta-pantavisor/security` |
-| An exact command, config key, or schema | `/pantavisor` |
-| A Yocto recipe, KAS config, or CI detail | `/meta-pantavisor` |
-| Troubleshooting a running device | `/meta-pantavisor/troubleshooting` |
+| What Pantavisor is, PID 1, architecture | `/meta-pantavisor/overview` |
+| The full build → flash → update workflow | `/meta-pantavisor/overview/composable-firmware` |
+| Flashing a Raspberry Pi, first hardware | `/meta-pantavisor/getting-started/start/download-and-flash` |
+| Installing on other hardware, board-specific | `/meta-pantavisor/getting-started/how-to-install` |
+| Building an image with Yocto | `/meta-pantavisor/overview/build-system` |
+| Shipping or updating an app container | `/meta-pantavisor/getting-started/develop` |
+| Operating a fleet, rollback, recovery | `/meta-pantavisor/getting-started/operate` |
+| Migrating off Mender, RAUC, SWUpdate, or Balena | `/meta-pantavisor/getting-started/migrate` |
+| Comparing to Yocto, Balena, Docker, or image updaters | `/meta-pantavisor/getting-started/benchmarks` |
+| A specific problem: size, secure OTA, reproducibility | `/meta-pantavisor/getting-started/solutions` |
+| Trust model, secure boot, SBOM/CVE, licensing | `/meta-pantavisor/getting-started/security` |
+| An exact command, config key, or schema | `/pantavisor/reference` |
+| A Yocto recipe, KAS config, or CI detail | `/meta-pantavisor/overview/ci` |
+| Troubleshooting a running device | `/meta-pantavisor/getting-started/troubleshooting` |
 
 ## Rules for you
 
