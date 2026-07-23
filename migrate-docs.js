@@ -123,8 +123,8 @@ function rewriteLegacyReferenceLinks(content) {
     /\]\((?:\.\.\/)*(?:reference\/)?legacy\/([A-Za-z0-9._-]+)\.md(#[^)\s]*)?\)/g,
     (match, name, anchor = '') => {
       if (LEGACY_LINK_IN_REFERENCE.has(name))
-        return `](/reference/pantavisor/reference/${name}${anchor})`;
-      if (name === 'customize-build-pantavisor') return '](/build)';
+        return `](/pantavisor/reference/${name}${anchor})`;
+      if (name === 'customize-build-pantavisor') return '](/meta-pantavisor/overview/build-system)';
       return match; // unknown legacy target — leave as-is
     },
   );
@@ -141,7 +141,7 @@ function rewriteLegacyReferenceLinks(content) {
     'choose-way': '/start/',
     'claim-device': '/operate/device-access/remote-pantahub',
     'clone-your-system': '/operate/',
-    'colibri-imx6ull': '/reference/meta-pantavisor/',
+    'colibri-imx6ull': '/meta-pantavisor/getting-started/how-to-install/toradex',
     'debug-pantavisor': '/troubleshooting/faq',
     'deploy-a-new-revision': '/develop/application/',
     'environment-setup': '/start/',
@@ -151,8 +151,8 @@ function rewriteLegacyReferenceLinks(content) {
     'navigating-console': '/operate/device-access/serial-port',
     'sdcard': '/start/download-and-flash',
     'testplan-pvctrl': '/develop/cli-tools/pvcontrol',
-    'toradex': '/reference/meta-pantavisor/',
-    'verdin-imx8mm': '/reference/meta-pantavisor/'
+    'toradex': '/meta-pantavisor/getting-started/how-to-install/toradex',
+    'verdin-imx8mm': '/meta-pantavisor/getting-started/how-to-install/toradex'
   };
   rewritten = rewritten.replace(
     /\]\((?:\.\.\/)+([A-Za-z0-9._-]+)\.md(#[^)\s]*)?\)/g,
@@ -172,7 +172,41 @@ function rewriteLegacyReferenceLinks(content) {
   return rewritten;
 }
 
-function processMarkdown(content) {
+// Cross-reference links authored as absolute site paths (e.g.
+// `/meta-pantavisor/getting-started/migrate/mender`) always resolve against
+// whichever version is served at the site root, so following one while
+// browsing a prefixed version (e.g. /development/...) silently drops the
+// reader into a different version. Docusaurus resolves *relative* doc links
+// within whatever version is currently active, so rewrite absolute links
+// that target one of the reference instance's own top-level sections into a
+// path relative to the linking file, computed against SRC (which mirrors
+// DEST 1:1 for this version) — that keeps them version-safe automatically.
+const REFERENCE_SECTIONS = ['meta-pantavisor', 'pantavisor', 'pvr'];
+function resolveReferenceLinkTarget(urlPath) {
+  const base = urlPath.replace(/\/$/, '');
+  for (const suffix of ['.md', '/index.md', '/_index.md', '/README.md']) {
+    const candidate = base + suffix;
+    if (fs.existsSync(path.join(SRC, candidate))) return candidate;
+  }
+  return null;
+}
+function rewriteAbsoluteReferenceLinks(content, relFilePath) {
+  const fileDir = path.dirname(relFilePath);
+  return content.replace(
+    /\]\((\/[A-Za-z0-9._/-]+)(#[^)\s]*)?\)/g,
+    (match, urlPath, anchor = '') => {
+      if (!REFERENCE_SECTIONS.includes(urlPath.split('/')[1])) return match;
+      const target = resolveReferenceLinkTarget(urlPath.slice(1));
+      if (!target) return match; // can't resolve — leave as-is
+      let rel = path.relative(fileDir, target).split(path.sep).join('/');
+      if (!rel.startsWith('.')) rel = `./${rel}`;
+      return `](${rel}${anchor})`;
+    },
+  );
+}
+
+function processMarkdown(content, relFilePath) {
+  const finish = (body) => rewriteAbsoluteReferenceLinks(rewriteLegacyReferenceLinks(body), relFilePath);
   // TOML frontmatter
   if (content.startsWith('+++')) {
     const end = content.indexOf('\n+++', 3);
@@ -182,7 +216,7 @@ function processMarkdown(content) {
       const parsed = parseTomlFrontmatter(toml);
       const fm = buildDocuFrontmatter(parsed);
       const fmStr = serializeFrontmatter(fm);
-      return rewriteLegacyReferenceLinks(`---\n${fmStr}\n---\n\n${body}`);
+      return finish(`---\n${fmStr}\n---\n\n${body}`);
     }
   }
   // YAML frontmatter
@@ -194,10 +228,10 @@ function processMarkdown(content) {
       const parsed = parseYamlFrontmatter(yaml);
       const fm = buildDocuFrontmatter(parsed);
       const fmStr = serializeFrontmatter(fm);
-      return rewriteLegacyReferenceLinks(`---\n${fmStr}\n---\n\n${body}`);
+      return finish(`---\n${fmStr}\n---\n\n${body}`);
     }
   }
-  return rewriteLegacyReferenceLinks(content);
+  return finish(content);
 }
 
 // Paths (relative to the release root) that are NOT reference material and are
@@ -236,7 +270,7 @@ function walk(srcDir, destDir) {
       walk(srcPath, destPath);
     } else if (entry.name.endsWith('.md')) {
       const raw = fs.readFileSync(srcPath, 'utf8');
-      fs.writeFileSync(destPath, processMarkdown(raw));
+      fs.writeFileSync(destPath, processMarkdown(raw, relFromRoot));
     } else {
       fs.copyFileSync(srcPath, destPath);
     }
