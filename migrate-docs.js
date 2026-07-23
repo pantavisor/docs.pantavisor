@@ -141,7 +141,6 @@ function rewriteLegacyReferenceLinks(content) {
     'choose-way': '/start/',
     'claim-device': '/operate/device-access/remote-pantahub',
     'clone-your-system': '/operate/',
-    'colibri-imx6ull': '/meta-pantavisor/getting-started/how-to-install/toradex',
     'debug-pantavisor': '/troubleshooting/faq',
     'deploy-a-new-revision': '/develop/application/',
     'environment-setup': '/start/',
@@ -151,12 +150,26 @@ function rewriteLegacyReferenceLinks(content) {
     'navigating-console': '/operate/device-access/serial-port',
     'sdcard': '/start/download-and-flash',
     'testplan-pvctrl': '/develop/cli-tools/pvcontrol',
-    'toradex': '/meta-pantavisor/getting-started/how-to-install/toradex',
-    'verdin-imx8mm': '/meta-pantavisor/getting-started/how-to-install/toradex'
   };
+  // The toradex flashing guide moved from meta-pantavisor/how-to-install/ to
+  // meta-pantavisor/getting-started/how-to-install/ in the getting-started
+  // restructure, but that restructure only landed in `development` and the
+  // in-flight `current` version — every frozen older version (RCs included)
+  // still has it at the old flat path. Resolve against THIS version's own
+  // source tree rather than hardcoding one path for every version.
+  const TORADEX_LINK_NAMES = new Set(['toradex', 'verdin-imx8mm', 'colibri-imx6ull']);
+  const TORADEX_LINK_CANDIDATES = [
+    '/meta-pantavisor/getting-started/how-to-install/toradex',
+    '/meta-pantavisor/how-to-install/toradex',
+  ];
+  function resolveToradexLink() {
+    return TORADEX_LINK_CANDIDATES.find((c) => resolveReferenceLinkTarget(c.slice(1)))
+      ?? TORADEX_LINK_CANDIDATES[0];
+  }
   rewritten = rewritten.replace(
     /\]\((?:\.\.\/)+([A-Za-z0-9._-]+)\.md(#[^)\s]*)?\)/g,
     (match, name, anchor = '') => {
+      if (TORADEX_LINK_NAMES.has(name)) return `](${resolveToradexLink()}${anchor})`;
       if (LEGACY_ROOT_LINKS[name]) {
         if (name === 'inspect-device') {
           if (anchor === '#ssh') return '](/operate/device-access/local-network#ssh-access)';
