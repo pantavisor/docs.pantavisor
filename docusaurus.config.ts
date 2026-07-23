@@ -15,11 +15,22 @@ const releases = JSON.parse(readFileSync('./releases.json', 'utf8')) as {
 const activeVersions = process.env.LOCAL_META
   ? [releases.current]
   : releases.versions;
+// The latest stable (non-RC, non-development) release is served unprefixed
+// at the site root. `versions` is newest-first, so the first non-RC entry
+// is always the current stable release — this tracks whichever version that
+// is (028 today, 029 once it ships, ...) without hardcoding a version here.
+// Falls back to `current` itself if every entry happens to be an RC/dev
+// build, so `rootVersionKey` is never left unresolved.
+const latestStableVersion =
+  activeVersions.find((v) => v !== 'development' && !v.includes('rc')) ?? releases.current;
+const rootVersionKey = latestStableVersion === releases.current ? 'current' : latestStableVersion;
+
 const referenceVersions: {[v: string]: {label: string; path: string}} = {};
 for (const version of activeVersions) {
+  const isRoot = version === latestStableVersion;
   if (version === releases.current) {
-    referenceVersions.current = {label: version, path: `/${version}`};
-  } else if (version === '028') {
+    referenceVersions.current = {label: version, path: isRoot ? '/' : `/${version}`};
+  } else if (isRoot) {
     referenceVersions[version] = {label: version, path: '/'};
   } else if (existsSync(`reference_versioned_docs/version-${version}`)) {
     referenceVersions[version] = {label: version, path: `/${version}`};
@@ -105,7 +116,7 @@ const config: Config = {
         path: 'reference',
         routeBasePath: '/',
         sidebarPath: './sidebarsReference.ts',
-        lastVersion: '028',
+        lastVersion: rootVersionKey,
         versions: referenceVersions,
         rehypePlugins: [rehypeMaterialIcons],
         // Expand every sidebar category by default instead of only the one
@@ -117,37 +128,7 @@ const config: Config = {
       '@docusaurus/plugin-client-redirects',
       {
         redirects: [
-          // Old curated top-level shortcuts → new Getting Started section
-          {from: '/start', to: '/meta-pantavisor/getting-started/start'},
-          {from: '/install', to: '/meta-pantavisor/getting-started/how-to-install'},
-          {from: '/build', to: '/meta-pantavisor/overview/get-started'},
-          {from: '/develop', to: '/meta-pantavisor/getting-started/develop'},
-          {from: '/operate', to: '/meta-pantavisor/getting-started/operate'},
-          {from: '/migrate', to: '/meta-pantavisor/getting-started/migrate'},
-          {from: '/security', to: '/meta-pantavisor/getting-started/security'},
-          {from: '/benchmarks', to: '/meta-pantavisor/getting-started/benchmarks'},
-          {from: '/solutions', to: '/meta-pantavisor/getting-started/solutions'},
-          {from: '/troubleshooting', to: '/meta-pantavisor/getting-started/troubleshooting'},
-          {from: '/licensing', to: '/meta-pantavisor/getting-started/licensing'},
-          {from: '/community', to: '/meta-pantavisor/getting-started/community'},
-          {from: '/build/build-system', to: '/meta-pantavisor/overview/get-started'},
           {from: '/concepts/meta-pantavisor-overview', to: '/meta-pantavisor/overview'},
-          // Old flat URLs → new nested URLs
-          {from: '/meta-pantavisor/start', to: '/meta-pantavisor/getting-started/start'},
-          {from: '/meta-pantavisor/develop', to: '/meta-pantavisor/getting-started/develop'},
-          {from: '/meta-pantavisor/how-to-install', to: '/meta-pantavisor/getting-started/how-to-install'},
-          {from: '/meta-pantavisor/operate', to: '/meta-pantavisor/getting-started/operate'},
-          {from: '/meta-pantavisor/migrate', to: '/meta-pantavisor/getting-started/migrate'},
-          {from: '/meta-pantavisor/security', to: '/meta-pantavisor/getting-started/security'},
-          {from: '/meta-pantavisor/benchmarks', to: '/meta-pantavisor/getting-started/benchmarks'},
-          {from: '/meta-pantavisor/solutions', to: '/meta-pantavisor/getting-started/solutions'},
-          {from: '/meta-pantavisor/troubleshooting', to: '/meta-pantavisor/getting-started/troubleshooting'},
-          {from: '/meta-pantavisor/licensing', to: '/meta-pantavisor/getting-started/licensing'},
-          {from: '/meta-pantavisor/community', to: '/meta-pantavisor/getting-started/community'},
-          {from: '/meta-pantavisor/examples', to: '/meta-pantavisor/overview/examples'},
-          {from: '/meta-pantavisor/testing', to: '/meta-pantavisor/overview/testing'},
-          {from: '/meta-pantavisor/ci', to: '/meta-pantavisor/overview/ci'},
-          {from: '/meta-pantavisor/how-to-build', to: '/meta-pantavisor/overview/get-started'},
           // Repo root → first child
           {from: '/pantavisor', to: '/pantavisor/overview'},
           {from: '/meta-pantavisor', to: '/meta-pantavisor/overview'},
