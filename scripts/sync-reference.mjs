@@ -198,6 +198,18 @@ if (LOCAL_META && existsSync(localTarball)) {
 }
 const manifest = LOCAL_META && existsSync(localTarball) ? {} : await fetchJson(cfg.manifest);
 
+const LATEST_JSON_URL = 'https://pantavisor-ci.s3.amazonaws.com/meta-pantavisor/docs/latest.json';
+let latestDocs = null;
+if (!LOCAL_META || !existsSync(localTarball)) {
+  try {
+    latestDocs = await fetchJson(LATEST_JSON_URL);
+    if (latestDocs.hash) latestDocs.sha256 = latestDocs.hash;
+    console.log(`Latest docs: ${latestDocs.name ?? 'unknown'}`);
+  } catch (e) {
+    console.warn(`WARNING: could not fetch latest docs from ${LATEST_JSON_URL}: ${e.message}`);
+  }
+}
+
 // Clean previous generated output so removed versions don't linger.
 for (const d of ['reference', 'reference_versioned_docs', 'reference_versioned_sidebars']) {
   rmSync(join(ROOT, d), {recursive: true, force: true});
@@ -212,8 +224,14 @@ if (LOCAL_META && existsSync(localTarball)) {
   // Normal pipeline: process all versions from the manifest
   for (const version of versions) {
     console.log(`Release ${version}:`);
-    const docs = findDocs(manifest, version);
-    if (!docs) throw new Error(`No docs tarball for "${version}" in upstream manifest ${cfg.manifest}`);
+    const docs = version === 'development' ? latestDocs : findDocs(manifest, version);
+    if (!docs) {
+      if (version === 'development') {
+        console.warn('  (no development docs available, skipping)');
+        continue;
+      }
+      throw new Error(`No docs tarball for "${version}" in upstream manifest ${cfg.manifest}`);
+    }
     await ensureSource(version, docs);
     if (version === current) {
       migrate(version, 'reference');

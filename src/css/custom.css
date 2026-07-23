@@ -98,3 +98,18 @@
 .docs-doc-id-index .theme-doc-breadcrumbs {
   display: none;
 }
+
+.dropdown__section-header {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.5rem 1rem 0.25rem;
+  color: var(--ifm-color-emphasis-600);
+  pointer-events: none;
+  user-select: none;
+}
+
+.dropdown__section-header:not(:first-child) {
+  padding-top: 0.75rem;
+}
