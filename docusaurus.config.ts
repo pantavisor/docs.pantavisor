@@ -33,9 +33,11 @@ for (const version of activeVersions) {
   } else if (isRoot) {
     referenceVersions[version] = {label: version, path: '/'};
   } else if (existsSync(`reference_versioned_docs/version-${version}`)) {
-    referenceVersions[version] = {label: version, path: `/${version}`};
+    referenceVersions[version] = {label: version === 'development' ? 'master' : version, path: `/${version}`};
   }
 }
+
+const hasDevelopment = existsSync('reference_versioned_docs/version-development');
 
 const stableVersions = [
   ...(!releases.current.includes('rc') ? ['current'] : []),
@@ -43,13 +45,17 @@ const stableVersions = [
     (v) => v !== releases.current && !v.includes('rc') && v !== 'development',
   ),
 ];
-const rcVersions = [
-  ...(releases.current.includes('rc') ? ['current'] : []),
-  ...activeVersions.filter(
-    (v) => v !== releases.current && v.includes('rc'),
+// 'development' (displayed as "master") is always the first entry so it
+// stays pinned at the top of the Unstable group.
+const unstableVersions: {[name: string]: {label?: string}} = {
+  ...(hasDevelopment ? {development: {label: 'master'}} : {}),
+  ...(releases.current.includes('rc') ? {current: {}} : {}),
+  ...Object.fromEntries(
+    activeVersions
+      .filter((v) => v !== releases.current && v.includes('rc'))
+      .map((v) => [v, {}]),
   ),
-];
-const hasDevelopment = existsSync('reference_versioned_docs/version-development');
+};
 
 const config: Config = {
   title: 'Pantavisor Docs',
@@ -186,12 +192,9 @@ const config: Config = {
           docsPluginId: 'reference',
           position: 'right',
           dropdownActiveClassDisabled: true,
-          versions: rcVersions,
-          label: 'RC',
+          versions: unstableVersions,
+          label: 'Unstable',
         },
-        ...(hasDevelopment
-          ? [{type: 'custom-developmentLink', to: '/development/pantavisor/overview/', label: 'Development', position: 'right' as const}]
-          : []),
         {
           href: 'https://github.com/pantavisor',
           label: 'GitHub',

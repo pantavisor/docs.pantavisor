@@ -8,7 +8,6 @@ import DocSidebarNavbarItem from '@theme/NavbarItem/DocSidebarNavbarItem';
 import DocsVersionNavbarItem from '@theme/NavbarItem/DocsVersionNavbarItem';
 import DocsVersionDropdownNavbarItem from '@theme/NavbarItem/DocsVersionDropdownNavbarItem';
 import VersionAwareLink from './VersionAwareLink';
-import DevelopmentNavbarLink from './DevelopmentNavbarLink';
 
 import type {ComponentTypesObject} from '@theme/NavbarItem/ComponentTypes';
 
@@ -23,7 +22,6 @@ const ComponentTypes: ComponentTypesObject = {
   docsVersion: DocsVersionNavbarItem,
   docsVersionDropdown: DocsVersionDropdownNavbarItem,
   'custom-versionAwareLink': VersionAwareLink,
-  'custom-developmentLink': DevelopmentNavbarLink,
 };
 
 export default ComponentTypes;

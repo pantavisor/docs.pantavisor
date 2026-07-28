@@ -30,10 +30,11 @@ function getVersionItems(
   versions: GlobalVersion[],
   configs?: PropVersions,
 ): VersionItem[] {
-  const filtered = versions.filter((v) => v.name !== 'development');
   if (configs) {
+    // Explicit configs name exactly which versions to show (e.g. the Unstable
+    // dropdown deliberately includes 'development') — no implicit filtering.
     const versionMap = new Map<string, GlobalVersion>(
-      filtered.map((version) => [version.name, version]),
+      versions.map((version) => [version.name, version]),
     );
 
     const toVersionItem = (
@@ -43,7 +44,7 @@ function getVersionItems(
       const version = versionMap.get(name);
       if (!version) {
         throw new Error(`No docs version exist for name '${name}', please verify your 'docsVersionDropdown' navbar item versions config.
-Available version names:\n- ${filtered.map((v) => `${v.name}`).join('\n- ')}`);
+Available version names:\n- ${versions.map((v) => `${v.name}`).join('\n- ')}`);
       }
       return {version, label: config?.label ?? version.label};
     };
@@ -56,7 +57,12 @@ Available version names:\n- ${filtered.map((v) => `${v.name}`).join('\n- ')}`);
       );
     }
   } else {
-    return filtered.map((version) => ({version, label: version.label}));
+    // No explicit configs (unused by this site today, both navbar dropdowns
+    // always pass one) — fall back to every version except 'development',
+    // which should only ever appear where explicitly requested.
+    return versions
+      .filter((v) => v.name !== 'development')
+      .map((version) => ({version, label: version.label}));
   }
 }
 
