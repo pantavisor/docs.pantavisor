@@ -28,7 +28,7 @@ migrate-docs.js                # Converts an extracted release into the referenc
 scripts/sync-reference.mjs     # Downloads tarballs + generates the reference docs          [COMMITTED]
 docusaurus.config.ts           # Reads releases.json to build the version dropdown          [COMMITTED]
 src/pages/index.mdx            # Site homepage                                              [COMMITTED]
-static/agent-guide.md          # Hand-authored AI/agent orientation guide                   [COMMITTED]
+static/llms.txt                # Hand-authored AI/agent orientation guide (llms.txt convention) [COMMITTED]
 archive/legacy/                # Parked snapshot of the old site — not served               [COMMITTED]
 src/  static/                  # Components, CSS, static assets                             [COMMITTED]
 
