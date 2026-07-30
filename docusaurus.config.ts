@@ -141,6 +141,17 @@ const config: Config = {
         ],
       },
     ],
+    [
+      'docusaurus-plugin-copy-page-button',
+      {
+        // Auto-injection targets any page with an `<article>`/TOC element,
+        // which would also catch the MDX landing page. We render the button
+        // ourselves from a swizzled DocItem/Layout (src/theme/DocItem/Layout)
+        // instead, so it only ever appears on actual doc pages.
+        injectButton: false,
+        generateMarkdownRoutes: true,
+      },
+    ],
   ],
 
   themes: [
