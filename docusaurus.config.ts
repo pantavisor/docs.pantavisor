@@ -222,7 +222,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Pantacor Ltd. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Pantacor Ltd.`,
     },
     prism: {
       theme: prismThemes.github,
