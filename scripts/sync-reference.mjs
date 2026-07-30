@@ -164,6 +164,11 @@ function mergePvrDocs(destRel) {
     return;
   }
   const pvrRef = join(ROOT, destRel, 'pvr');
+  // Some older release tarballs don't bundle a pvr/ folder at all — create it
+  // so this release still gets the (unversioned) pvr command reference.
+  if (!existsSync(pvrRef)) {
+    mkdirSync(pvrRef, {recursive: true});
+  }
   // Remove the tarball's README.md (it was replaced by docs/ structure)
   const tarballReadme = join(pvrRef, 'README.md');
   if (existsSync(tarballReadme)) {
