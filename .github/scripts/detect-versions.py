@@ -35,11 +35,19 @@ import sys
 
 VERSION_RE = re.compile(r"^(0\d+)(?:-rc(\d+)(?:\.(\d+))?)?$")
 
+# Sentinel entry for the unstable/master build. It has no upstream release
+# manifest and no docs tarball, so it never comes from `new_versions` and
+# must never be picked as `current` — it only needs to sort first.
+DEVELOPMENT = "development"
 
-def parse_ver(v: str) -> tuple[int, float, float]:
+
+def parse_ver(v: str) -> tuple[float, float, float]:
     """Return (base, rc, patch) for sorting. Stable releases use math.inf as rc
     so they rank above all RC builds of the same base number. Patch releases
-    (e.g. 028-rc10.1) sort between their base RC and the next RC."""
+    (e.g. 028-rc10.1) sort between their base RC and the next RC. `development`
+    always sorts first."""
+    if v == DEVELOPMENT:
+        return (math.inf, math.inf, math.inf)
     m = VERSION_RE.match(v)
     if not m:
         raise ValueError(f"Unexpected version format: {v!r}")
@@ -80,7 +88,7 @@ def main() -> None:
     all_versions = sorted(known | set(new_versions), key=parse_ver, reverse=True)
 
     local["versions"] = all_versions
-    local["current"]  = all_versions[0]
+    local["current"]  = next(v for v in all_versions if v != DEVELOPMENT)
 
     with open(local_path, "w") as f:
         json.dump(local, f, indent=2)
