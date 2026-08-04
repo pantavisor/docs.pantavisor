@@ -71,7 +71,7 @@ jobs:
           git config user.name  "Pantavisor Docs CI"
           git config user.email "pantavisor-meta@ci.pantavisor.io"
           git add .github/state/docs-latest-hash.txt
-          git commit -m "chore: record latest.json hash change"
+          git commit -m "ci: record latest.json hash change"
           git push origin HEAD:master
 
   publish:
