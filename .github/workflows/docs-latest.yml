@@ -13,6 +13,11 @@ name: "Docs: latest (development) sync"
 #
 # Tagged releases (client_payload.tag = "029-rc5", …) are handled by
 # docs-sync.yml instead, which registers the new version in releases.json.
+#
+# The repository_dispatch above is the normal trigger, but it depends on
+# meta-pantavisor's CI actually firing it. As a safety net, a schedule polls
+# docs/latest.json every 30 minutes and rebuilds if its `hash` field changed
+# since the last run (tracked in .github/state/docs-latest-hash.txt).
 
 on:
   # Manual trigger, e.g. to republish after an out-of-band docs upload.
@@ -21,15 +26,68 @@ on:
     # docs-latest is accepted too, so meta-pantavisor can move to a dedicated
     # event type later without a change here.
     types: [docs-release, docs-latest]
+  schedule:
+    - cron: "*/30 * * * *"
 
 jobs:
+  check:
+    name: Poll latest.json for changes
+    # Only the schedule needs to poll; other triggers already know a rebuild
+    # is warranted.
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      changed: ${{ steps.compare.outputs.changed }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch upstream latest.json
+        run: |
+          curl -fsSL \
+            'https://pantavisor-ci.s3.amazonaws.com/meta-pantavisor/docs/latest.json' \
+            -o /tmp/latest.json
+
+      - name: Compare hash against last seen
+        id: compare
+        run: |
+          STATE_FILE=.github/state/docs-latest-hash.txt
+          NEW_HASH=$(jq -r '.hash' /tmp/latest.json)
+          OLD_HASH=$(cat "$STATE_FILE" 2>/dev/null || true)
+
+          if [ "$NEW_HASH" != "$OLD_HASH" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            mkdir -p "$(dirname "$STATE_FILE")"
+            echo "$NEW_HASH" > "$STATE_FILE"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Record new hash
+        if: steps.compare.outputs.changed == 'true'
+        run: |
+          git config user.name  "Pantavisor Docs CI"
+          git config user.email "pantavisor-meta@ci.pantavisor.io"
+          git add .github/state/docs-latest-hash.txt
+          git commit -m "chore: record latest.json hash change"
+          git push origin HEAD:master
+
   publish:
     name: Rebuild and deploy
-    # Only the `latest` payload belongs here. workflow_dispatch carries no
-    # client_payload, so it always runs.
+    needs: [check]
+    # Run on workflow_dispatch, on a `latest` repository_dispatch payload, or
+    # when the schedule's check job found a new hash. `always()` is needed
+    # because `check` is skipped (not failed) on the first two triggers, and
+    # a skipped dependency would otherwise skip this job too.
     if: >-
-      github.event_name != 'repository_dispatch' ||
-      github.event.client_payload.tag == 'latest'
+      always() &&
+      (
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'repository_dispatch' && github.event.client_payload.tag == 'latest') ||
+        (github.event_name == 'schedule' && needs.check.outputs.changed == 'true')
+      )
     permissions:
       contents: read
       pages: write
