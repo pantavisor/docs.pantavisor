@@ -51,6 +51,14 @@ const cards: CardItem[] = [
     to: '/meta-pantavisor/getting-started/benchmarks',
     cta: 'See the comparison',
   },
+  {
+    path: 'hub.pantacor.com/docs',
+    title: 'Pantahub docs',
+    description:
+      'REST API reference for the cloud fleet service, plus the guide to running your own Pantahub server.',
+    to: 'https://hub.pantacor.com/docs/',
+    cta: 'View Pantahub docs',
+  },
 ];
 
 function Arrow() {
