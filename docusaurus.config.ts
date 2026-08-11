@@ -25,19 +25,21 @@ const latestStableVersion =
   activeVersions.find((v) => v !== 'development' && !v.includes('rc')) ?? releases.current;
 const rootVersionKey = latestStableVersion === releases.current ? 'current' : latestStableVersion;
 
-const referenceVersions: {[v: string]: {label: string; path: string}} = {};
+// Only the version served at site root ('/') is indexable — every other
+// version (old stables, RCs, master) is near-duplicate content and gets
+// noIndex so search engines don't dilute rankings across dozens of
+// versioned copies of the same pages.
+const referenceVersions: {[v: string]: {label: string; path: string; noIndex?: boolean}} = {};
 for (const version of activeVersions) {
   const isRoot = version === latestStableVersion;
   if (version === releases.current) {
-    referenceVersions.current = {label: version, path: isRoot ? '/' : `/${version}`};
+    referenceVersions.current = {label: version, path: isRoot ? '/' : `/${version}`, ...(isRoot ? {} : {noIndex: true})};
   } else if (isRoot) {
     referenceVersions[version] = {label: version, path: '/'};
   } else if (existsSync(`reference_versioned_docs/version-${version}`)) {
-    referenceVersions[version] = {label: version === 'development' ? 'master' : version, path: `/${version}`};
+    referenceVersions[version] = {label: version === 'development' ? 'master' : version, path: `/${version}`, noIndex: true};
   }
 }
-
-const hasDevelopment = existsSync('reference_versioned_docs/version-development');
 
 const stableVersions = [
   ...(!releases.current.includes('rc') ? ['current'] : []),
@@ -45,17 +47,6 @@ const stableVersions = [
     (v) => v !== releases.current && !v.includes('rc') && v !== 'development',
   ),
 ];
-// 'development' (displayed as "master") is always the first entry so it
-// stays pinned at the top of the Unstable group.
-const unstableVersions: {[name: string]: {label?: string}} = {
-  ...(hasDevelopment ? {development: {label: 'master'}} : {}),
-  ...(releases.current.includes('rc') ? {current: {}} : {}),
-  ...Object.fromEntries(
-    activeVersions
-      .filter((v) => v !== releases.current && v.includes('rc'))
-      .map((v) => [v, {}]),
-  ),
-};
 
 const config: Config = {
   title: 'Pantavisor Docs',
@@ -196,15 +187,8 @@ const config: Config = {
           position: 'right',
           dropdownActiveClassDisabled: true,
           versions: stableVersions,
-          label: 'Stable',
-        },
-        {
-          type: 'docsVersionDropdown',
-          docsPluginId: 'reference',
-          position: 'right',
-          dropdownActiveClassDisabled: true,
-          versions: unstableVersions,
-          label: 'Unstable',
+          label: 'Versions',
+          dropdownItemsAfter: [{to: '/versions', label: 'Others'}],
         },
         {
           href: 'https://github.com/pantavisor',

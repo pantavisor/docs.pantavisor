@@ -1,0 +1,53 @@
+.main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 4rem;
+}
+
+.intro {
+  color: var(--ifm-color-emphasis-700);
+  margin-bottom: 2.5rem;
+}
+
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.sectionTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ifm-color-emphasis-700);
+  border-bottom: 1px solid var(--ifm-color-emphasis-300);
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.rowLink {
+  display: block;
+  padding: 0.65rem 0.25rem;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.95rem;
+  color: var(--ifm-font-color-base);
+  text-decoration: none;
+}
+
+.rowLink:hover {
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+}
