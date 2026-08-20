@@ -6,6 +6,7 @@ description: "Pantavisor is a PID-1 embedded Linux runtime with container orches
 import HomepageHero from '@site/src/components/HomepageHero';
 import HomepageCards from '@site/src/components/HomepageCards';
 import HomepageAgentBanner from '@site/src/components/HomepageAgentBanner';
+import {HeadsUpArchitectureDiagram, StackSideBySideDiagram} from '@site/src/components/HomepageDiagrams';
 
 <HomepageHero />
 <HomepageCards />
@@ -27,11 +28,56 @@ Help me understand and set up Pantavisor. Read https://docs.pantavisor.io/llms.t
   [migration guides](/meta-pantavisor/getting-started/migrate), and more
 - [**PVR CLI**](/pvr) — device state management tool
 
+## Architecture at a glance
+
+Pantavisor is PID 1 on the device — not an app or a service. It boots straight
+into a container-based runtime where the kernel, bootloader, firmware and
+every app are all just versioned entries in one manifest, `state.json`.
+
+- **Layer 0 — Hardware:** SoC, storage, board.
+- **Layer 1 — Bootloader:** verifies and boots Pantavisor.
+- **Pantavisor (PID 1):** reads/writes `state.json`; owns the BSP container
+  (kernel, bootloader assets, firmware — versioned like any other container)
+  and every app container (LXC-first, ring-3 isolation, near-bare-metal
+  speed, each updating independently). Built-in subsystems: watchdog,
+  xconnect, ipam, local control.
+- **Pantahub (optional):** cloud backend over the local network for fleet
+  push, logs, and device claim. Not required — Pantavisor updates fully
+  standalone.
+
+**Update & rollback flow:** new revision (changed objects only) → written to
+pending slot → switch & boot → health check → pass: stays / fail: automatic
+rollback. Containers with `restart_policy: container` update with zero
+reboot at all.
+
+<HeadsUpArchitectureDiagram />
+
+*For the full breakdown of each piece shown above, see the
+[Technical Overview](/pantavisor/overview): [architecture](/pantavisor/overview/pantavisor-architecture),
+[BSP](/pantavisor/overview/bsp), [containers](/pantavisor/overview/containers),
+[updates &amp; rollback](/pantavisor/overview/updates), [watchdog](/pantavisor/overview/watchdog),
+[xconnect](/pantavisor/overview/xconnect), [IPAM](/pantavisor/overview/ipam),
+[local control](/pantavisor/overview/local-control), and
+[remote control via Pantahub](/pantavisor/overview/remote-control).*
+
 ## Why Pantavisor over an image updater
 
 Image updaters (Mender, RAUC, SWUpdate) update **the image**: every change —
 even a one-line app fix — is a full-image event. Pantavisor versions the device
 as content-addressed objects, so a change ships only what actually changed.
+
+A traditional image bakes everything into one monolithic rootfs. Pantavisor
+keeps every layer as its own versioned, independently-updatable piece: each
+app in its own container → BSP container (kernel, bootloader assets,
+firmware — versioned like any app) → Pantavisor (PID 1), driven by the
+`state.json` manifest of content-addressed objects → bootloader → hardware.
+A failed revision rolls back automatically, no bolted-on updater required.
+
+<StackSideBySideDiagram />
+
+*See [architecture](/pantavisor/overview/pantavisor-architecture),
+[BSP](/pantavisor/overview/bsp), and [updates &amp; rollback](/pantavisor/overview/updates)
+for how each layer above is actually versioned and swapped.*
 
 - **Lifecycle decoupling.** Patch a small container layer, not a 200&nbsp;MB
   rootfs. Update an app without touching the certified base; swap the BSP
