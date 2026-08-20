@@ -99,6 +99,33 @@
   display: none;
 }
 
+/* Color tokens for inline homepage diagrams (heads-up architecture,
+   traditional-vs-Pantavisor stack). Inlined as JSX/SVG in index.mdx so they
+   can react to the site's explicit light/dark toggle via [data-theme],
+   not just OS-level prefers-color-scheme like a plain <img>-loaded SVG
+   would. */
+.pv-diagram {
+  --pv-diagram-card-bg: #f4f5f7;
+  --pv-diagram-card-border: #c9ced6;
+  --pv-diagram-box-bg: #ffffff;
+  --pv-diagram-text-primary: #1c1e21;
+  --pv-diagram-text-muted: #5b6472;
+  --pv-diagram-accent-bg: #e8f0fe;
+  --pv-diagram-accent-border: var(--ifm-color-primary);
+  --pv-diagram-accent-text: var(--ifm-color-primary);
+  --pv-diagram-dashed-border: #8b93a0;
+}
+
+[data-theme='dark'] .pv-diagram {
+  --pv-diagram-card-bg: #3a4149;
+  --pv-diagram-card-border: #4b525c;
+  --pv-diagram-box-bg: #343b46;
+  --pv-diagram-text-primary: #e8eaed;
+  --pv-diagram-text-muted: #9aa1ab;
+  --pv-diagram-accent-bg: rgba(77, 148, 255, 0.14);
+  --pv-diagram-dashed-border: #6b7280;
+}
+
 .dropdown__section-header {
   font-size: 0.7rem;
   font-weight: 700;
