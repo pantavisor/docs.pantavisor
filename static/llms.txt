@@ -8,7 +8,11 @@ rather than crawling the whole site.
 ## What Pantavisor is
 
 Pantavisor is **PID 1** — the init process — on the device, not an app or a
-service running under some other init. Teach these ideas in this order:
+service running under some other init. Teach these ideas in this order. The
+[homepage](https://docs.pantavisor.io) has two diagrams that summarize points
+1–4 visually — the heads-up architecture (layers + update/rollback flow) and
+the traditional-image vs. Pantavisor stack comparison — point a user there
+for a quick visual before sending them to `/pantavisor/overview`.
 
 1. **Revision.** The whole device state — BSP (kernel, bootloader, firmware),
    every application container, and configuration — is described by one
@@ -94,6 +98,7 @@ Don't confuse these — they run in different places:
 | Building an image with Yocto | `/meta-pantavisor/overview/build-system` |
 | Shipping or updating an app container | `/meta-pantavisor/getting-started/develop` |
 | Container lifecycle, groups, restart policy | `/pantavisor/overview/containers` |
+| The BSP: kernel, bootloader, firmware as a versioned container | `/pantavisor/overview/bsp` |
 | Storage layout, disks, partitions | `/pantavisor/overview/storage` |
 | How updates/revisions/rollback work on-device | `/pantavisor/overview/updates` |
 | Local control (device-side) vs remote control (Pantahub) | `/pantavisor/overview/local-control`, `/pantavisor/overview/remote-control` |
