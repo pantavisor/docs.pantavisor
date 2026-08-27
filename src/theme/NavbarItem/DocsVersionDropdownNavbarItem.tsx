@@ -74,7 +74,19 @@ function useVersionItems({
   configs: Props['versions'];
 }): VersionItem[] {
   const versions = useVersions(docsPluginId);
-  return getVersionItems(versions, configs);
+  const {activeVersion} = useActiveDocContext(docsPluginId);
+  const items = getVersionItems(versions, configs);
+
+  // If the version currently being browsed isn't one of the default dropdown
+  // entries (e.g. an RC or old release reached via the "Others" page), surface
+  // it in the dropdown for as long as it's the active version. It drops back
+  // out on its own once the user switches to another version, since this
+  // recomputes from the active version on every render.
+  if (activeVersion && !items.some((vi) => vi.version === activeVersion)) {
+    items.push({version: activeVersion, label: activeVersion.label});
+  }
+
+  return items;
 }
 
 function getVersionMainDoc(version: GlobalVersion): GlobalDoc {
@@ -135,10 +147,12 @@ export default function DocsVersionDropdownNavbarItem({
     label,
   }: VersionItem): LinkLikeNavbarItemProps {
     const targetDoc = getVersionTargetDoc(version, activeDocContext);
+    const isActive = version === activeDocContext.activeVersion;
     return {
-      label,
+      // Bold the version currently being browsed so it stands out in the list.
+      label: isActive ? <strong>{label}</strong> : label,
       to: `${targetDoc.path}${search}${hash}`,
-      isActive: () => version === activeDocContext.activeVersion,
+      isActive: () => isActive,
       onClick: () => savePreferredVersionName(version.name),
     };
   }
