@@ -140,3 +140,9 @@
 .dropdown__section-header:not(:first-child) {
   padding-top: 0.75rem;
 }
+
+/* Bold the left-hand navbar link for the docs section currently on screen.
+   VersionAwareLink adds navbar__link--active; Infima only recolors it. */
+.navbar__link--active {
+  font-weight: 700;
+}
