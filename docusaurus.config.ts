@@ -141,6 +141,10 @@ const config: Config = {
         // instead, so it only ever appears on actual doc pages.
         injectButton: false,
         generateMarkdownRoutes: true,
+        // Backed by mcp-server/ in this repo, deployed to the pantacor k8s
+        // cluster. Adds "Install in Cursor/VS Code" and "Copy MCP config"
+        // actions to the dropdown.
+        mcpServer: {name: 'pantavisor-docs', url: 'https://mcp.pantavisor.io/mcp'},
       },
     ],
   ],

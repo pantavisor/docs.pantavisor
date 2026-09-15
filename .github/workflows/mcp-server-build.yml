@@ -1,0 +1,53 @@
+name: "MCP server: build and deploy"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - 'mcp-server/**'
+      - '.github/workflows/mcp-server-build.yml'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-deploy:
+    name: Build image and deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: mcp-server
+          push: true
+          tags: |
+            ghcr.io/pantavisor/docs-mcp-server:latest
+            ghcr.io/pantavisor/docs-mcp-server:${{ github.sha }}
+
+      - name: Set up kubeconfig
+        run: |
+          mkdir -p "$HOME/.kube"
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > "$HOME/.kube/config"
+
+      - name: Apply manifests
+        run: kubectl apply -f mcp-server/k8s/
+
+      - name: Roll out new image
+        run: |
+          kubectl set image deployment/docs-mcp-server \
+            docs-mcp-server=ghcr.io/pantavisor/docs-mcp-server:${{ github.sha }} \
+            -n docs-mcp
+          kubectl rollout status deployment/docs-mcp-server -n docs-mcp
