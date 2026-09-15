@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: docs-mcp-server
+  namespace: docs-mcp
+  annotations:
+    # Placeholders — adjust to match the cluster's actual ingress class and
+    # cert-manager ClusterIssuer name before applying.
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+    - hosts:
+        - mcp.pantavisor.io
+      secretName: docs-mcp-server-tls
+  rules:
+    - host: mcp.pantavisor.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: docs-mcp-server
+                port:
+                  number: 80

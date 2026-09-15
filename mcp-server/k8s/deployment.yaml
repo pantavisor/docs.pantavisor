@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docs-mcp-server
+  namespace: docs-mcp
+  labels:
+    app: docs-mcp-server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: docs-mcp-server
+  template:
+    metadata:
+      labels:
+        app: docs-mcp-server
+    spec:
+      containers:
+        - name: docs-mcp-server
+          # Tag is set by CI (`kubectl set image`) on each deploy.
+          image: ghcr.io/pantavisor/docs-mcp-server:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: PORT
+              value: "3000"
+            - name: HOST
+              value: "0.0.0.0"
+            - name: ALLOWED_HOSTS
+              value: "mcp.pantavisor.io"
+            - name: DOCS_ORIGIN
+              value: "https://docs.pantavisor.io"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
