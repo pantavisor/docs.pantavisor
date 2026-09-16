@@ -45,18 +45,16 @@ jobs:
           mkdir -p "$HOME/.kube"
           echo "${{ secrets.KUBE_CONFIG_PROD }}" | base64 -d > "$HOME/.kube/config"
 
-      # Bootstraps pv-prod-docs-mcp-server on first run; a no-op afterwards
-      # (other Pantacor services on this cluster have their Deployment
-      # created once out-of-band and CI only does `set image` — this repo
-      # doesn't have that manual step yet, so apply covers it here too).
-      # --validate=false: the CI credential isn't granted the cluster's
-      # OpenAPI discovery endpoint (only the specific resources it manages),
-      # so kubectl's default client-side schema validation fails with
-      # "the server has asked for the client to provide credentials" before
-      # it ever gets to applying anything.
-      - name: Apply manifests
-        run: kubectl -n default apply --validate=false -f mcp-server/k8s/
-
+      # No `kubectl apply` here: it needs a full multi-group API discovery
+      # call up front to map every object in the manifest to its resource
+      # type, and this CI credential gets "the server has asked for the
+      # client to provide credentials" on that call even with
+      # --validate=false. Other Pantacor services on this cluster hit the
+      # same wall, so their Deployment/Service/Ingress is created once by
+      # hand instead, and CI only ever does `set image` afterwards — same
+      # convention here. Someone with full cluster access needs to run
+      # `kubectl apply -f mcp-server/k8s/` once before this workflow's
+      # first successful run.
       - name: Roll out new image
         run: |
           kubectl -n default set image deploy/pv-prod-docs-mcp-server \
