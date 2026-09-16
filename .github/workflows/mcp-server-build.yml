@@ -49,8 +49,13 @@ jobs:
       # (other Pantacor services on this cluster have their Deployment
       # created once out-of-band and CI only does `set image` — this repo
       # doesn't have that manual step yet, so apply covers it here too).
+      # --validate=false: the CI credential isn't granted the cluster's
+      # OpenAPI discovery endpoint (only the specific resources it manages),
+      # so kubectl's default client-side schema validation fails with
+      # "the server has asked for the client to provide credentials" before
+      # it ever gets to applying anything.
       - name: Apply manifests
-        run: kubectl -n default apply -f mcp-server/k8s/
+        run: kubectl -n default apply --validate=false -f mcp-server/k8s/
 
       - name: Roll out new image
         run: |
