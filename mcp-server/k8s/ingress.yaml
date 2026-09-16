@@ -1,8 +1,8 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: docs-mcp-server
-  namespace: docs-mcp
+  name: pv-prod-docs-mcp-server
+  namespace: default
   annotations:
     # Placeholders — adjust to match the cluster's actual ingress class and
     # cert-manager ClusterIssuer name before applying.
@@ -21,6 +21,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: docs-mcp-server
+                name: pv-prod-docs-mcp-server
                 port:
                   number: 80

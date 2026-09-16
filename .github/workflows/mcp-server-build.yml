@@ -37,17 +37,23 @@ jobs:
             ghcr.io/pantavisor/docs-mcp-server:latest
             ghcr.io/pantavisor/docs-mcp-server:${{ github.sha }}
 
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
       - name: Set up kubeconfig
         run: |
           mkdir -p "$HOME/.kube"
-          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > "$HOME/.kube/config"
+          echo "${{ secrets.KUBE_CONFIG_PROD }}" | base64 -d > "$HOME/.kube/config"
 
+      # Bootstraps pv-prod-docs-mcp-server on first run; a no-op afterwards
+      # (other Pantacor services on this cluster have their Deployment
+      # created once out-of-band and CI only does `set image` — this repo
+      # doesn't have that manual step yet, so apply covers it here too).
       - name: Apply manifests
-        run: kubectl apply -f mcp-server/k8s/
+        run: kubectl -n default apply -f mcp-server/k8s/
 
       - name: Roll out new image
         run: |
-          kubectl set image deployment/docs-mcp-server \
-            docs-mcp-server=ghcr.io/pantavisor/docs-mcp-server:${{ github.sha }} \
-            -n docs-mcp
-          kubectl rollout status deployment/docs-mcp-server -n docs-mcp
+          kubectl -n default set image deploy/pv-prod-docs-mcp-server \
+            docs-mcp-server=ghcr.io/pantavisor/docs-mcp-server:${{ github.sha }}
+          kubectl -n default rollout status deploy/pv-prod-docs-mcp-server
