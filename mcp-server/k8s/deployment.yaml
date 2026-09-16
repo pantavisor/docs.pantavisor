@@ -1,8 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: docs-mcp-server
-  namespace: docs-mcp
+  # Follows the pv-prod-<service> naming convention used for other
+  # Pantacor services in this cluster's default namespace.
+  name: pv-prod-docs-mcp-server
+  namespace: default
   labels:
     app: docs-mcp-server
 spec:
