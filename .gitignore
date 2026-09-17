@@ -33,3 +33,5 @@ npm-debug.log*
 # Environment
 .env
 .env.local
+
+mcp-server/k8s/ghcr.io-auth.yaml

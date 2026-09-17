@@ -17,6 +17,8 @@ spec:
       labels:
         app: docs-mcp-server
     spec:
+      imagePullSecrets:
+        - name: ghcr.io-auth
       containers:
         - name: docs-mcp-server
           # Tag is set by CI (`kubectl set image`) on each deploy.
