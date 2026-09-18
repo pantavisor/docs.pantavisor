@@ -13,7 +13,14 @@ const HOST = process.env.HOST ?? '0.0.0.0';
 const ALLOWED_HOSTS = (process.env.ALLOWED_HOSTS ?? 'mcp.docs.pantavisor.io').split(',');
 
 function buildServer(): McpServer {
-  const server = new McpServer({name: 'pantavisor-docs', version: '1.0.0'});
+  const server = new McpServer({
+    name: 'pantavisor-docs',
+    version: '1.0.0',
+    websiteUrl: 'https://docs.pantavisor.io',
+    // Shown next to the server name in MCP client UIs (e.g. Claude's
+    // connectors list). Served by this same docs site.
+    icons: [{src: 'https://docs.pantavisor.io/img/favicon.png', mimeType: 'image/png'}],
+  });
   registerSearchDocs(server);
   registerFetchPage(server);
   return server;
