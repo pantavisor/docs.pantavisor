@@ -11,10 +11,10 @@ metadata:
 spec:
   tls:
     - hosts:
-        - mcp.pantavisor.io
+        - mcp.docs.pantavisor.io
       secretName: docs-mcp-server-tls
   rules:
-    - host: mcp.pantavisor.io
+    - host: mcp.docs.pantavisor.io
       http:
         paths:
           - path: /
