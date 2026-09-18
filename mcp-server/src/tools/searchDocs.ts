@@ -6,12 +6,20 @@ export function registerSearchDocs(server: McpServer): void {
   server.registerTool(
     'search_docs',
     {
+      title: 'Search docs',
       description:
         'Search the Pantavisor documentation (docs.pantavisor.io) for pages matching a query. ' +
         'Returns matching page titles, URLs, and a snippet of the matching content.',
       inputSchema: {
         query: z.string().describe('Search terms, e.g. "xconnect networking" or "state.json schema"'),
         limit: z.number().int().min(1).max(20).optional().describe('Max results to return (default 5)'),
+      },
+      annotations: {
+        title: 'Search docs',
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
       },
     },
     async ({query, limit}) => {
