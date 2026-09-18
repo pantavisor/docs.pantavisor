@@ -144,7 +144,7 @@ const config: Config = {
         // Backed by mcp-server/ in this repo, deployed to the pantacor k8s
         // cluster. Adds "Install in Cursor/VS Code" and "Copy MCP config"
         // actions to the dropdown.
-        mcpServer: {name: 'pantavisor-docs', url: 'https://mcp.pantavisor.io/mcp'},
+        mcpServer: {name: 'pantavisor-docs', url: 'https://mcp.docs.pantavisor.io/mcp'},
       },
     ],
   ],

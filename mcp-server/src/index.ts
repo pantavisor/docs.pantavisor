@@ -10,7 +10,7 @@ const PORT = Number(process.env.PORT ?? 3000);
 const HOST = process.env.HOST ?? '0.0.0.0';
 // Set to the ingress hostname so the SDK's DNS-rebinding-protection
 // middleware still applies even though we bind to 0.0.0.0 in the container.
-const ALLOWED_HOSTS = (process.env.ALLOWED_HOSTS ?? 'mcp.pantavisor.io').split(',');
+const ALLOWED_HOSTS = (process.env.ALLOWED_HOSTS ?? 'mcp.docs.pantavisor.io').split(',');
 
 function buildServer(): McpServer {
   const server = new McpServer({name: 'pantavisor-docs', version: '1.0.0'});
