@@ -6,11 +6,19 @@ export function registerFetchPage(server: McpServer): void {
   server.registerTool(
     'fetch_page',
     {
+      title: 'Fetch docs page',
       description:
         'Fetch the full raw markdown content of a Pantavisor docs page by its site path ' +
-        '(e.g. "/pantavisor/overview/xconnect"), as returned by search_docs.',
+        '(e.g. "/pantavisor/overview/xconnect"), as returned by the search_docs tool.',
       inputSchema: {
         path: z.string().describe('Site-relative path of the page, e.g. "/pantavisor/overview"'),
+      },
+      annotations: {
+        title: 'Fetch docs page',
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
       },
     },
     async ({path}) => {
