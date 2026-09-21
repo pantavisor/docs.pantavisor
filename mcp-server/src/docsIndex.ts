@@ -43,6 +43,10 @@ class DocsIndex {
       idField: 'url',
       fields: ['title', 'content'],
       storeFields: ['url', 'title', 'content'],
+      // A term in the page title should outweigh body-text frequency, so a
+      // query like "xconnect networking" ranks the page titled "Pantavisor
+      // xconnect" above pages that merely mention networking a lot.
+      searchOptions: {boost: {title: 3}, prefix: true},
     });
 
     const byPath = new Map<string, DocPage>();
@@ -143,7 +147,15 @@ function snippetFor(content: string, query: string, radius = 160): string {
   const lower = content.toLowerCase();
   const idx = lower.indexOf(query.toLowerCase());
   if (idx === -1) return content.slice(0, radius * 2).trim();
-  const start = Math.max(0, idx - radius);
-  const end = Math.min(content.length, idx + query.length + radius);
+  let start = Math.max(0, idx - radius);
+  let end = Math.min(content.length, idx + query.length + radius);
+  // Snap the window to word boundaries so the snippet never opens or closes
+  // mid-word (e.g. "…ples" for "pv-examples").
+  if (start > 0) {
+    while (start > 0 && !/\s/.test(content[start - 1])) start--;
+  }
+  if (end < content.length) {
+    while (end < content.length && !/\s/.test(content[end])) end++;
+  }
   return `${start > 0 ? '…' : ''}${content.slice(start, end).trim()}${end < content.length ? '…' : ''}`;
 }
