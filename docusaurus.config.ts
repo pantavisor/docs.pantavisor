@@ -160,6 +160,13 @@ const config: Config = {
         indexBlog: false,
         docsRouteBasePath: ['/'],
         docsDir: ['reference'],
+        // Every non-root version is built with `noIndex` (SEO, see above), which
+        // adds a robots noindex meta tag. The indexer treats noindex pages as
+        // unlisted and skips them, which would leave the per-version search
+        // indexes (/<version>/search-index.json) EMPTY and break search after a
+        // version switch. The noindex is only meant for search engines, so tell
+        // the indexer to disregard it.
+        forceIgnoreNoIndex: true,
         highlightSearchTermsOnTargetPage: true,
         searchResultLimits: 8,
       },
